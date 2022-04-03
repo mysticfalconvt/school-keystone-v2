@@ -1,14 +1,14 @@
-import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-next/fields';
-import { list } from '@keystone-next/keystone/schema';
+import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
+import { list } from '@keystone-6/core';
 import { check } from 'prettier';
 import { rules, isSignedIn } from '../access';
 
 export const Bullying = list({
     access: {
-        create: isSignedIn,
-        read: isSignedIn,
-        update: isSignedIn,
-        delete: isSignedIn,
+        // create: isSignedIn,
+        // read: isSignedIn,
+        // update: isSignedIn,
+        // delete: isSignedIn,
     },
     fields: {
 
@@ -20,25 +20,16 @@ export const Bullying = list({
         }),
 
         dateReported: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
         }),
         dateOfEvent: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+         defaultValue: {kind: "now"},
         }),
         investigationDate: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
         }),
 
         studentReporter: text(),
@@ -56,11 +47,8 @@ export const Bullying = list({
             ],
         }),
         determinationDate: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
         }),
         determinationExplanation: text(),
         assignmentInvestigator: text(),

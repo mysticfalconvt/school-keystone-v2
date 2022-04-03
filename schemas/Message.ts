@@ -1,14 +1,13 @@
-import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-next/fields';
-import { list } from '@keystone-next/keystone/schema';
+import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
+import { list } from '@keystone-6/core';
 import { rules, isSignedIn } from '../access';
-import { CalendarDay } from '@keystonejs/fields'
 
 export const Message = list({
     access: {
-        create: isSignedIn,
-        read: isSignedIn,
-        update: isSignedIn,
-        delete: isSignedIn,
+        // create: isSignedIn,
+        // read: isSignedIn,
+        // update: isSignedIn,
+        // delete: isSignedIn,
     },
     fields: {
         subject: text(),
@@ -25,13 +24,10 @@ export const Message = list({
             ref: 'User.messageReceiver',
         }),
         sent: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
         }),
-        read: checkbox({ defaultValue: false, isRequired: true, label: 'Read' }),
+        read: checkbox({ defaultValue: false,  label: 'Read' }),
         link: text(),
     },
 });

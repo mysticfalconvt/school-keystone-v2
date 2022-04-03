@@ -1,17 +1,16 @@
-import { integer, select, text, relationship, timestamp, } from '@keystone-next/fields';
-import { list } from '@keystone-next/keystone/schema';
+import { integer, select, text, relationship, timestamp, } from '@keystone-6/core/fields';
+import { list } from '@keystone-6/core';
 import { rules, isSignedIn } from '../access';
-import { CalendarDay } from '@keystonejs/fields'
 
 export const Calendar = list({
   access: {
-    create: isSignedIn,
-    read: isSignedIn,
-    update: isSignedIn,
-    delete: isSignedIn,
+    // create: isSignedIn,
+    // read: isSignedIn,
+    // update: isSignedIn,
+    // delete: isSignedIn,
   },
   fields: {
-    name: text({ isRequired: true }),
+    name: text({ validation: {isRequired: true} }),
     description: text({
       ui: {
         displayMode: 'textarea',
@@ -26,28 +25,22 @@ export const Calendar = list({
         { label: 'Both', value: 'Both' },
       ],
       defaultValue: 'Both',
-      isRequired: true,
+     validation: { isRequired: true},
       ui: {
         displayMode: 'segmented-control',
         createView: { fieldMode: 'hidden' },
       },
     }),
     date: timestamp({
-      isRequired: true,
-      defaultValue: () => {
-        const date = new Date();
-        return date.toISOString();
-      }
+      validation: {isRequired: true},
+      defaultValue: {kind: "now"},
     }),
     author: relationship({
       ref: 'User',
     }),
     dateCreated: timestamp({
-      isRequired: true,
-      defaultValue: () => {
-        const date = new Date();
-        return date.toISOString();
-      }
+      validation: {isRequired: true},
+      defaultValue: {kind: "now"},
     }),
     link: text(),
     linkTitle: text(),

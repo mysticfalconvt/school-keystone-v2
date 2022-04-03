@@ -19,6 +19,22 @@ import { withAuth, session } from './auth';
 
 // Schemas from individual files
 import { User } from './schemas/User';
+import { Calendar } from './schemas/Calendar'
+import { Link } from './schemas/Link'
+import { Message } from './schemas/Message'
+import { PbisCard } from './schemas/PbisCard'
+import { PbisTeam } from './schemas/PbisTeam'
+import { StudentFocus } from './schemas/StudentFocus'
+import { CellPhoneViolation } from './schemas/CellPhoneViolation'
+import { Callback } from './schemas/Callback'
+import { Discipline } from './schemas/Discipline'
+import { PbisCollection } from './schemas/PbisCollection'
+import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
+import { Birthday } from './schemas/Birthday'
+import { BugReport } from './schemas/BugReport'
+import { Bullying } from './schemas/Bullying'
+import { SortingHatQuestion } from './schemas/SortingHatQuestion';
+import { TrimesterAward } from './schemas/TrimesterAward';
 
 // database URL is set in .env file
 const databaseURL = process.env.DATABASE_URL || 'postgres://localhost/keystone';
@@ -40,6 +56,24 @@ export default withAuth(
     },
     lists:{
       User,
+      Birthday,
+      BugReport,
+      Bullying,
+      Callback,
+      Calendar,
+      CellPhoneViolation,
+      Discipline,
+      Link,
+      Message,
+      PbisCard,
+      PbisCollection,
+      PbisTeam,
+      SchoolPbisInfo,
+      SortingHatQuestion,
+      StudentFocus,
+      TrimesterAward,
+      
+
     },
     session,
   })

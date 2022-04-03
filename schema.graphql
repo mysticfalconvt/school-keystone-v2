@@ -49,11 +49,168 @@ type User {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  block1Teacher: User
+  block1Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block1StudentsCount(where: UserWhereInput! = {}): Int
+  block2Teacher: User
+  block2Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block2StudentsCount(where: UserWhereInput! = {}): Int
+  block3Teacher: User
+  block3Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block3StudentsCount(where: UserWhereInput! = {}): Int
+  block4Teacher: User
+  block4Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block4StudentsCount(where: UserWhereInput! = {}): Int
+  block5Teacher: User
+  block5Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block5StudentsCount(where: UserWhereInput! = {}): Int
+  taTeam: PbisTeam
+  studentFocusTeacher(
+    where: StudentFocusWhereInput! = {}
+    orderBy: [StudentFocusOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [StudentFocus!]
+  studentFocusTeacherCount(where: StudentFocusWhereInput! = {}): Int
+  studentFocusStudent(
+    where: StudentFocusWhereInput! = {}
+    orderBy: [StudentFocusOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [StudentFocus!]
+  studentFocusStudentCount(where: StudentFocusWhereInput! = {}): Int
+  studentCellPhoneViolation(
+    where: CellPhoneViolationWhereInput! = {}
+    orderBy: [CellPhoneViolationOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [CellPhoneViolation!]
+  studentCellPhoneViolationCount(where: CellPhoneViolationWhereInput! = {}): Int
+  teacherCellPhoneViolation(
+    where: CellPhoneViolationWhereInput! = {}
+    orderBy: [CellPhoneViolationOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [CellPhoneViolation!]
+  teacherCellPhoneViolationCount(where: CellPhoneViolationWhereInput! = {}): Int
+  teacherPbisCards(
+    where: PbisCardWhereInput! = {}
+    orderBy: [PbisCardOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisCard!]
+  teacherPbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  studentPbisCards(
+    where: PbisCardWhereInput! = {}
+    orderBy: [PbisCardOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisCard!]
+  studentPbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  teacherDiscipline(
+    where: DisciplineWhereInput! = {}
+    orderBy: [DisciplineOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Discipline!]
+  teacherDisciplineCount(where: DisciplineWhereInput! = {}): Int
+  studentDiscipline(
+    where: DisciplineWhereInput! = {}
+    orderBy: [DisciplineOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Discipline!]
+  studentDisciplineCount(where: DisciplineWhereInput! = {}): Int
+  callbackItems(
+    where: CallbackWhereInput! = {}
+    orderBy: [CallbackOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Callback!]
+  callbackItemsCount(where: CallbackWhereInput! = {}): Int
+  callbackAssigned(
+    where: CallbackWhereInput! = {}
+    orderBy: [CallbackOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Callback!]
+  callbackAssignedCount(where: CallbackWhereInput! = {}): Int
+  messageSender(
+    where: MessageWhereInput! = {}
+    orderBy: [MessageOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Message!]
+  messageSenderCount(where: MessageWhereInput! = {}): Int
+  messageReceiver(
+    where: MessageWhereInput! = {}
+    orderBy: [MessageOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Message!]
+  messageReceiverCount(where: MessageWhereInput! = {}): Int
+  currentTaWinner: User
+  previousTaWinner: User
+  studentIsCurrentWinner: User
+  studentIsPreviousWinner: User
+  birthday: Birthday
+  individualPbisLevel: Int
+  callbackCount: Int
+  totalCallbackCount: Int
+  PbisCardCount: Int
+  YearPbisCount: Int
+  teacherSubject: String
+  taPbisCardCount: Int
+  averageTimeToCompleteCallback: Int
+  block1Assignment: String
+  block1ClassName: String
+  block1AssignmentLastUpdated: DateTime
+  block2Assignment: String
+  block2ClassName: String
+  block2AssignmentLastUpdated: DateTime
+  block3Assignment: String
+  block3ClassName: String
+  block3AssignmentLastUpdated: DateTime
+  block4Assignment: String
+  block4ClassName: String
+  block4AssignmentLastUpdated: DateTime
+  block5Assignment: String
+  block5ClassName: String
+  block5AssignmentLastUpdated: DateTime
+  sortingHat: String
 }
 
 type PasswordState {
   isSet: Boolean!
 }
+
+scalar DateTime
+  @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 input UserWhereUniqueInput {
   id: ID
@@ -93,6 +250,58 @@ input UserWhereInput {
   isGuidance: BooleanFilter
   isSuperAdmin: BooleanFilter
   canManagePbis: BooleanFilter
+  block1Teacher: UserWhereInput
+  block1Students: UserManyRelationFilter
+  block2Teacher: UserWhereInput
+  block2Students: UserManyRelationFilter
+  block3Teacher: UserWhereInput
+  block3Students: UserManyRelationFilter
+  block4Teacher: UserWhereInput
+  block4Students: UserManyRelationFilter
+  block5Teacher: UserWhereInput
+  block5Students: UserManyRelationFilter
+  taTeam: PbisTeamWhereInput
+  studentFocusTeacher: StudentFocusManyRelationFilter
+  studentFocusStudent: StudentFocusManyRelationFilter
+  studentCellPhoneViolation: CellPhoneViolationManyRelationFilter
+  teacherCellPhoneViolation: CellPhoneViolationManyRelationFilter
+  teacherPbisCards: PbisCardManyRelationFilter
+  studentPbisCards: PbisCardManyRelationFilter
+  teacherDiscipline: DisciplineManyRelationFilter
+  studentDiscipline: DisciplineManyRelationFilter
+  callbackItems: CallbackManyRelationFilter
+  callbackAssigned: CallbackManyRelationFilter
+  messageSender: MessageManyRelationFilter
+  messageReceiver: MessageManyRelationFilter
+  currentTaWinner: UserWhereInput
+  previousTaWinner: UserWhereInput
+  studentIsCurrentWinner: UserWhereInput
+  studentIsPreviousWinner: UserWhereInput
+  birthday: BirthdayWhereInput
+  individualPbisLevel: IntNullableFilter
+  callbackCount: IntNullableFilter
+  totalCallbackCount: IntNullableFilter
+  PbisCardCount: IntNullableFilter
+  YearPbisCount: IntNullableFilter
+  teacherSubject: StringFilter
+  taPbisCardCount: IntNullableFilter
+  averageTimeToCompleteCallback: IntNullableFilter
+  block1Assignment: StringFilter
+  block1ClassName: StringFilter
+  block1AssignmentLastUpdated: DateTimeNullableFilter
+  block2Assignment: StringFilter
+  block2ClassName: StringFilter
+  block2AssignmentLastUpdated: DateTimeNullableFilter
+  block3Assignment: StringFilter
+  block3ClassName: StringFilter
+  block3AssignmentLastUpdated: DateTimeNullableFilter
+  block4Assignment: StringFilter
+  block4ClassName: StringFilter
+  block4AssignmentLastUpdated: DateTimeNullableFilter
+  block5Assignment: StringFilter
+  block5ClassName: StringFilter
+  block5AssignmentLastUpdated: DateTimeNullableFilter
+  sortingHat: StringFilter
 }
 
 input IDFilter {
@@ -155,6 +364,64 @@ input BooleanFilter {
   not: BooleanFilter
 }
 
+input StudentFocusManyRelationFilter {
+  every: StudentFocusWhereInput
+  some: StudentFocusWhereInput
+  none: StudentFocusWhereInput
+}
+
+input CellPhoneViolationManyRelationFilter {
+  every: CellPhoneViolationWhereInput
+  some: CellPhoneViolationWhereInput
+  none: CellPhoneViolationWhereInput
+}
+
+input PbisCardManyRelationFilter {
+  every: PbisCardWhereInput
+  some: PbisCardWhereInput
+  none: PbisCardWhereInput
+}
+
+input DisciplineManyRelationFilter {
+  every: DisciplineWhereInput
+  some: DisciplineWhereInput
+  none: DisciplineWhereInput
+}
+
+input CallbackManyRelationFilter {
+  every: CallbackWhereInput
+  some: CallbackWhereInput
+  none: CallbackWhereInput
+}
+
+input MessageManyRelationFilter {
+  every: MessageWhereInput
+  some: MessageWhereInput
+  none: MessageWhereInput
+}
+
+input IntNullableFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntNullableFilter
+}
+
+input DateTimeNullableFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: DateTimeNullableFilter
+}
+
 input UserOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -180,6 +447,30 @@ input UserOrderByInput {
   isGuidance: OrderDirection
   isSuperAdmin: OrderDirection
   canManagePbis: OrderDirection
+  individualPbisLevel: OrderDirection
+  callbackCount: OrderDirection
+  totalCallbackCount: OrderDirection
+  PbisCardCount: OrderDirection
+  YearPbisCount: OrderDirection
+  teacherSubject: OrderDirection
+  taPbisCardCount: OrderDirection
+  averageTimeToCompleteCallback: OrderDirection
+  block1Assignment: OrderDirection
+  block1ClassName: OrderDirection
+  block1AssignmentLastUpdated: OrderDirection
+  block2Assignment: OrderDirection
+  block2ClassName: OrderDirection
+  block2AssignmentLastUpdated: OrderDirection
+  block3Assignment: OrderDirection
+  block3ClassName: OrderDirection
+  block3AssignmentLastUpdated: OrderDirection
+  block4Assignment: OrderDirection
+  block4ClassName: OrderDirection
+  block4AssignmentLastUpdated: OrderDirection
+  block5Assignment: OrderDirection
+  block5ClassName: OrderDirection
+  block5AssignmentLastUpdated: OrderDirection
+  sortingHat: OrderDirection
 }
 
 enum OrderDirection {
@@ -216,6 +507,58 @@ input UserUpdateInput {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  block1Teacher: UserRelateToOneForUpdateInput
+  block1Students: UserRelateToManyForUpdateInput
+  block2Teacher: UserRelateToOneForUpdateInput
+  block2Students: UserRelateToManyForUpdateInput
+  block3Teacher: UserRelateToOneForUpdateInput
+  block3Students: UserRelateToManyForUpdateInput
+  block4Teacher: UserRelateToOneForUpdateInput
+  block4Students: UserRelateToManyForUpdateInput
+  block5Teacher: UserRelateToOneForUpdateInput
+  block5Students: UserRelateToManyForUpdateInput
+  taTeam: PbisTeamRelateToOneForUpdateInput
+  studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
+  studentFocusStudent: StudentFocusRelateToManyForUpdateInput
+  studentCellPhoneViolation: CellPhoneViolationRelateToManyForUpdateInput
+  teacherCellPhoneViolation: CellPhoneViolationRelateToManyForUpdateInput
+  teacherPbisCards: PbisCardRelateToManyForUpdateInput
+  studentPbisCards: PbisCardRelateToManyForUpdateInput
+  teacherDiscipline: DisciplineRelateToManyForUpdateInput
+  studentDiscipline: DisciplineRelateToManyForUpdateInput
+  callbackItems: CallbackRelateToManyForUpdateInput
+  callbackAssigned: CallbackRelateToManyForUpdateInput
+  messageSender: MessageRelateToManyForUpdateInput
+  messageReceiver: MessageRelateToManyForUpdateInput
+  currentTaWinner: UserRelateToOneForUpdateInput
+  previousTaWinner: UserRelateToOneForUpdateInput
+  studentIsCurrentWinner: UserRelateToOneForUpdateInput
+  studentIsPreviousWinner: UserRelateToOneForUpdateInput
+  birthday: BirthdayRelateToOneForUpdateInput
+  individualPbisLevel: Int
+  callbackCount: Int
+  totalCallbackCount: Int
+  PbisCardCount: Int
+  YearPbisCount: Int
+  teacherSubject: String
+  taPbisCardCount: Int
+  averageTimeToCompleteCallback: Int
+  block1Assignment: String
+  block1ClassName: String
+  block1AssignmentLastUpdated: DateTime
+  block2Assignment: String
+  block2ClassName: String
+  block2AssignmentLastUpdated: DateTime
+  block3Assignment: String
+  block3ClassName: String
+  block3AssignmentLastUpdated: DateTime
+  block4Assignment: String
+  block4ClassName: String
+  block4AssignmentLastUpdated: DateTime
+  block5Assignment: String
+  block5ClassName: String
+  block5AssignmentLastUpdated: DateTime
+  sortingHat: String
 }
 
 input UserRelateToManyForUpdateInput {
@@ -228,6 +571,60 @@ input UserRelateToManyForUpdateInput {
 input UserRelateToOneForUpdateInput {
   create: UserCreateInput
   connect: UserWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PbisTeamRelateToOneForUpdateInput {
+  create: PbisTeamCreateInput
+  connect: PbisTeamWhereUniqueInput
+  disconnect: Boolean
+}
+
+input StudentFocusRelateToManyForUpdateInput {
+  disconnect: [StudentFocusWhereUniqueInput!]
+  set: [StudentFocusWhereUniqueInput!]
+  create: [StudentFocusCreateInput!]
+  connect: [StudentFocusWhereUniqueInput!]
+}
+
+input CellPhoneViolationRelateToManyForUpdateInput {
+  disconnect: [CellPhoneViolationWhereUniqueInput!]
+  set: [CellPhoneViolationWhereUniqueInput!]
+  create: [CellPhoneViolationCreateInput!]
+  connect: [CellPhoneViolationWhereUniqueInput!]
+}
+
+input PbisCardRelateToManyForUpdateInput {
+  disconnect: [PbisCardWhereUniqueInput!]
+  set: [PbisCardWhereUniqueInput!]
+  create: [PbisCardCreateInput!]
+  connect: [PbisCardWhereUniqueInput!]
+}
+
+input DisciplineRelateToManyForUpdateInput {
+  disconnect: [DisciplineWhereUniqueInput!]
+  set: [DisciplineWhereUniqueInput!]
+  create: [DisciplineCreateInput!]
+  connect: [DisciplineWhereUniqueInput!]
+}
+
+input CallbackRelateToManyForUpdateInput {
+  disconnect: [CallbackWhereUniqueInput!]
+  set: [CallbackWhereUniqueInput!]
+  create: [CallbackCreateInput!]
+  connect: [CallbackWhereUniqueInput!]
+}
+
+input MessageRelateToManyForUpdateInput {
+  disconnect: [MessageWhereUniqueInput!]
+  set: [MessageWhereUniqueInput!]
+  create: [MessageCreateInput!]
+  connect: [MessageWhereUniqueInput!]
+}
+
+input BirthdayRelateToOneForUpdateInput {
+  create: BirthdayCreateInput
+  connect: BirthdayWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -265,6 +662,58 @@ input UserCreateInput {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  block1Teacher: UserRelateToOneForCreateInput
+  block1Students: UserRelateToManyForCreateInput
+  block2Teacher: UserRelateToOneForCreateInput
+  block2Students: UserRelateToManyForCreateInput
+  block3Teacher: UserRelateToOneForCreateInput
+  block3Students: UserRelateToManyForCreateInput
+  block4Teacher: UserRelateToOneForCreateInput
+  block4Students: UserRelateToManyForCreateInput
+  block5Teacher: UserRelateToOneForCreateInput
+  block5Students: UserRelateToManyForCreateInput
+  taTeam: PbisTeamRelateToOneForCreateInput
+  studentFocusTeacher: StudentFocusRelateToManyForCreateInput
+  studentFocusStudent: StudentFocusRelateToManyForCreateInput
+  studentCellPhoneViolation: CellPhoneViolationRelateToManyForCreateInput
+  teacherCellPhoneViolation: CellPhoneViolationRelateToManyForCreateInput
+  teacherPbisCards: PbisCardRelateToManyForCreateInput
+  studentPbisCards: PbisCardRelateToManyForCreateInput
+  teacherDiscipline: DisciplineRelateToManyForCreateInput
+  studentDiscipline: DisciplineRelateToManyForCreateInput
+  callbackItems: CallbackRelateToManyForCreateInput
+  callbackAssigned: CallbackRelateToManyForCreateInput
+  messageSender: MessageRelateToManyForCreateInput
+  messageReceiver: MessageRelateToManyForCreateInput
+  currentTaWinner: UserRelateToOneForCreateInput
+  previousTaWinner: UserRelateToOneForCreateInput
+  studentIsCurrentWinner: UserRelateToOneForCreateInput
+  studentIsPreviousWinner: UserRelateToOneForCreateInput
+  birthday: BirthdayRelateToOneForCreateInput
+  individualPbisLevel: Int
+  callbackCount: Int
+  totalCallbackCount: Int
+  PbisCardCount: Int
+  YearPbisCount: Int
+  teacherSubject: String
+  taPbisCardCount: Int
+  averageTimeToCompleteCallback: Int
+  block1Assignment: String
+  block1ClassName: String
+  block1AssignmentLastUpdated: DateTime
+  block2Assignment: String
+  block2ClassName: String
+  block2AssignmentLastUpdated: DateTime
+  block3Assignment: String
+  block3ClassName: String
+  block3AssignmentLastUpdated: DateTime
+  block4Assignment: String
+  block4ClassName: String
+  block4AssignmentLastUpdated: DateTime
+  block5Assignment: String
+  block5ClassName: String
+  block5AssignmentLastUpdated: DateTime
+  sortingHat: String
 }
 
 input UserRelateToManyForCreateInput {
@@ -275,6 +724,1293 @@ input UserRelateToManyForCreateInput {
 input UserRelateToOneForCreateInput {
   create: UserCreateInput
   connect: UserWhereUniqueInput
+}
+
+input PbisTeamRelateToOneForCreateInput {
+  create: PbisTeamCreateInput
+  connect: PbisTeamWhereUniqueInput
+}
+
+input StudentFocusRelateToManyForCreateInput {
+  create: [StudentFocusCreateInput!]
+  connect: [StudentFocusWhereUniqueInput!]
+}
+
+input CellPhoneViolationRelateToManyForCreateInput {
+  create: [CellPhoneViolationCreateInput!]
+  connect: [CellPhoneViolationWhereUniqueInput!]
+}
+
+input PbisCardRelateToManyForCreateInput {
+  create: [PbisCardCreateInput!]
+  connect: [PbisCardWhereUniqueInput!]
+}
+
+input DisciplineRelateToManyForCreateInput {
+  create: [DisciplineCreateInput!]
+  connect: [DisciplineWhereUniqueInput!]
+}
+
+input CallbackRelateToManyForCreateInput {
+  create: [CallbackCreateInput!]
+  connect: [CallbackWhereUniqueInput!]
+}
+
+input MessageRelateToManyForCreateInput {
+  create: [MessageCreateInput!]
+  connect: [MessageWhereUniqueInput!]
+}
+
+input BirthdayRelateToOneForCreateInput {
+  create: BirthdayCreateInput
+  connect: BirthdayWhereUniqueInput
+}
+
+type Birthday {
+  id: ID!
+  cakeType: String
+  date: DateTime
+  hasChosen: Boolean
+  hasDelivered: Boolean
+  student: User
+}
+
+input BirthdayWhereUniqueInput {
+  id: ID
+}
+
+input BirthdayWhereInput {
+  AND: [BirthdayWhereInput!]
+  OR: [BirthdayWhereInput!]
+  NOT: [BirthdayWhereInput!]
+  id: IDFilter
+  cakeType: StringFilter
+  date: DateTimeFilter
+  hasChosen: BooleanFilter
+  hasDelivered: BooleanFilter
+  student: UserWhereInput
+}
+
+input DateTimeFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: DateTimeFilter
+}
+
+input BirthdayOrderByInput {
+  id: OrderDirection
+  cakeType: OrderDirection
+  date: OrderDirection
+  hasChosen: OrderDirection
+  hasDelivered: OrderDirection
+}
+
+input BirthdayUpdateInput {
+  cakeType: String
+  date: DateTime
+  hasChosen: Boolean
+  hasDelivered: Boolean
+  student: UserRelateToOneForUpdateInput
+}
+
+input BirthdayUpdateArgs {
+  where: BirthdayWhereUniqueInput!
+  data: BirthdayUpdateInput!
+}
+
+input BirthdayCreateInput {
+  cakeType: String
+  date: DateTime
+  hasChosen: Boolean
+  hasDelivered: Boolean
+  student: UserRelateToOneForCreateInput
+}
+
+type BugReport {
+  id: ID!
+  name: String
+  description: String
+  submittedBy: User
+  date: DateTime
+  read: Boolean
+}
+
+input BugReportWhereUniqueInput {
+  id: ID
+}
+
+input BugReportWhereInput {
+  AND: [BugReportWhereInput!]
+  OR: [BugReportWhereInput!]
+  NOT: [BugReportWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  description: StringFilter
+  submittedBy: UserWhereInput
+  date: DateTimeFilter
+  read: BooleanFilter
+}
+
+input BugReportOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  date: OrderDirection
+  read: OrderDirection
+}
+
+input BugReportUpdateInput {
+  name: String
+  description: String
+  submittedBy: UserRelateToOneForUpdateInput
+  date: DateTime
+  read: Boolean
+}
+
+input BugReportUpdateArgs {
+  where: BugReportWhereUniqueInput!
+  data: BugReportUpdateInput!
+}
+
+input BugReportCreateInput {
+  name: String
+  description: String
+  submittedBy: UserRelateToOneForCreateInput
+  date: DateTime
+  read: Boolean
+}
+
+type Bullying {
+  id: ID!
+  studentOffender: User
+  teacherAuthor: User
+  dateReported: DateTime
+  dateOfEvent: DateTime
+  investigationDate: DateTime
+  studentReporter: String
+  employeeWitness: String
+  studentWitness: String
+  studentsInterviewed: String
+  initialActions: String
+  nextSteps: String
+  reporter: String
+  description: String
+  determination: String
+  determinationDate: DateTime
+  determinationExplanation: String
+  assignmentInvestigator: String
+}
+
+input BullyingWhereUniqueInput {
+  id: ID
+}
+
+input BullyingWhereInput {
+  AND: [BullyingWhereInput!]
+  OR: [BullyingWhereInput!]
+  NOT: [BullyingWhereInput!]
+  id: IDFilter
+  studentOffender: UserWhereInput
+  teacherAuthor: UserWhereInput
+  dateReported: DateTimeFilter
+  dateOfEvent: DateTimeFilter
+  investigationDate: DateTimeFilter
+  studentReporter: StringFilter
+  employeeWitness: StringFilter
+  studentWitness: StringFilter
+  studentsInterviewed: StringFilter
+  initialActions: StringFilter
+  nextSteps: StringFilter
+  reporter: StringFilter
+  description: StringFilter
+  determination: StringNullableFilter
+  determinationDate: DateTimeFilter
+  determinationExplanation: StringFilter
+  assignmentInvestigator: StringFilter
+}
+
+input StringNullableFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: NestedStringNullableFilter
+}
+
+input NestedStringNullableFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: NestedStringNullableFilter
+}
+
+input BullyingOrderByInput {
+  id: OrderDirection
+  dateReported: OrderDirection
+  dateOfEvent: OrderDirection
+  investigationDate: OrderDirection
+  studentReporter: OrderDirection
+  employeeWitness: OrderDirection
+  studentWitness: OrderDirection
+  studentsInterviewed: OrderDirection
+  initialActions: OrderDirection
+  nextSteps: OrderDirection
+  reporter: OrderDirection
+  description: OrderDirection
+  determination: OrderDirection
+  determinationDate: OrderDirection
+  determinationExplanation: OrderDirection
+  assignmentInvestigator: OrderDirection
+}
+
+input BullyingUpdateInput {
+  studentOffender: UserRelateToOneForUpdateInput
+  teacherAuthor: UserRelateToOneForUpdateInput
+  dateReported: DateTime
+  dateOfEvent: DateTime
+  investigationDate: DateTime
+  studentReporter: String
+  employeeWitness: String
+  studentWitness: String
+  studentsInterviewed: String
+  initialActions: String
+  nextSteps: String
+  reporter: String
+  description: String
+  determination: String
+  determinationDate: DateTime
+  determinationExplanation: String
+  assignmentInvestigator: String
+}
+
+input BullyingUpdateArgs {
+  where: BullyingWhereUniqueInput!
+  data: BullyingUpdateInput!
+}
+
+input BullyingCreateInput {
+  studentOffender: UserRelateToOneForCreateInput
+  teacherAuthor: UserRelateToOneForCreateInput
+  dateReported: DateTime
+  dateOfEvent: DateTime
+  investigationDate: DateTime
+  studentReporter: String
+  employeeWitness: String
+  studentWitness: String
+  studentsInterviewed: String
+  initialActions: String
+  nextSteps: String
+  reporter: String
+  description: String
+  determination: String
+  determinationDate: DateTime
+  determinationExplanation: String
+  assignmentInvestigator: String
+}
+
+type Callback {
+  id: ID!
+  title: String
+  description: String
+  student: User
+  teacher: User
+  dateAssigned: DateTime
+  dateCompleted: DateTime
+  link: String
+  messageFromTeacher: String
+  messageFromTeacherDate: String
+  messageFromStudent: String
+  messageFromStudentDate: String
+  daysLate: Int
+}
+
+input CallbackWhereUniqueInput {
+  id: ID
+}
+
+input CallbackWhereInput {
+  AND: [CallbackWhereInput!]
+  OR: [CallbackWhereInput!]
+  NOT: [CallbackWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  description: StringFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+  dateAssigned: DateTimeFilter
+  dateCompleted: DateTimeNullableFilter
+  link: StringFilter
+  messageFromTeacher: StringFilter
+  messageFromTeacherDate: StringFilter
+  messageFromStudent: StringFilter
+  messageFromStudentDate: StringFilter
+  daysLate: IntNullableFilter
+}
+
+input CallbackOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  description: OrderDirection
+  dateAssigned: OrderDirection
+  dateCompleted: OrderDirection
+  link: OrderDirection
+  messageFromTeacher: OrderDirection
+  messageFromTeacherDate: OrderDirection
+  messageFromStudent: OrderDirection
+  messageFromStudentDate: OrderDirection
+  daysLate: OrderDirection
+}
+
+input CallbackUpdateInput {
+  title: String
+  description: String
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+  dateAssigned: DateTime
+  dateCompleted: DateTime
+  link: String
+  messageFromTeacher: String
+  messageFromTeacherDate: String
+  messageFromStudent: String
+  messageFromStudentDate: String
+  daysLate: Int
+}
+
+input CallbackUpdateArgs {
+  where: CallbackWhereUniqueInput!
+  data: CallbackUpdateInput!
+}
+
+input CallbackCreateInput {
+  title: String
+  description: String
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
+  dateAssigned: DateTime
+  dateCompleted: DateTime
+  link: String
+  messageFromTeacher: String
+  messageFromTeacherDate: String
+  messageFromStudent: String
+  messageFromStudentDate: String
+  daysLate: Int
+}
+
+type Calendar {
+  id: ID!
+  name: String
+  description: String
+  status: String
+  date: DateTime
+  author: User
+  dateCreated: DateTime
+  link: String
+  linkTitle: String
+}
+
+input CalendarWhereUniqueInput {
+  id: ID
+}
+
+input CalendarWhereInput {
+  AND: [CalendarWhereInput!]
+  OR: [CalendarWhereInput!]
+  NOT: [CalendarWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  description: StringFilter
+  status: StringFilter
+  date: DateTimeFilter
+  author: UserWhereInput
+  dateCreated: DateTimeFilter
+  link: StringFilter
+  linkTitle: StringFilter
+}
+
+input CalendarOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  status: OrderDirection
+  date: OrderDirection
+  dateCreated: OrderDirection
+  link: OrderDirection
+  linkTitle: OrderDirection
+}
+
+input CalendarUpdateInput {
+  name: String
+  description: String
+  status: String
+  date: DateTime
+  author: UserRelateToOneForUpdateInput
+  dateCreated: DateTime
+  link: String
+  linkTitle: String
+}
+
+input CalendarUpdateArgs {
+  where: CalendarWhereUniqueInput!
+  data: CalendarUpdateInput!
+}
+
+input CalendarCreateInput {
+  name: String
+  description: String
+  status: String
+  date: DateTime
+  author: UserRelateToOneForCreateInput
+  dateCreated: DateTime
+  link: String
+  linkTitle: String
+}
+
+type CellPhoneViolation {
+  id: ID!
+  description: String
+  student: User
+  teacher: User
+  dateGiven: DateTime
+}
+
+input CellPhoneViolationWhereUniqueInput {
+  id: ID
+}
+
+input CellPhoneViolationWhereInput {
+  AND: [CellPhoneViolationWhereInput!]
+  OR: [CellPhoneViolationWhereInput!]
+  NOT: [CellPhoneViolationWhereInput!]
+  id: IDFilter
+  description: StringFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+  dateGiven: DateTimeFilter
+}
+
+input CellPhoneViolationOrderByInput {
+  id: OrderDirection
+  description: OrderDirection
+  dateGiven: OrderDirection
+}
+
+input CellPhoneViolationUpdateInput {
+  description: String
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+  dateGiven: DateTime
+}
+
+input CellPhoneViolationUpdateArgs {
+  where: CellPhoneViolationWhereUniqueInput!
+  data: CellPhoneViolationUpdateInput!
+}
+
+input CellPhoneViolationCreateInput {
+  description: String
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
+  dateGiven: DateTime
+}
+
+type Discipline {
+  id: ID!
+  teacherComments: String
+  adminComments: String
+  classType: String
+  location: String
+  timeOfDay: String
+  student: User
+  teacher: User
+  date: DateTime
+  addressed: DateTime
+  inappropriateLanguage: Boolean
+  physicalConduct: Boolean
+  nonCompliance: Boolean
+  disruption: Boolean
+  propertyMisuse: Boolean
+  otherConduct: Boolean
+  VerbalWarning: Boolean
+  buddyRoom: Boolean
+  conferenceWithStudent: Boolean
+  ParentContact: Boolean
+  PlanningRoomReferral: Boolean
+  FollowupPlan: Boolean
+  LossOfPrivilege: Boolean
+  DetentionWithTeacher: Boolean
+  IndividualizedInstruction: Boolean
+  GuidanceReferral: Boolean
+  ReferToAdministrator: Boolean
+  OtherAction: Boolean
+  none: Boolean
+  peers: Boolean
+  teacherInvolved: Boolean
+  substitute: Boolean
+  unknown: Boolean
+  othersInvolved: Boolean
+}
+
+input DisciplineWhereUniqueInput {
+  id: ID
+}
+
+input DisciplineWhereInput {
+  AND: [DisciplineWhereInput!]
+  OR: [DisciplineWhereInput!]
+  NOT: [DisciplineWhereInput!]
+  id: IDFilter
+  teacherComments: StringFilter
+  adminComments: StringFilter
+  classType: StringNullableFilter
+  location: StringNullableFilter
+  timeOfDay: StringNullableFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+  date: DateTimeFilter
+  addressed: DateTimeFilter
+  inappropriateLanguage: BooleanFilter
+  physicalConduct: BooleanFilter
+  nonCompliance: BooleanFilter
+  disruption: BooleanFilter
+  propertyMisuse: BooleanFilter
+  otherConduct: BooleanFilter
+  VerbalWarning: BooleanFilter
+  buddyRoom: BooleanFilter
+  conferenceWithStudent: BooleanFilter
+  ParentContact: BooleanFilter
+  PlanningRoomReferral: BooleanFilter
+  FollowupPlan: BooleanFilter
+  LossOfPrivilege: BooleanFilter
+  DetentionWithTeacher: BooleanFilter
+  IndividualizedInstruction: BooleanFilter
+  GuidanceReferral: BooleanFilter
+  ReferToAdministrator: BooleanFilter
+  OtherAction: BooleanFilter
+  none: BooleanFilter
+  peers: BooleanFilter
+  teacherInvolved: BooleanFilter
+  substitute: BooleanFilter
+  unknown: BooleanFilter
+  othersInvolved: BooleanFilter
+}
+
+input DisciplineOrderByInput {
+  id: OrderDirection
+  teacherComments: OrderDirection
+  adminComments: OrderDirection
+  classType: OrderDirection
+  location: OrderDirection
+  timeOfDay: OrderDirection
+  date: OrderDirection
+  addressed: OrderDirection
+  inappropriateLanguage: OrderDirection
+  physicalConduct: OrderDirection
+  nonCompliance: OrderDirection
+  disruption: OrderDirection
+  propertyMisuse: OrderDirection
+  otherConduct: OrderDirection
+  VerbalWarning: OrderDirection
+  buddyRoom: OrderDirection
+  conferenceWithStudent: OrderDirection
+  ParentContact: OrderDirection
+  PlanningRoomReferral: OrderDirection
+  FollowupPlan: OrderDirection
+  LossOfPrivilege: OrderDirection
+  DetentionWithTeacher: OrderDirection
+  IndividualizedInstruction: OrderDirection
+  GuidanceReferral: OrderDirection
+  ReferToAdministrator: OrderDirection
+  OtherAction: OrderDirection
+  none: OrderDirection
+  peers: OrderDirection
+  teacherInvolved: OrderDirection
+  substitute: OrderDirection
+  unknown: OrderDirection
+  othersInvolved: OrderDirection
+}
+
+input DisciplineUpdateInput {
+  teacherComments: String
+  adminComments: String
+  classType: String
+  location: String
+  timeOfDay: String
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+  date: DateTime
+  addressed: DateTime
+  inappropriateLanguage: Boolean
+  physicalConduct: Boolean
+  nonCompliance: Boolean
+  disruption: Boolean
+  propertyMisuse: Boolean
+  otherConduct: Boolean
+  VerbalWarning: Boolean
+  buddyRoom: Boolean
+  conferenceWithStudent: Boolean
+  ParentContact: Boolean
+  PlanningRoomReferral: Boolean
+  FollowupPlan: Boolean
+  LossOfPrivilege: Boolean
+  DetentionWithTeacher: Boolean
+  IndividualizedInstruction: Boolean
+  GuidanceReferral: Boolean
+  ReferToAdministrator: Boolean
+  OtherAction: Boolean
+  none: Boolean
+  peers: Boolean
+  teacherInvolved: Boolean
+  substitute: Boolean
+  unknown: Boolean
+  othersInvolved: Boolean
+}
+
+input DisciplineUpdateArgs {
+  where: DisciplineWhereUniqueInput!
+  data: DisciplineUpdateInput!
+}
+
+input DisciplineCreateInput {
+  teacherComments: String
+  adminComments: String
+  classType: String
+  location: String
+  timeOfDay: String
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
+  date: DateTime
+  addressed: DateTime
+  inappropriateLanguage: Boolean
+  physicalConduct: Boolean
+  nonCompliance: Boolean
+  disruption: Boolean
+  propertyMisuse: Boolean
+  otherConduct: Boolean
+  VerbalWarning: Boolean
+  buddyRoom: Boolean
+  conferenceWithStudent: Boolean
+  ParentContact: Boolean
+  PlanningRoomReferral: Boolean
+  FollowupPlan: Boolean
+  LossOfPrivilege: Boolean
+  DetentionWithTeacher: Boolean
+  IndividualizedInstruction: Boolean
+  GuidanceReferral: Boolean
+  ReferToAdministrator: Boolean
+  OtherAction: Boolean
+  none: Boolean
+  peers: Boolean
+  teacherInvolved: Boolean
+  substitute: Boolean
+  unknown: Boolean
+  othersInvolved: Boolean
+}
+
+type Link {
+  id: ID!
+  name: String
+  description: String
+  forTeachers: Boolean
+  forStudents: Boolean
+  forParents: Boolean
+  onHomePage: Boolean
+  forPbis: Boolean
+  modifiedBy: User
+  modified: DateTime
+  link: String
+}
+
+input LinkWhereUniqueInput {
+  id: ID
+}
+
+input LinkWhereInput {
+  AND: [LinkWhereInput!]
+  OR: [LinkWhereInput!]
+  NOT: [LinkWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  description: StringFilter
+  forTeachers: BooleanFilter
+  forStudents: BooleanFilter
+  forParents: BooleanFilter
+  onHomePage: BooleanFilter
+  forPbis: BooleanFilter
+  modifiedBy: UserWhereInput
+  modified: DateTimeFilter
+  link: StringFilter
+}
+
+input LinkOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  forTeachers: OrderDirection
+  forStudents: OrderDirection
+  forParents: OrderDirection
+  onHomePage: OrderDirection
+  forPbis: OrderDirection
+  modified: OrderDirection
+  link: OrderDirection
+}
+
+input LinkUpdateInput {
+  name: String
+  description: String
+  forTeachers: Boolean
+  forStudents: Boolean
+  forParents: Boolean
+  onHomePage: Boolean
+  forPbis: Boolean
+  modifiedBy: UserRelateToOneForUpdateInput
+  modified: DateTime
+  link: String
+}
+
+input LinkUpdateArgs {
+  where: LinkWhereUniqueInput!
+  data: LinkUpdateInput!
+}
+
+input LinkCreateInput {
+  name: String
+  description: String
+  forTeachers: Boolean
+  forStudents: Boolean
+  forParents: Boolean
+  onHomePage: Boolean
+  forPbis: Boolean
+  modifiedBy: UserRelateToOneForCreateInput
+  modified: DateTime
+  link: String
+}
+
+type Message {
+  id: ID!
+  subject: String
+  message: String
+  sender: User
+  receiver: User
+  sent: DateTime
+  read: Boolean
+  link: String
+}
+
+input MessageWhereUniqueInput {
+  id: ID
+}
+
+input MessageWhereInput {
+  AND: [MessageWhereInput!]
+  OR: [MessageWhereInput!]
+  NOT: [MessageWhereInput!]
+  id: IDFilter
+  subject: StringFilter
+  message: StringFilter
+  sender: UserWhereInput
+  receiver: UserWhereInput
+  sent: DateTimeFilter
+  read: BooleanFilter
+  link: StringFilter
+}
+
+input MessageOrderByInput {
+  id: OrderDirection
+  subject: OrderDirection
+  message: OrderDirection
+  sent: OrderDirection
+  read: OrderDirection
+  link: OrderDirection
+}
+
+input MessageUpdateInput {
+  subject: String
+  message: String
+  sender: UserRelateToOneForUpdateInput
+  receiver: UserRelateToOneForUpdateInput
+  sent: DateTime
+  read: Boolean
+  link: String
+}
+
+input MessageUpdateArgs {
+  where: MessageWhereUniqueInput!
+  data: MessageUpdateInput!
+}
+
+input MessageCreateInput {
+  subject: String
+  message: String
+  sender: UserRelateToOneForCreateInput
+  receiver: UserRelateToOneForCreateInput
+  sent: DateTime
+  read: Boolean
+  link: String
+}
+
+type PbisCard {
+  id: ID!
+  category: String
+  cardMessage: String
+  student: User
+  teacher: User
+  dateGiven: DateTime
+  counted: Boolean
+}
+
+input PbisCardWhereUniqueInput {
+  id: ID
+}
+
+input PbisCardWhereInput {
+  AND: [PbisCardWhereInput!]
+  OR: [PbisCardWhereInput!]
+  NOT: [PbisCardWhereInput!]
+  id: IDFilter
+  category: StringFilter
+  cardMessage: StringFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+  dateGiven: DateTimeFilter
+  counted: BooleanFilter
+}
+
+input PbisCardOrderByInput {
+  id: OrderDirection
+  category: OrderDirection
+  cardMessage: OrderDirection
+  dateGiven: OrderDirection
+  counted: OrderDirection
+}
+
+input PbisCardUpdateInput {
+  category: String
+  cardMessage: String
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+  dateGiven: DateTime
+  counted: Boolean
+}
+
+input PbisCardUpdateArgs {
+  where: PbisCardWhereUniqueInput!
+  data: PbisCardUpdateInput!
+}
+
+input PbisCardCreateInput {
+  category: String
+  cardMessage: String
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
+  dateGiven: DateTime
+  counted: Boolean
+}
+
+type PbisCollection {
+  id: ID!
+  name: String
+  collectionDate: DateTime
+  personalLevelWinners: String
+  randomDrawingWinners: String
+  taTeamsLevels: String
+  taTeamNewLevelWinners: String
+  currentPbisTeamGoal: String
+  collectedCards: String
+  dateModified: DateTime
+  lastModifiedBy: User
+}
+
+input PbisCollectionWhereUniqueInput {
+  id: ID
+}
+
+input PbisCollectionWhereInput {
+  AND: [PbisCollectionWhereInput!]
+  OR: [PbisCollectionWhereInput!]
+  NOT: [PbisCollectionWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  collectionDate: DateTimeFilter
+  personalLevelWinners: StringFilter
+  randomDrawingWinners: StringFilter
+  taTeamsLevels: StringFilter
+  taTeamNewLevelWinners: StringFilter
+  currentPbisTeamGoal: StringFilter
+  collectedCards: StringFilter
+  dateModified: DateTimeFilter
+  lastModifiedBy: UserWhereInput
+}
+
+input PbisCollectionOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  collectionDate: OrderDirection
+  personalLevelWinners: OrderDirection
+  randomDrawingWinners: OrderDirection
+  taTeamsLevels: OrderDirection
+  taTeamNewLevelWinners: OrderDirection
+  currentPbisTeamGoal: OrderDirection
+  collectedCards: OrderDirection
+  dateModified: OrderDirection
+}
+
+input PbisCollectionUpdateInput {
+  name: String
+  collectionDate: DateTime
+  personalLevelWinners: String
+  randomDrawingWinners: String
+  taTeamsLevels: String
+  taTeamNewLevelWinners: String
+  currentPbisTeamGoal: String
+  collectedCards: String
+  dateModified: DateTime
+  lastModifiedBy: UserRelateToOneForUpdateInput
+}
+
+input PbisCollectionUpdateArgs {
+  where: PbisCollectionWhereUniqueInput!
+  data: PbisCollectionUpdateInput!
+}
+
+input PbisCollectionCreateInput {
+  name: String
+  collectionDate: DateTime
+  personalLevelWinners: String
+  randomDrawingWinners: String
+  taTeamsLevels: String
+  taTeamNewLevelWinners: String
+  currentPbisTeamGoal: String
+  collectedCards: String
+  dateModified: DateTime
+  lastModifiedBy: UserRelateToOneForCreateInput
+}
+
+type PbisTeam {
+  id: ID!
+  teamName: String
+  taTeacher(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  taTeacherCount(where: UserWhereInput! = {}): Int
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+  lastModifiedBy: User
+}
+
+input PbisTeamWhereUniqueInput {
+  id: ID
+}
+
+input PbisTeamWhereInput {
+  AND: [PbisTeamWhereInput!]
+  OR: [PbisTeamWhereInput!]
+  NOT: [PbisTeamWhereInput!]
+  id: IDFilter
+  teamName: StringFilter
+  taTeacher: UserManyRelationFilter
+  uncountedCards: IntNullableFilter
+  countedCards: IntNullableFilter
+  currentLevel: IntNullableFilter
+  numberOfStudents: IntNullableFilter
+  averageCardsPerStudent: IntNullableFilter
+  dateModified: DateTimeFilter
+  lastModifiedBy: UserWhereInput
+}
+
+input PbisTeamOrderByInput {
+  id: OrderDirection
+  teamName: OrderDirection
+  uncountedCards: OrderDirection
+  countedCards: OrderDirection
+  currentLevel: OrderDirection
+  numberOfStudents: OrderDirection
+  averageCardsPerStudent: OrderDirection
+  dateModified: OrderDirection
+}
+
+input PbisTeamUpdateInput {
+  teamName: String
+  taTeacher: UserRelateToManyForUpdateInput
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+  lastModifiedBy: UserRelateToOneForUpdateInput
+}
+
+input PbisTeamUpdateArgs {
+  where: PbisTeamWhereUniqueInput!
+  data: PbisTeamUpdateInput!
+}
+
+input PbisTeamCreateInput {
+  teamName: String
+  taTeacher: UserRelateToManyForCreateInput
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+  lastModifiedBy: UserRelateToOneForCreateInput
+}
+
+type SchoolPbisInfo {
+  id: ID!
+  teamName: String
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+}
+
+input SchoolPbisInfoWhereUniqueInput {
+  id: ID
+}
+
+input SchoolPbisInfoWhereInput {
+  AND: [SchoolPbisInfoWhereInput!]
+  OR: [SchoolPbisInfoWhereInput!]
+  NOT: [SchoolPbisInfoWhereInput!]
+  id: IDFilter
+  teamName: StringFilter
+  uncountedCards: IntNullableFilter
+  countedCards: IntNullableFilter
+  currentLevel: IntNullableFilter
+  numberOfStudents: IntNullableFilter
+  averageCardsPerStudent: IntNullableFilter
+  dateModified: DateTimeFilter
+}
+
+input SchoolPbisInfoOrderByInput {
+  id: OrderDirection
+  teamName: OrderDirection
+  uncountedCards: OrderDirection
+  countedCards: OrderDirection
+  currentLevel: OrderDirection
+  numberOfStudents: OrderDirection
+  averageCardsPerStudent: OrderDirection
+  dateModified: OrderDirection
+}
+
+input SchoolPbisInfoUpdateInput {
+  teamName: String
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+}
+
+input SchoolPbisInfoUpdateArgs {
+  where: SchoolPbisInfoWhereUniqueInput!
+  data: SchoolPbisInfoUpdateInput!
+}
+
+input SchoolPbisInfoCreateInput {
+  teamName: String
+  uncountedCards: Int
+  countedCards: Int
+  currentLevel: Int
+  numberOfStudents: Int
+  averageCardsPerStudent: Int
+  dateModified: DateTime
+}
+
+type SortingHatQuestion {
+  id: ID!
+  question: String
+  gryffindorChoice: String
+  hufflepuffChoice: String
+  ravenclawChoice: String
+  slytherinChoice: String
+  createdBy: User
+}
+
+input SortingHatQuestionWhereUniqueInput {
+  id: ID
+}
+
+input SortingHatQuestionWhereInput {
+  AND: [SortingHatQuestionWhereInput!]
+  OR: [SortingHatQuestionWhereInput!]
+  NOT: [SortingHatQuestionWhereInput!]
+  id: IDFilter
+  question: StringFilter
+  gryffindorChoice: StringFilter
+  hufflepuffChoice: StringFilter
+  ravenclawChoice: StringFilter
+  slytherinChoice: StringFilter
+  createdBy: UserWhereInput
+}
+
+input SortingHatQuestionOrderByInput {
+  id: OrderDirection
+  question: OrderDirection
+  gryffindorChoice: OrderDirection
+  hufflepuffChoice: OrderDirection
+  ravenclawChoice: OrderDirection
+  slytherinChoice: OrderDirection
+}
+
+input SortingHatQuestionUpdateInput {
+  question: String
+  gryffindorChoice: String
+  hufflepuffChoice: String
+  ravenclawChoice: String
+  slytherinChoice: String
+  createdBy: UserRelateToOneForUpdateInput
+}
+
+input SortingHatQuestionUpdateArgs {
+  where: SortingHatQuestionWhereUniqueInput!
+  data: SortingHatQuestionUpdateInput!
+}
+
+input SortingHatQuestionCreateInput {
+  question: String
+  gryffindorChoice: String
+  hufflepuffChoice: String
+  ravenclawChoice: String
+  slytherinChoice: String
+  createdBy: UserRelateToOneForCreateInput
+}
+
+type StudentFocus {
+  id: ID!
+  comments: String
+  category: String
+  student: User
+  teacher: User
+  dateCreated: DateTime
+}
+
+input StudentFocusWhereUniqueInput {
+  id: ID
+}
+
+input StudentFocusWhereInput {
+  AND: [StudentFocusWhereInput!]
+  OR: [StudentFocusWhereInput!]
+  NOT: [StudentFocusWhereInput!]
+  id: IDFilter
+  comments: StringFilter
+  category: StringFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+  dateCreated: DateTimeFilter
+}
+
+input StudentFocusOrderByInput {
+  id: OrderDirection
+  comments: OrderDirection
+  category: OrderDirection
+  dateCreated: OrderDirection
+}
+
+input StudentFocusUpdateInput {
+  comments: String
+  category: String
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+  dateCreated: DateTime
+}
+
+input StudentFocusUpdateArgs {
+  where: StudentFocusWhereUniqueInput!
+  data: StudentFocusUpdateInput!
+}
+
+input StudentFocusCreateInput {
+  comments: String
+  category: String
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
+  dateCreated: DateTime
+}
+
+type TrimesterAward {
+  id: ID!
+  howl: String
+  trimester: String
+  date: DateTime
+  student: User
+  teacher: User
+}
+
+input TrimesterAwardWhereUniqueInput {
+  id: ID
+}
+
+input TrimesterAwardWhereInput {
+  AND: [TrimesterAwardWhereInput!]
+  OR: [TrimesterAwardWhereInput!]
+  NOT: [TrimesterAwardWhereInput!]
+  id: IDFilter
+  howl: StringFilter
+  trimester: StringNullableFilter
+  date: DateTimeFilter
+  student: UserWhereInput
+  teacher: UserWhereInput
+}
+
+input TrimesterAwardOrderByInput {
+  id: OrderDirection
+  howl: OrderDirection
+  trimester: OrderDirection
+  date: OrderDirection
+}
+
+input TrimesterAwardUpdateInput {
+  howl: String
+  trimester: String
+  date: DateTime
+  student: UserRelateToOneForUpdateInput
+  teacher: UserRelateToOneForUpdateInput
+}
+
+input TrimesterAwardUpdateArgs {
+  where: TrimesterAwardWhereUniqueInput!
+  data: TrimesterAwardUpdateInput!
+}
+
+input TrimesterAwardCreateInput {
+  howl: String
+  trimester: String
+  date: DateTime
+  student: UserRelateToOneForCreateInput
+  teacher: UserRelateToOneForCreateInput
 }
 
 """
@@ -292,6 +2028,173 @@ type Mutation {
   updateUsers(data: [UserUpdateArgs!]!): [User]
   deleteUser(where: UserWhereUniqueInput!): User
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
+  createBirthday(data: BirthdayCreateInput!): Birthday
+  createBirthdays(data: [BirthdayCreateInput!]!): [Birthday]
+  updateBirthday(
+    where: BirthdayWhereUniqueInput!
+    data: BirthdayUpdateInput!
+  ): Birthday
+  updateBirthdays(data: [BirthdayUpdateArgs!]!): [Birthday]
+  deleteBirthday(where: BirthdayWhereUniqueInput!): Birthday
+  deleteBirthdays(where: [BirthdayWhereUniqueInput!]!): [Birthday]
+  createBugReport(data: BugReportCreateInput!): BugReport
+  createBugReports(data: [BugReportCreateInput!]!): [BugReport]
+  updateBugReport(
+    where: BugReportWhereUniqueInput!
+    data: BugReportUpdateInput!
+  ): BugReport
+  updateBugReports(data: [BugReportUpdateArgs!]!): [BugReport]
+  deleteBugReport(where: BugReportWhereUniqueInput!): BugReport
+  deleteBugReports(where: [BugReportWhereUniqueInput!]!): [BugReport]
+  createBullying(data: BullyingCreateInput!): Bullying
+  createBullyings(data: [BullyingCreateInput!]!): [Bullying]
+  updateBullying(
+    where: BullyingWhereUniqueInput!
+    data: BullyingUpdateInput!
+  ): Bullying
+  updateBullyings(data: [BullyingUpdateArgs!]!): [Bullying]
+  deleteBullying(where: BullyingWhereUniqueInput!): Bullying
+  deleteBullyings(where: [BullyingWhereUniqueInput!]!): [Bullying]
+  createCallback(data: CallbackCreateInput!): Callback
+  createCallbacks(data: [CallbackCreateInput!]!): [Callback]
+  updateCallback(
+    where: CallbackWhereUniqueInput!
+    data: CallbackUpdateInput!
+  ): Callback
+  updateCallbacks(data: [CallbackUpdateArgs!]!): [Callback]
+  deleteCallback(where: CallbackWhereUniqueInput!): Callback
+  deleteCallbacks(where: [CallbackWhereUniqueInput!]!): [Callback]
+  createCalendar(data: CalendarCreateInput!): Calendar
+  createCalendars(data: [CalendarCreateInput!]!): [Calendar]
+  updateCalendar(
+    where: CalendarWhereUniqueInput!
+    data: CalendarUpdateInput!
+  ): Calendar
+  updateCalendars(data: [CalendarUpdateArgs!]!): [Calendar]
+  deleteCalendar(where: CalendarWhereUniqueInput!): Calendar
+  deleteCalendars(where: [CalendarWhereUniqueInput!]!): [Calendar]
+  createCellPhoneViolation(
+    data: CellPhoneViolationCreateInput!
+  ): CellPhoneViolation
+  createCellPhoneViolations(
+    data: [CellPhoneViolationCreateInput!]!
+  ): [CellPhoneViolation]
+  updateCellPhoneViolation(
+    where: CellPhoneViolationWhereUniqueInput!
+    data: CellPhoneViolationUpdateInput!
+  ): CellPhoneViolation
+  updateCellPhoneViolations(
+    data: [CellPhoneViolationUpdateArgs!]!
+  ): [CellPhoneViolation]
+  deleteCellPhoneViolation(
+    where: CellPhoneViolationWhereUniqueInput!
+  ): CellPhoneViolation
+  deleteCellPhoneViolations(
+    where: [CellPhoneViolationWhereUniqueInput!]!
+  ): [CellPhoneViolation]
+  createDiscipline(data: DisciplineCreateInput!): Discipline
+  createDisciplines(data: [DisciplineCreateInput!]!): [Discipline]
+  updateDiscipline(
+    where: DisciplineWhereUniqueInput!
+    data: DisciplineUpdateInput!
+  ): Discipline
+  updateDisciplines(data: [DisciplineUpdateArgs!]!): [Discipline]
+  deleteDiscipline(where: DisciplineWhereUniqueInput!): Discipline
+  deleteDisciplines(where: [DisciplineWhereUniqueInput!]!): [Discipline]
+  createLink(data: LinkCreateInput!): Link
+  createLinks(data: [LinkCreateInput!]!): [Link]
+  updateLink(where: LinkWhereUniqueInput!, data: LinkUpdateInput!): Link
+  updateLinks(data: [LinkUpdateArgs!]!): [Link]
+  deleteLink(where: LinkWhereUniqueInput!): Link
+  deleteLinks(where: [LinkWhereUniqueInput!]!): [Link]
+  createMessage(data: MessageCreateInput!): Message
+  createMessages(data: [MessageCreateInput!]!): [Message]
+  updateMessage(
+    where: MessageWhereUniqueInput!
+    data: MessageUpdateInput!
+  ): Message
+  updateMessages(data: [MessageUpdateArgs!]!): [Message]
+  deleteMessage(where: MessageWhereUniqueInput!): Message
+  deleteMessages(where: [MessageWhereUniqueInput!]!): [Message]
+  createPbisCard(data: PbisCardCreateInput!): PbisCard
+  createPbisCards(data: [PbisCardCreateInput!]!): [PbisCard]
+  updatePbisCard(
+    where: PbisCardWhereUniqueInput!
+    data: PbisCardUpdateInput!
+  ): PbisCard
+  updatePbisCards(data: [PbisCardUpdateArgs!]!): [PbisCard]
+  deletePbisCard(where: PbisCardWhereUniqueInput!): PbisCard
+  deletePbisCards(where: [PbisCardWhereUniqueInput!]!): [PbisCard]
+  createPbisCollection(data: PbisCollectionCreateInput!): PbisCollection
+  createPbisCollections(data: [PbisCollectionCreateInput!]!): [PbisCollection]
+  updatePbisCollection(
+    where: PbisCollectionWhereUniqueInput!
+    data: PbisCollectionUpdateInput!
+  ): PbisCollection
+  updatePbisCollections(data: [PbisCollectionUpdateArgs!]!): [PbisCollection]
+  deletePbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
+  deletePbisCollections(
+    where: [PbisCollectionWhereUniqueInput!]!
+  ): [PbisCollection]
+  createPbisTeam(data: PbisTeamCreateInput!): PbisTeam
+  createPbisTeams(data: [PbisTeamCreateInput!]!): [PbisTeam]
+  updatePbisTeam(
+    where: PbisTeamWhereUniqueInput!
+    data: PbisTeamUpdateInput!
+  ): PbisTeam
+  updatePbisTeams(data: [PbisTeamUpdateArgs!]!): [PbisTeam]
+  deletePbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
+  deletePbisTeams(where: [PbisTeamWhereUniqueInput!]!): [PbisTeam]
+  createSchoolPbisInfo(data: SchoolPbisInfoCreateInput!): SchoolPbisInfo
+  createSchoolPbisInfos(data: [SchoolPbisInfoCreateInput!]!): [SchoolPbisInfo]
+  updateSchoolPbisInfo(
+    where: SchoolPbisInfoWhereUniqueInput!
+    data: SchoolPbisInfoUpdateInput!
+  ): SchoolPbisInfo
+  updateSchoolPbisInfos(data: [SchoolPbisInfoUpdateArgs!]!): [SchoolPbisInfo]
+  deleteSchoolPbisInfo(where: SchoolPbisInfoWhereUniqueInput!): SchoolPbisInfo
+  deleteSchoolPbisInfos(
+    where: [SchoolPbisInfoWhereUniqueInput!]!
+  ): [SchoolPbisInfo]
+  createSortingHatQuestion(
+    data: SortingHatQuestionCreateInput!
+  ): SortingHatQuestion
+  createSortingHatQuestions(
+    data: [SortingHatQuestionCreateInput!]!
+  ): [SortingHatQuestion]
+  updateSortingHatQuestion(
+    where: SortingHatQuestionWhereUniqueInput!
+    data: SortingHatQuestionUpdateInput!
+  ): SortingHatQuestion
+  updateSortingHatQuestions(
+    data: [SortingHatQuestionUpdateArgs!]!
+  ): [SortingHatQuestion]
+  deleteSortingHatQuestion(
+    where: SortingHatQuestionWhereUniqueInput!
+  ): SortingHatQuestion
+  deleteSortingHatQuestions(
+    where: [SortingHatQuestionWhereUniqueInput!]!
+  ): [SortingHatQuestion]
+  createStudentFocus(data: StudentFocusCreateInput!): StudentFocus
+  createStudentFoci(data: [StudentFocusCreateInput!]!): [StudentFocus]
+  updateStudentFocus(
+    where: StudentFocusWhereUniqueInput!
+    data: StudentFocusUpdateInput!
+  ): StudentFocus
+  updateStudentFoci(data: [StudentFocusUpdateArgs!]!): [StudentFocus]
+  deleteStudentFocus(where: StudentFocusWhereUniqueInput!): StudentFocus
+  deleteStudentFoci(where: [StudentFocusWhereUniqueInput!]!): [StudentFocus]
+  createTrimesterAward(data: TrimesterAwardCreateInput!): TrimesterAward
+  createTrimesterAwards(data: [TrimesterAwardCreateInput!]!): [TrimesterAward]
+  updateTrimesterAward(
+    where: TrimesterAwardWhereUniqueInput!
+    data: TrimesterAwardUpdateInput!
+  ): TrimesterAward
+  updateTrimesterAwards(data: [TrimesterAwardUpdateArgs!]!): [TrimesterAward]
+  deleteTrimesterAward(where: TrimesterAwardWhereUniqueInput!): TrimesterAward
+  deleteTrimesterAwards(
+    where: [TrimesterAwardWhereUniqueInput!]!
+  ): [TrimesterAward]
   endSession: Boolean!
   authenticateUserWithPassword(
     email: String!
@@ -330,6 +2233,138 @@ type Query {
   ): [User!]
   user(where: UserWhereUniqueInput!): User
   usersCount(where: UserWhereInput! = {}): Int
+  birthdays(
+    where: BirthdayWhereInput! = {}
+    orderBy: [BirthdayOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Birthday!]
+  birthday(where: BirthdayWhereUniqueInput!): Birthday
+  birthdaysCount(where: BirthdayWhereInput! = {}): Int
+  bugReports(
+    where: BugReportWhereInput! = {}
+    orderBy: [BugReportOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [BugReport!]
+  bugReport(where: BugReportWhereUniqueInput!): BugReport
+  bugReportsCount(where: BugReportWhereInput! = {}): Int
+  bullyings(
+    where: BullyingWhereInput! = {}
+    orderBy: [BullyingOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Bullying!]
+  bullying(where: BullyingWhereUniqueInput!): Bullying
+  bullyingsCount(where: BullyingWhereInput! = {}): Int
+  callbacks(
+    where: CallbackWhereInput! = {}
+    orderBy: [CallbackOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Callback!]
+  callback(where: CallbackWhereUniqueInput!): Callback
+  callbacksCount(where: CallbackWhereInput! = {}): Int
+  calendars(
+    where: CalendarWhereInput! = {}
+    orderBy: [CalendarOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Calendar!]
+  calendar(where: CalendarWhereUniqueInput!): Calendar
+  calendarsCount(where: CalendarWhereInput! = {}): Int
+  cellPhoneViolations(
+    where: CellPhoneViolationWhereInput! = {}
+    orderBy: [CellPhoneViolationOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [CellPhoneViolation!]
+  cellPhoneViolation(
+    where: CellPhoneViolationWhereUniqueInput!
+  ): CellPhoneViolation
+  cellPhoneViolationsCount(where: CellPhoneViolationWhereInput! = {}): Int
+  disciplines(
+    where: DisciplineWhereInput! = {}
+    orderBy: [DisciplineOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Discipline!]
+  discipline(where: DisciplineWhereUniqueInput!): Discipline
+  disciplinesCount(where: DisciplineWhereInput! = {}): Int
+  links(
+    where: LinkWhereInput! = {}
+    orderBy: [LinkOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Link!]
+  link(where: LinkWhereUniqueInput!): Link
+  linksCount(where: LinkWhereInput! = {}): Int
+  messages(
+    where: MessageWhereInput! = {}
+    orderBy: [MessageOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Message!]
+  message(where: MessageWhereUniqueInput!): Message
+  messagesCount(where: MessageWhereInput! = {}): Int
+  pbisCards(
+    where: PbisCardWhereInput! = {}
+    orderBy: [PbisCardOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisCard!]
+  pbisCard(where: PbisCardWhereUniqueInput!): PbisCard
+  pbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  pbisCollections(
+    where: PbisCollectionWhereInput! = {}
+    orderBy: [PbisCollectionOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisCollection!]
+  pbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
+  pbisCollectionsCount(where: PbisCollectionWhereInput! = {}): Int
+  pbisTeams(
+    where: PbisTeamWhereInput! = {}
+    orderBy: [PbisTeamOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisTeam!]
+  pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
+  pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int
+  schoolPbisInfos(
+    where: SchoolPbisInfoWhereInput! = {}
+    orderBy: [SchoolPbisInfoOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [SchoolPbisInfo!]
+  schoolPbisInfo(where: SchoolPbisInfoWhereUniqueInput!): SchoolPbisInfo
+  schoolPbisInfosCount(where: SchoolPbisInfoWhereInput! = {}): Int
+  sortingHatQuestions(
+    where: SortingHatQuestionWhereInput! = {}
+    orderBy: [SortingHatQuestionOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [SortingHatQuestion!]
+  sortingHatQuestion(
+    where: SortingHatQuestionWhereUniqueInput!
+  ): SortingHatQuestion
+  sortingHatQuestionsCount(where: SortingHatQuestionWhereInput! = {}): Int
+  studentFoci(
+    where: StudentFocusWhereInput! = {}
+    orderBy: [StudentFocusOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [StudentFocus!]
+  studentFocus(where: StudentFocusWhereUniqueInput!): StudentFocus
+  studentFociCount(where: StudentFocusWhereInput! = {}): Int
+  trimesterAwards(
+    where: TrimesterAwardWhereInput! = {}
+    orderBy: [TrimesterAwardOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [TrimesterAward!]
+  trimesterAward(where: TrimesterAwardWhereUniqueInput!): TrimesterAward
+  trimesterAwardsCount(where: TrimesterAwardWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
 }

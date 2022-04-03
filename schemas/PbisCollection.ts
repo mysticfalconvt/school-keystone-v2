@@ -1,38 +1,32 @@
-import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-next/fields';
-import { list } from '@keystone-next/keystone/schema';
+import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
+import { list } from '@keystone-6/core';
 import { rules, isSignedIn } from '../access';
-import { CalendarDay } from '@keystonejs/fields'
 
 export const PbisCollection = list({
     access: {
-        create: isSignedIn,
-        read: isSignedIn,
-        update: isSignedIn,
-        delete: isSignedIn,
+        // create: isSignedIn,
+        // read: isSignedIn,
+        // update: isSignedIn,
+        // delete: isSignedIn,
     },
     fields: {
         name: text(),
 
         collectionDate: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
+            
         }),
         personalLevelWinners: text(),
         randomDrawingWinners: text(),
         taTeamsLevels: text(),
         taTeamNewLevelWinners: text(),
-        currentPbisTeamGoal: text({ defaultValue: '0', isRequired: true }),
+        currentPbisTeamGoal: text({ defaultValue: '0',validation: { isRequired: true} }),
         collectedCards: text(),
 
         dateModified: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation: {isRequired: true},
+            defaultValue: {kind: "now"},
         }),
         lastModifiedBy: relationship({ ref: 'User' })
 

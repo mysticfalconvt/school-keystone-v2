@@ -12,37 +12,385 @@ generator client {
 }
 
 model User {
-  id                     String  @id @default(cuid())
-  name                   String  @default("")
-  preferredName          String  @default("")
-  email                  String  @unique @default("")
-  password               String?
-  taStudents             User[]  @relation("User_taTeacher")
-  taTeacher              User?   @relation("User_taTeacher", fields: [taTeacherId], references: [id])
-  taTeacherId            String? @map("taTeacher")
-  parent                 User[]  @relation("User_children")
-  children               User[]  @relation("User_children")
-  canManageCalendar      Boolean @default(false)
-  canSeeOtherUsers       Boolean @default(false)
-  canManageUsers         Boolean @default(false)
-  canManageRoles         Boolean @default(false)
-  canManageLinks         Boolean @default(false)
-  canManageDiscipline    Boolean @default(false)
-  canSeeAllDiscipline    Boolean @default(false)
-  canSeeAllTeacherEvents Boolean @default(false)
-  canSeeStudentEvents    Boolean @default(false)
-  canSeeOwnCallback      Boolean @default(false)
-  canSeeAllCallback      Boolean @default(false)
-  hasTA                  Boolean @default(false)
-  hasClasses             Boolean @default(false)
-  isStudent              Boolean @default(false)
-  isParent               Boolean @default(false)
-  isStaff                Boolean @default(false)
-  isTeacher              Boolean @default(false)
-  isGuidance             Boolean @default(false)
-  isSuperAdmin           Boolean @default(false)
-  canManagePbis          Boolean @default(false)
+  id                                 String               @id @default(cuid())
+  name                               String               @default("")
+  preferredName                      String               @default("")
+  email                              String               @unique @default("")
+  password                           String?
+  taStudents                         User[]               @relation("User_taTeacher")
+  taTeacher                          User?                @relation("User_taTeacher", fields: [taTeacherId], references: [id])
+  taTeacherId                        String?              @map("taTeacher")
+  parent                             User[]               @relation("User_children")
+  children                           User[]               @relation("User_children")
+  canManageCalendar                  Boolean              @default(false)
+  canSeeOtherUsers                   Boolean              @default(false)
+  canManageUsers                     Boolean              @default(false)
+  canManageRoles                     Boolean              @default(false)
+  canManageLinks                     Boolean              @default(false)
+  canManageDiscipline                Boolean              @default(false)
+  canSeeAllDiscipline                Boolean              @default(false)
+  canSeeAllTeacherEvents             Boolean              @default(false)
+  canSeeStudentEvents                Boolean              @default(false)
+  canSeeOwnCallback                  Boolean              @default(false)
+  canSeeAllCallback                  Boolean              @default(false)
+  hasTA                              Boolean              @default(false)
+  hasClasses                         Boolean              @default(false)
+  isStudent                          Boolean              @default(false)
+  isParent                           Boolean              @default(false)
+  isStaff                            Boolean              @default(false)
+  isTeacher                          Boolean              @default(false)
+  isGuidance                         Boolean              @default(false)
+  isSuperAdmin                       Boolean              @default(false)
+  canManagePbis                      Boolean              @default(false)
+  block1Teacher                      User?                @relation("User_block1Teacher", fields: [block1TeacherId], references: [id])
+  block1TeacherId                    String?              @map("block1Teacher")
+  block1Students                     User[]               @relation("User_block1Teacher")
+  block2Teacher                      User?                @relation("User_block2Teacher", fields: [block2TeacherId], references: [id])
+  block2TeacherId                    String?              @map("block2Teacher")
+  block2Students                     User[]               @relation("User_block2Teacher")
+  block3Teacher                      User?                @relation("User_block3Teacher", fields: [block3TeacherId], references: [id])
+  block3TeacherId                    String?              @map("block3Teacher")
+  block3Students                     User[]               @relation("User_block3Teacher")
+  block4Teacher                      User?                @relation("User_block4Teacher", fields: [block4TeacherId], references: [id])
+  block4TeacherId                    String?              @map("block4Teacher")
+  block4Students                     User[]               @relation("User_block4Teacher")
+  block5Teacher                      User?                @relation("User_block5Teacher", fields: [block5TeacherId], references: [id])
+  block5TeacherId                    String?              @map("block5Teacher")
+  block5Students                     User[]               @relation("User_block5Teacher")
+  taTeam                             PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
+  taTeamId                           String?              @map("taTeam")
+  studentFocusTeacher                StudentFocus[]       @relation("StudentFocus_teacher")
+  studentFocusStudent                StudentFocus[]       @relation("StudentFocus_student")
+  studentCellPhoneViolation          CellPhoneViolation[] @relation("CellPhoneViolation_student")
+  teacherCellPhoneViolation          CellPhoneViolation[] @relation("CellPhoneViolation_teacher")
+  teacherPbisCards                   PbisCard[]           @relation("PbisCard_teacher")
+  studentPbisCards                   PbisCard[]           @relation("PbisCard_student")
+  teacherDiscipline                  Discipline[]         @relation("Discipline_teacher")
+  studentDiscipline                  Discipline[]         @relation("Discipline_student")
+  callbackItems                      Callback[]           @relation("Callback_student")
+  callbackAssigned                   Callback[]           @relation("Callback_teacher")
+  messageSender                      Message[]            @relation("Message_sender")
+  messageReceiver                    Message[]            @relation("Message_receiver")
+  currentTaWinner                    User?                @relation("User_currentTaWinner", fields: [currentTaWinnerId], references: [id])
+  currentTaWinnerId                  String?              @unique @map("currentTaWinner")
+  previousTaWinner                   User?                @relation("User_previousTaWinner", fields: [previousTaWinnerId], references: [id])
+  previousTaWinnerId                 String?              @unique @map("previousTaWinner")
+  studentIsCurrentWinner             User?                @relation("User_currentTaWinner")
+  studentIsPreviousWinner            User?                @relation("User_previousTaWinner")
+  birthday                           Birthday?            @relation("Birthday_student")
+  individualPbisLevel                Int?                 @default(0)
+  callbackCount                      Int?                 @default(0)
+  totalCallbackCount                 Int?                 @default(0)
+  PbisCardCount                      Int?                 @default(0)
+  YearPbisCount                      Int?                 @default(0)
+  teacherSubject                     String               @default("")
+  taPbisCardCount                    Int?                 @default(0)
+  averageTimeToCompleteCallback      Int?
+  block1Assignment                   String               @default("Current Assignment for Block 1 goes here")
+  block1ClassName                    String               @default("Class Name Goes Here")
+  block1AssignmentLastUpdated        DateTime?
+  block2Assignment                   String               @default("Current Assignment for Block 2 goes here")
+  block2ClassName                    String               @default("Class Name Goes Here")
+  block2AssignmentLastUpdated        DateTime?
+  block3Assignment                   String               @default("Current Assignment for Block 3 goes here")
+  block3ClassName                    String               @default("Class Name Goes Here")
+  block3AssignmentLastUpdated        DateTime?
+  block4Assignment                   String               @default("Current Assignment for Block 4 goes here")
+  block4ClassName                    String               @default("Class Name Goes Here")
+  block4AssignmentLastUpdated        DateTime?
+  block5Assignment                   String               @default("Current Assignment for Block 5 goes here")
+  block5ClassName                    String               @default("Class Name Goes Here")
+  block5AssignmentLastUpdated        DateTime?
+  sortingHat                         String               @default("")
+  from_BugReport_submittedBy         BugReport[]          @relation("BugReport_submittedBy")
+  from_Bullying_studentOffender      Bullying[]           @relation("Bullying_studentOffender")
+  from_Bullying_teacherAuthor        Bullying[]           @relation("Bullying_teacherAuthor")
+  from_Calendar_author               Calendar[]           @relation("Calendar_author")
+  from_Link_modifiedBy               Link[]               @relation("Link_modifiedBy")
+  from_PbisCollection_lastModifiedBy PbisCollection[]     @relation("PbisCollection_lastModifiedBy")
+  from_PbisTeam_lastModifiedBy       PbisTeam[]           @relation("PbisTeam_lastModifiedBy")
+  from_SortingHatQuestion_createdBy  SortingHatQuestion[] @relation("SortingHatQuestion_createdBy")
+  from_TrimesterAward_student        TrimesterAward[]     @relation("TrimesterAward_student")
+  from_TrimesterAward_teacher        TrimesterAward[]     @relation("TrimesterAward_teacher")
 
   @@index([name])
   @@index([taTeacherId])
+  @@index([block1TeacherId])
+  @@index([block2TeacherId])
+  @@index([block3TeacherId])
+  @@index([block4TeacherId])
+  @@index([block5TeacherId])
+  @@index([taTeamId])
+}
+
+model Birthday {
+  id           String   @id @default(cuid())
+  cakeType     String   @default("")
+  date         DateTime
+  hasChosen    Boolean  @default(false)
+  hasDelivered Boolean  @default(false)
+  student      User?    @relation("Birthday_student", fields: [studentId], references: [id])
+  studentId    String?  @unique @map("student")
+}
+
+model BugReport {
+  id            String   @id @default(cuid())
+  name          String   @default("")
+  description   String   @default("")
+  submittedBy   User?    @relation("BugReport_submittedBy", fields: [submittedById], references: [id])
+  submittedById String?  @map("submittedBy")
+  date          DateTime @default(now())
+  read          Boolean  @default(false)
+
+  @@index([submittedById])
+}
+
+model Bullying {
+  id                       String   @id @default(cuid())
+  studentOffender          User?    @relation("Bullying_studentOffender", fields: [studentOffenderId], references: [id])
+  studentOffenderId        String?  @map("studentOffender")
+  teacherAuthor            User?    @relation("Bullying_teacherAuthor", fields: [teacherAuthorId], references: [id])
+  teacherAuthorId          String?  @map("teacherAuthor")
+  dateReported             DateTime @default(now())
+  dateOfEvent              DateTime @default(now())
+  investigationDate        DateTime @default(now())
+  studentReporter          String   @default("")
+  employeeWitness          String   @default("")
+  studentWitness           String   @default("")
+  studentsInterviewed      String   @default("")
+  initialActions           String   @default("")
+  nextSteps                String   @default("")
+  reporter                 String   @default("")
+  description              String   @default("")
+  determination            String?
+  determinationDate        DateTime @default(now())
+  determinationExplanation String   @default("")
+  assignmentInvestigator   String   @default("")
+
+  @@index([studentOffenderId])
+  @@index([teacherAuthorId])
+}
+
+model Callback {
+  id                     String    @id @default(cuid())
+  title                  String    @default("")
+  description            String    @default("")
+  student                User?     @relation("Callback_student", fields: [studentId], references: [id])
+  studentId              String?   @map("student")
+  teacher                User?     @relation("Callback_teacher", fields: [teacherId], references: [id])
+  teacherId              String?   @map("teacher")
+  dateAssigned           DateTime  @default(now())
+  dateCompleted          DateTime?
+  link                   String    @default("")
+  messageFromTeacher     String    @default("")
+  messageFromTeacherDate String    @default("")
+  messageFromStudent     String    @default("")
+  messageFromStudentDate String    @default("")
+  daysLate               Int?
+
+  @@index([studentId])
+  @@index([teacherId])
+}
+
+model Calendar {
+  id          String   @id @default(cuid())
+  name        String   @default("")
+  description String   @default("")
+  status      String   @default("Both")
+  date        DateTime @default(now())
+  author      User?    @relation("Calendar_author", fields: [authorId], references: [id])
+  authorId    String?  @map("author")
+  dateCreated DateTime @default(now())
+  link        String   @default("")
+  linkTitle   String   @default("")
+
+  @@index([authorId])
+}
+
+model CellPhoneViolation {
+  id          String   @id @default(cuid())
+  description String   @default("")
+  student     User?    @relation("CellPhoneViolation_student", fields: [studentId], references: [id])
+  studentId   String?  @map("student")
+  teacher     User?    @relation("CellPhoneViolation_teacher", fields: [teacherId], references: [id])
+  teacherId   String?  @map("teacher")
+  dateGiven   DateTime @default(now())
+
+  @@index([studentId])
+  @@index([teacherId])
+}
+
+model Discipline {
+  id                        String   @id @default(cuid())
+  teacherComments           String   @default("")
+  adminComments             String   @default("")
+  classType                 String?
+  location                  String?
+  timeOfDay                 String?
+  student                   User?    @relation("Discipline_student", fields: [studentId], references: [id])
+  studentId                 String?  @map("student")
+  teacher                   User?    @relation("Discipline_teacher", fields: [teacherId], references: [id])
+  teacherId                 String?  @map("teacher")
+  date                      DateTime @default(now())
+  addressed                 DateTime @default(now())
+  inappropriateLanguage     Boolean  @default(false)
+  physicalConduct           Boolean  @default(false)
+  nonCompliance             Boolean  @default(false)
+  disruption                Boolean  @default(false)
+  propertyMisuse            Boolean  @default(false)
+  otherConduct              Boolean  @default(false)
+  VerbalWarning             Boolean  @default(false)
+  buddyRoom                 Boolean  @default(false)
+  conferenceWithStudent     Boolean  @default(false)
+  ParentContact             Boolean  @default(false)
+  PlanningRoomReferral      Boolean  @default(false)
+  FollowupPlan              Boolean  @default(false)
+  LossOfPrivilege           Boolean  @default(false)
+  DetentionWithTeacher      Boolean  @default(false)
+  IndividualizedInstruction Boolean  @default(false)
+  GuidanceReferral          Boolean  @default(false)
+  ReferToAdministrator      Boolean  @default(false)
+  OtherAction               Boolean  @default(false)
+  none                      Boolean  @default(false)
+  peers                     Boolean  @default(false)
+  teacherInvolved           Boolean  @default(false)
+  substitute                Boolean  @default(false)
+  unknown                   Boolean  @default(false)
+  othersInvolved            Boolean  @default(false)
+
+  @@index([studentId])
+  @@index([teacherId])
+}
+
+model Link {
+  id           String   @id @default(cuid())
+  name         String   @default("")
+  description  String   @default("")
+  forTeachers  Boolean  @default(false)
+  forStudents  Boolean  @default(false)
+  forParents   Boolean  @default(false)
+  onHomePage   Boolean  @default(false)
+  forPbis      Boolean  @default(false)
+  modifiedBy   User?    @relation("Link_modifiedBy", fields: [modifiedById], references: [id])
+  modifiedById String?  @map("modifiedBy")
+  modified     DateTime @default(now())
+  link         String   @default("")
+
+  @@index([modifiedById])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  subject    String   @default("")
+  message    String   @default("")
+  sender     User?    @relation("Message_sender", fields: [senderId], references: [id])
+  senderId   String?  @map("sender")
+  receiver   User?    @relation("Message_receiver", fields: [receiverId], references: [id])
+  receiverId String?  @map("receiver")
+  sent       DateTime @default(now())
+  read       Boolean  @default(false)
+  link       String   @default("")
+
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+model PbisCard {
+  id          String   @id @default(cuid())
+  category    String   @default("")
+  cardMessage String   @default("")
+  student     User?    @relation("PbisCard_student", fields: [studentId], references: [id])
+  studentId   String?  @map("student")
+  teacher     User?    @relation("PbisCard_teacher", fields: [teacherId], references: [id])
+  teacherId   String?  @map("teacher")
+  dateGiven   DateTime @default(now())
+  counted     Boolean  @default(false)
+
+  @@index([studentId])
+  @@index([teacherId])
+}
+
+model PbisCollection {
+  id                    String   @id @default(cuid())
+  name                  String   @default("")
+  collectionDate        DateTime @default(now())
+  personalLevelWinners  String   @default("")
+  randomDrawingWinners  String   @default("")
+  taTeamsLevels         String   @default("")
+  taTeamNewLevelWinners String   @default("")
+  currentPbisTeamGoal   String   @default("0")
+  collectedCards        String   @default("")
+  dateModified          DateTime @default(now())
+  lastModifiedBy        User?    @relation("PbisCollection_lastModifiedBy", fields: [lastModifiedById], references: [id])
+  lastModifiedById      String?  @map("lastModifiedBy")
+
+  @@index([lastModifiedById])
+}
+
+model PbisTeam {
+  id                     String   @id @default(cuid())
+  teamName               String   @default("")
+  taTeacher              User[]   @relation("User_taTeam")
+  uncountedCards         Int?     @default(0)
+  countedCards           Int?     @default(0)
+  currentLevel           Int?     @default(0)
+  numberOfStudents       Int?
+  averageCardsPerStudent Int?     @default(0)
+  dateModified           DateTime @default(now())
+  lastModifiedBy         User?    @relation("PbisTeam_lastModifiedBy", fields: [lastModifiedById], references: [id])
+  lastModifiedById       String?  @map("lastModifiedBy")
+
+  @@index([lastModifiedById])
+}
+
+model SchoolPbisInfo {
+  id                     String   @id @default(cuid())
+  teamName               String   @default("")
+  uncountedCards         Int?     @default(0)
+  countedCards           Int?     @default(0)
+  currentLevel           Int?     @default(0)
+  numberOfStudents       Int?
+  averageCardsPerStudent Int?     @default(0)
+  dateModified           DateTime @default(now())
+}
+
+model SortingHatQuestion {
+  id               String  @id @default(cuid())
+  question         String  @default("")
+  gryffindorChoice String  @default("")
+  hufflepuffChoice String  @default("")
+  ravenclawChoice  String  @default("")
+  slytherinChoice  String  @default("")
+  createdBy        User?   @relation("SortingHatQuestion_createdBy", fields: [createdById], references: [id])
+  createdById      String? @map("createdBy")
+
+  @@index([createdById])
+}
+
+model StudentFocus {
+  id          String   @id @default(cuid())
+  comments    String   @default("")
+  category    String   @default("")
+  student     User?    @relation("StudentFocus_student", fields: [studentId], references: [id])
+  studentId   String?  @map("student")
+  teacher     User?    @relation("StudentFocus_teacher", fields: [teacherId], references: [id])
+  teacherId   String?  @map("teacher")
+  dateCreated DateTime @default(now())
+
+  @@index([studentId])
+  @@index([teacherId])
+}
+
+model TrimesterAward {
+  id        String   @id @default(cuid())
+  howl      String
+  trimester String?
+  date      DateTime @default(now())
+  student   User?    @relation("TrimesterAward_student", fields: [studentId], references: [id])
+  studentId String?  @map("student")
+  teacher   User?    @relation("TrimesterAward_teacher", fields: [teacherId], references: [id])
+  teacherId String?  @map("teacher")
+
+  @@index([studentId])
+  @@index([teacherId])
 }

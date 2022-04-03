@@ -4,10 +4,10 @@ import { rules, isSignedIn } from '../access';
 
 export const TrimesterAward = list({
     access: {
-        create: isSignedIn,
-        read: isSignedIn,
-        update: isSignedIn,
-        delete: isSignedIn,
+        // create: isSignedIn,
+        // read: isSignedIn,
+        // update: isSignedIn,
+        // delete: isSignedIn,
     },
     fields: {
         howl: select({
@@ -17,7 +17,7 @@ export const TrimesterAward = list({
                 { value: 'Perseverance', label: 'Perseverance' },
             ],
 
-            isRequired: true,
+           validation:{ isRequired: true},
         }),
         trimester: select({
             options: [
@@ -28,9 +28,8 @@ export const TrimesterAward = list({
         }),
 
         date: timestamp({
-            isRequired: true,
-            defaultValue: () => new Date().toISOString(),
-
+            validation: {isRequired: true}, 
+            defaultValue: {kind: "now"},
         }),
 
         student: relationship({

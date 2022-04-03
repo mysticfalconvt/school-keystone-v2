@@ -2,7 +2,7 @@ import { integer, select, text, relationship, timestamp, checkbox, } from '@keys
 import { list } from '@keystone-6/core';
 import { rules, isSignedIn } from '../access';
 
-export const SortingHatQuestion = list({
+export const BugReport = list({
     access: {
         // create: isSignedIn,
         // read: isSignedIn,
@@ -10,25 +10,22 @@ export const SortingHatQuestion = list({
         // delete: isSignedIn,
     },
     fields: {
-
-        question: text({
+        name: text({ validation: { isRequired: true }}),
+        description: text({
             ui: {
                 displayMode: 'textarea',
             },
-        }),
-        gryffindorChoice: text(),
-        hufflepuffChoice: text(),
-        ravenclawChoice: text(),
-        slytherinChoice: text(),
 
-        createdBy: relationship({
+        }),
+
+        submittedBy: relationship({
             ref: 'User',
         }),
+        date: timestamp({
+            validation:{ isRequired: true},
+            defaultValue: {kind: "now"}
+        }),
+        read: checkbox({defaultValue: false}),
 
-    },
-    ui: {
-        listView: {
-            initialColumns: ['question'],
-        },
     },
 });

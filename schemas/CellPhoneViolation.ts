@@ -1,13 +1,13 @@
-import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-next/fields';
-import { list } from '@keystone-next/keystone/schema';
+import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
+import { list } from '@keystone-6/core';
 import { rules, isSignedIn } from '../access';
 
 export const CellPhoneViolation = list({
     access: {
-        create: isSignedIn,
-        read: isSignedIn,
-        update: isSignedIn,
-        delete: isSignedIn,
+        // create: isSignedIn,
+        // read: isSignedIn,
+        // update: isSignedIn,
+        // delete: isSignedIn,
     },
     fields: {
 
@@ -24,11 +24,8 @@ export const CellPhoneViolation = list({
             ref: 'User.teacherCellPhoneViolation',
         }),
         dateGiven: timestamp({
-            isRequired: true,
-            defaultValue: () => {
-                const date = new Date();
-                return date.toISOString();
-            }
+            validation:  {isRequired: true},
+            defaultValue:{kind: "now"},
         }),
 
     },
