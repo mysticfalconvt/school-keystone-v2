@@ -16,7 +16,7 @@ model User {
   name                               String               @default("")
   preferredName                      String               @default("")
   email                              String               @unique @default("")
-  password                           String?
+  password                           String
   taStudents                         User[]               @relation("User_taTeacher")
   taTeacher                          User?                @relation("User_taTeacher", fields: [taTeacherId], references: [id])
   taTeacherId                        String?              @map("taTeacher")

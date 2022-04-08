@@ -49,6 +49,13 @@ export default withAuth(
       provider: 'postgresql',
       url: databaseURL,
     },
+    // server options
+    server: {
+      // the port to run the server on
+      port: Number(process.env.PORT) || 4000,
+      cors: { origin: true, 
+      credentials: true },
+    },
     // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
     ui: {
       // For our starter, we check that someone has session data before letting them see the Admin UI.
@@ -72,9 +79,9 @@ export default withAuth(
       SortingHatQuestion,
       StudentFocus,
       TrimesterAward,
-      
 
     },
     session,
+    
   })
 );

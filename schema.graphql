@@ -225,7 +225,6 @@ input UserWhereInput {
   name: StringFilter
   preferredName: StringFilter
   email: StringFilter
-  password: PasswordFilter
   taStudents: UserManyRelationFilter
   taTeacher: UserWhereInput
   parent: UserManyRelationFilter
@@ -347,10 +346,6 @@ input NestedStringFilter {
   startsWith: String
   endsWith: String
   not: NestedStringFilter
-}
-
-input PasswordFilter {
-  isSet: Boolean!
 }
 
 input UserManyRelationFilter {

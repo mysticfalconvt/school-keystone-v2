@@ -26,7 +26,7 @@ export const User = list({
     name: text({  isIndexed: true, validation: { isRequired: true } }),
     preferredName: text(),
     email: text({ validation:{isRequired: true,} , isIndexed: 'unique' }),
-    password: password(),
+    password: password({ isNullable: false, validation: { isRequired: true } }),
     taStudents: relationship({ ref: 'User.taTeacher', many: true }),
     taTeacher: relationship({ ref: 'User.taStudents', many: false }),
     parent: relationship({ ref: 'User.children', many: true }),
@@ -101,4 +101,12 @@ export const User = list({
 
 
   },
+  hooks: {
+    // log session on read
+    beforeOperation: (args) => {
+      console.log('read', args);
+      
+    }
+  },
+
 });
