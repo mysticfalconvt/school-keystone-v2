@@ -103,10 +103,10 @@ export const User = list({
   },
   hooks: {
     // log session on read
-    beforeOperation: (args) => {
-      console.log('read', args);
+    // beforeOperation: (args) => {
+    //   console.log('read', args);
       
-    }
+    // }
   },
 
 });
