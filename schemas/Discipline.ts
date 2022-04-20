@@ -60,9 +60,10 @@ export const Discipline = list({
                 { label: 'Morning TA', value: 'Morning TA' },
                 { label: 'Block 1', value: 'Block 1' },
                 { label: 'Block 2', value: 'Block 2' },
-                { label: 'Lunch', value: 'Lunch' },
                 { label: 'Block 3', value: 'Block 3' },
+                { label: 'Lunch', value: 'Lunch' },
                 { label: 'Block 4', value: 'Block 4' },
+                { label: 'Block 5', value: 'Block 5' },
                 { label: 'Afternoon TA', value: 'Afternoon TA' },
 
             ],
