@@ -71,7 +71,10 @@ export async function sendAnEmail(
   subject: string,
   body: string
 ): Promise<void> {
-  // console.log(process.env.MAIL_HOST);
+  console.log(process.env.MAIL_HOST);
+  console.log(process.env.MAIL_USER);
+  console.log(process.env.MAIL_PASS);
+  console.log(process.env.MAIL_PORT);
   // console.log('to', to);
   // console.log('from', from);
   // console.log('subject', subject);
