@@ -37,7 +37,8 @@ import { SortingHatQuestion } from './schemas/SortingHatQuestion';
 import { TrimesterAward } from './schemas/TrimesterAward';
 
 // database URL is set in .env file
-const databaseURL =  process.env.DATABASE_URL ;
+const databaseURL =   process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/postgres';
+if(databaseURL.includes("local"))console.log(databaseURL);
 
 // extend gql with custom mutations
 import { extendGraphqlSchema } from './mutations';

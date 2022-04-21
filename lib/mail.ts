@@ -83,6 +83,7 @@ export async function sendAnEmail(
     subject,
     html: makeANiceEmail(body),
   })) as MailResponse;
+  console.log(info)
   if (process.env.MAIL_USER.includes('ethereal.email')) {
     console.log(`💌 Message Sent!  Preview it at ${getTestMessageUrl(info)}`);
   }
