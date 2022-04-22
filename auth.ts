@@ -11,6 +11,7 @@ import { createAuth } from '@keystone-6/auth';
 
 // See https://keystonejs.com/docs/apis/session#session-api for the session docs
 import { statelessSessions } from '@keystone-6/core/session';
+import { sendPasswordResetEmail } from './lib/mail';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -40,6 +41,11 @@ const { withAuth } = createAuth({
     fields: ['name', 'email', 'password',],
     itemData: {isSuperAdmin: true}
   },
+  passwordResetLink: {
+    async sendToken(args){
+      await sendPasswordResetEmail(args.token, args.identity)
+    }
+  }
 });
 
 // This defines how long people will remain logged in for.
