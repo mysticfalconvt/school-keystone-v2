@@ -5,14 +5,14 @@ import { permissionFields } from './fields';
 
 export const User = list({
   access: {
-    // create: () => true,
-    // read: isSignedIn,
-    // update: isSignedIn,
-    // delete: isSignedIn,
-    // delete: rules.canManageUsers,
-    // update: rules.canManageUsers,
-    // only people with the permission can delete themselves!
-    // You can't delete yourself
+    operation: {
+      query: isSignedIn,
+      create: isSignedIn,
+      delete: isSignedIn,
+      update: isSignedIn,
+
+    }
+    
   },
   ui: {
     // hide the backend UI from regular users

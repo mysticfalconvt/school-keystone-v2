@@ -309,6 +309,8 @@ model PbisCard {
   dateGiven   DateTime @default(now())
   counted     Boolean  @default(false)
 
+  @@index([category])
+  @@index([cardMessage])
   @@index([studentId])
   @@index([teacherId])
 }

@@ -10,15 +10,19 @@ export const PbisCard = list({
         // delete: isSignedIn,
     },
     fields: {
-        category: text(),
+        category: text({
+            isIndexed: true,
+        }),
         cardMessage: text({
             ui: {
                 displayMode: 'textarea',
             },
+            isIndexed: true,
         }),
 
         student: relationship({
             ref: 'User.studentPbisCards',
+            
         }),
         teacher: relationship({
             ref: 'User.teacherPbisCards',

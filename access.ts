@@ -1,12 +1,14 @@
 import { permissionsList } from './schemas/fields';
 import { ListAccessArgs } from './types';
+import { Session } from './types';
+import { SessionContext } from '@keystone-6/core/types';
 import { KeystoneContext } from '@keystone-6/core/types';
 // At it's simplest, the access control returns a yes or no value depending on the users session
 
-export function isSignedIn({ session, itemId, context }: ListAccessArgs) {
+export function isSignedIn({ session, context}: ListAccessArgs) {
 
-
-  // console.log("context", context.req)
+// console.log(context)
+  // console.log("context", context.req.rawHeaders)
   const isAuth = context?.req?.rawHeaders?.includes("test auth for keystone")
   // console.log("isAuth", isAuth)
   const hasSession = !!session;
