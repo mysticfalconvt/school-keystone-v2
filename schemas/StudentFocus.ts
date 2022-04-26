@@ -4,10 +4,12 @@ import { rules, isSignedIn } from '../access';
 
 export const StudentFocus = list({
     access: {
-        // create: isSignedIn,
-        // read: () => true,
-        // update: isSignedIn,
-        // delete: isSignedIn,
+        operation: {
+            query: isSignedIn,
+            create: isSignedIn,
+            delete: isSignedIn,
+            update: isSignedIn,
+        }
     },
     fields: {
 

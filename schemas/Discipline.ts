@@ -5,10 +5,12 @@ import { rules, isSignedIn } from '../access';
 
 export const Discipline = list({
     access: {
-        // create: isSignedIn,
-        // read: isSignedIn,
-        // update: isSignedIn,
-        // delete: isSignedIn,
+      operation:{
+        query: isSignedIn,
+        create: isSignedIn,
+        delete: isSignedIn,
+        update: isSignedIn,
+      }
     },
     fields: {
 
