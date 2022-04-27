@@ -11,6 +11,12 @@ export const StudentFocus = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['category', 'teacher', 'student' ],
+            pageSize: 100,
+        },
+    },
     fields: {
 
         comments: text({

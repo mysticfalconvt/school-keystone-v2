@@ -11,6 +11,13 @@ export const CellPhoneViolation = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: [ 'dateGiven' , 'teacher', 'student' ],
+            initialSort: { field: 'dateGiven', direction: 'ASC' },
+            pageSize: 100,
+        },
+    },
     fields: {
 
         description: text({

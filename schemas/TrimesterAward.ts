@@ -1,6 +1,6 @@
 import { text, relationship, timestamp, checkbox, select, } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
-import { rules, isSignedIn } from '../access';
+import { isSignedIn } from '../access';
 
 export const TrimesterAward = list({
     access: {
@@ -10,6 +10,13 @@ export const TrimesterAward = list({
             delete: isSignedIn,
             update: isSignedIn,
         }
+    },
+    ui: {
+        labelField: "teacher",
+        listView: {
+            initialColumns: ['howl', 'teacher', 'student', 'trimester' ],
+            pageSize: 100,
+        },
     },
     fields: {
         howl: select({

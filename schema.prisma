@@ -355,17 +355,6 @@ model PbisTeam {
   @@index([lastModifiedById])
 }
 
-model SchoolPbisInfo {
-  id                     String   @id @default(cuid())
-  teamName               String   @default("")
-  uncountedCards         Int?     @default(0)
-  countedCards           Int?     @default(0)
-  currentLevel           Int?     @default(0)
-  numberOfStudents       Int?
-  averageCardsPerStudent Int?     @default(0)
-  dateModified           DateTime @default(now())
-}
-
 model SortingHatQuestion {
   id               String  @id @default(cuid())
   question         String  @default("")

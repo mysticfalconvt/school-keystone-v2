@@ -29,7 +29,7 @@ import { CellPhoneViolation } from './schemas/CellPhoneViolation'
 import { Callback } from './schemas/Callback'
 import { Discipline } from './schemas/Discipline'
 import { PbisCollection } from './schemas/PbisCollection'
-import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
+// import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
 import { Birthday } from './schemas/Birthday'
 import { BugReport } from './schemas/BugReport'
 import { Bullying } from './schemas/Bullying'
@@ -79,7 +79,7 @@ export default withAuth(
       PbisCard,
       PbisCollection,
       PbisTeam,
-      SchoolPbisInfo,
+      // SchoolPbisInfo,
       SortingHatQuestion,
       StudentFocus,
       TrimesterAward,

@@ -130,17 +130,6 @@ type Mutation {
   updatePbisTeams(data: [PbisTeamUpdateArgs!]!): [PbisTeam]
   deletePbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   deletePbisTeams(where: [PbisTeamWhereUniqueInput!]!): [PbisTeam]
-  createSchoolPbisInfo(data: SchoolPbisInfoCreateInput!): SchoolPbisInfo
-  createSchoolPbisInfos(data: [SchoolPbisInfoCreateInput!]!): [SchoolPbisInfo]
-  updateSchoolPbisInfo(
-    where: SchoolPbisInfoWhereUniqueInput!
-    data: SchoolPbisInfoUpdateInput!
-  ): SchoolPbisInfo
-  updateSchoolPbisInfos(data: [SchoolPbisInfoUpdateArgs!]!): [SchoolPbisInfo]
-  deleteSchoolPbisInfo(where: SchoolPbisInfoWhereUniqueInput!): SchoolPbisInfo
-  deleteSchoolPbisInfos(
-    where: [SchoolPbisInfoWhereUniqueInput!]!
-  ): [SchoolPbisInfo]
   createSortingHatQuestion(
     data: SortingHatQuestionCreateInput!
   ): SortingHatQuestion
@@ -1991,71 +1980,6 @@ input PbisTeamCreateInput {
   lastModifiedBy: UserRelateToOneForCreateInput
 }
 
-type SchoolPbisInfo {
-  id: ID!
-  teamName: String
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-}
-
-input SchoolPbisInfoWhereUniqueInput {
-  id: ID
-}
-
-input SchoolPbisInfoWhereInput {
-  AND: [SchoolPbisInfoWhereInput!]
-  OR: [SchoolPbisInfoWhereInput!]
-  NOT: [SchoolPbisInfoWhereInput!]
-  id: IDFilter
-  teamName: StringFilter
-  uncountedCards: IntNullableFilter
-  countedCards: IntNullableFilter
-  currentLevel: IntNullableFilter
-  numberOfStudents: IntNullableFilter
-  averageCardsPerStudent: IntNullableFilter
-  dateModified: DateTimeFilter
-}
-
-input SchoolPbisInfoOrderByInput {
-  id: OrderDirection
-  teamName: OrderDirection
-  uncountedCards: OrderDirection
-  countedCards: OrderDirection
-  currentLevel: OrderDirection
-  numberOfStudents: OrderDirection
-  averageCardsPerStudent: OrderDirection
-  dateModified: OrderDirection
-}
-
-input SchoolPbisInfoUpdateInput {
-  teamName: String
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-}
-
-input SchoolPbisInfoUpdateArgs {
-  where: SchoolPbisInfoWhereUniqueInput!
-  data: SchoolPbisInfoUpdateInput!
-}
-
-input SchoolPbisInfoCreateInput {
-  teamName: String
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-}
-
 type SortingHatQuestion {
   id: ID!
   question: String
@@ -2366,14 +2290,6 @@ type Query {
   ): [PbisTeam!]
   pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int
-  schoolPbisInfos(
-    where: SchoolPbisInfoWhereInput! = {}
-    orderBy: [SchoolPbisInfoOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [SchoolPbisInfo!]
-  schoolPbisInfo(where: SchoolPbisInfoWhereUniqueInput!): SchoolPbisInfo
-  schoolPbisInfosCount(where: SchoolPbisInfoWhereInput! = {}): Int
   sortingHatQuestions(
     where: SortingHatQuestionWhereInput! = {}
     orderBy: [SortingHatQuestionOrderByInput!]! = []

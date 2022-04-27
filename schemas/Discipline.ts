@@ -1,7 +1,7 @@
 import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
 import { check } from 'prettier';
-import { rules, isSignedIn } from '../access';
+import { isSignedIn } from '../access';
 
 export const Discipline = list({
     access: {
@@ -11,6 +11,13 @@ export const Discipline = list({
         delete: isSignedIn,
         update: isSignedIn,
       }
+    },
+    ui: {
+        listView: {
+            initialColumns: [ 'date' , 'teacher', 'student' ],
+            initialSort: { field: 'date', direction: 'ASC' },
+            pageSize: 100,
+        },
     },
     fields: {
 
@@ -117,10 +124,5 @@ export const Discipline = list({
         unknown: checkbox(),
         othersInvolved: checkbox(),
 
-    }, ui: {
-        listView: {
-            initialColumns: ['student', 'teacher', 'date'],
-            initialSort: { field: 'date', direction: "ASC" },
-        }
-    }
+    },
 });

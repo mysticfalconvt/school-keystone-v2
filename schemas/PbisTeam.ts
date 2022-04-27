@@ -11,6 +11,12 @@ export const PbisTeam = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['teamName', 'taTeacher' ],
+            pageSize: 100,
+        },
+    },
     fields: {
 
         teamName: text(),

@@ -11,6 +11,13 @@ export const Birthday = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: [ 'student', 'cakeType' ],
+            initialSort: { field: 'date', direction: 'ASC' },
+            pageSize: 100,
+        },
+    },
     fields: {
         cakeType: text(),
         date: timestamp({

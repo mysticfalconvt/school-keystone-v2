@@ -11,6 +11,12 @@ export const PbisCard = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['category', 'teacher', 'student' ],
+            pageSize: 200,
+        },
+    },
     fields: {
         category: text({
             isIndexed: true,

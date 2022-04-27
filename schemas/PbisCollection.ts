@@ -11,6 +11,12 @@ export const PbisCollection = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['name', 'collectionDate' ],
+            pageSize: 100,
+        },
+    },
     fields: {
         name: text(),
 

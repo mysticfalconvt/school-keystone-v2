@@ -11,6 +11,12 @@ export const SortingHatQuestion = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['createdBy', 'question' ],
+            pageSize: 100,
+        },
+    },
     fields: {
 
         question: text({

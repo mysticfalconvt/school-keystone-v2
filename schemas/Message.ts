@@ -11,6 +11,12 @@ export const Message = list({
             update: isSignedIn,
         }
     },
+    ui: {
+        listView: {
+            initialColumns: ['subject', 'receiver', 'sent' ],
+            pageSize: 100,
+        },
+    },
     fields: {
         subject: text(),
         message: text({

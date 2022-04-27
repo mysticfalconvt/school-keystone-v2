@@ -1,7 +1,6 @@
-import { integer, select, text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
+import {  select, text, relationship, timestamp,  } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
-import { check } from 'prettier';
-import { rules, isSignedIn } from '../access';
+import {  isSignedIn } from '../access';
 
 export const Bullying = list({
     access: {
@@ -11,6 +10,13 @@ export const Bullying = list({
             delete: isSignedIn,
             update: isSignedIn,
         }
+    },
+    ui: {
+        listView: {
+            initialColumns: [ 'dateOfEvent' , 'studentOffender', 'teacherAuthor' ],
+            initialSort: { field: 'dateOfEvent', direction: 'ASC' },
+            pageSize: 100,
+        },
     },
     fields: {
 
@@ -57,10 +63,5 @@ export const Bullying = list({
 
 
 
-    }, ui: {
-        listView: {
-            initialColumns: ['studentOffender', 'teacherAuthor', 'dateReported'],
-            initialSort: { field: 'dateReported', direction: "ASC" },
-        }
-    }
+    }, 
 });

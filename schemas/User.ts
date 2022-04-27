@@ -18,7 +18,8 @@ export const User = list({
     // hide the backend UI from regular users
     isHidden: !isAdmin,
     listView: {
-      initialColumns: ['name', 'email', ],
+      initialColumns: ['name', 'email', 'taTeacher' ],
+      pageSize: 100,
     },
   },
   fields: {

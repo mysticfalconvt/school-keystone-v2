@@ -1,6 +1,6 @@
-import { integer, select, text, relationship, timestamp, } from '@keystone-6/core/fields';
+import { select, text, relationship, timestamp, } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
-import { rules, isSignedIn } from '../access';
+import {  isSignedIn } from '../access';
 
 export const Calendar = list({
   access: {
@@ -11,6 +11,13 @@ export const Calendar = list({
       update: isSignedIn,
   }
   },
+  ui: {
+    listView: {
+        initialColumns: [  'date', 'status', 'name', ],
+        initialSort: { field: 'date', direction: 'ASC' },
+        pageSize: 100,
+    },
+},
   fields: {
     name: text({ validation: {isRequired: true} }),
     description: text({
