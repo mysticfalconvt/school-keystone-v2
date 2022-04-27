@@ -73,6 +73,7 @@ export const Discipline = list({
                 displayMode: 'select',
                 // createView: { fieldMode: 'hidden' },
             },
+            isIndexed: true,
         }),
         student: relationship({
             ref: 'User.studentDiscipline',

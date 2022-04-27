@@ -31,7 +31,7 @@ export const Callback = list({
             defaultValue: {kind: "now"},
         }),
         dateCompleted: timestamp({
-            
+            isIndexed: true,
         }),
         link: text(),
         messageFromTeacher: text(),

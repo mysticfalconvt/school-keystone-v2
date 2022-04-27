@@ -1,6 +1,6 @@
 import { list } from '@keystone-6/core';
 import { text, password, relationship, integer, timestamp } from '@keystone-6/core/fields';
-import { isSignedIn, permissions, rules } from '../access';
+import { isAdmin, isSignedIn } from '../access';
 import { permissionFields } from './fields';
 
 export const User = list({
@@ -16,8 +16,7 @@ export const User = list({
   },
   ui: {
     // hide the backend UI from regular users
-    hideCreate: (args) => !rules.canManageUsers(args),
-    hideDelete: (args) => !rules.canManageUsers(args),
+    isHidden: !isAdmin,
     listView: {
       initialColumns: ['name', 'email', ],
     },

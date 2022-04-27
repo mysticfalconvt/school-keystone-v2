@@ -27,6 +27,7 @@ export const TrimesterAward = list({
                 { value: '2', label: '2' },
                 { value: '3', label: '3' },
             ],
+            isIndexed: true,
         }),
 
         date: timestamp({

@@ -134,6 +134,8 @@ model Birthday {
   hasDelivered Boolean  @default(false)
   student      User?    @relation("Birthday_student", fields: [studentId], references: [id])
   studentId    String?  @unique @map("student")
+
+  @@index([date])
 }
 
 model BugReport {
@@ -193,6 +195,7 @@ model Callback {
 
   @@index([studentId])
   @@index([teacherId])
+  @@index([dateCompleted])
 }
 
 model Calendar {
@@ -207,6 +210,8 @@ model Calendar {
   link        String   @default("")
   linkTitle   String   @default("")
 
+  @@index([status])
+  @@index([date])
   @@index([authorId])
 }
 
@@ -221,6 +226,7 @@ model CellPhoneViolation {
 
   @@index([studentId])
   @@index([teacherId])
+  @@index([dateGiven])
 }
 
 model Discipline {
@@ -261,6 +267,7 @@ model Discipline {
   unknown                   Boolean  @default(false)
   othersInvolved            Boolean  @default(false)
 
+  @@index([timeOfDay])
   @@index([studentId])
   @@index([teacherId])
 }
@@ -396,6 +403,7 @@ model TrimesterAward {
   teacher   User?    @relation("TrimesterAward_teacher", fields: [teacherId], references: [id])
   teacherId String?  @map("teacher")
 
+  @@index([trimester])
   @@index([studentId])
   @@index([teacherId])
 }

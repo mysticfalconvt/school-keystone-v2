@@ -32,10 +32,12 @@ export const Calendar = list({
         displayMode: 'segmented-control',
         createView: { fieldMode: 'hidden' },
       },
+      isIndexed: true,
     }),
     date: timestamp({
       validation: {isRequired: true},
       defaultValue: {kind: "now"},
+      isIndexed: true,
     }),
     author: relationship({
       ref: 'User',

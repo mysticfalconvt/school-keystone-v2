@@ -28,6 +28,7 @@ export const CellPhoneViolation = list({
         dateGiven: timestamp({
             validation:  {isRequired: true},
             defaultValue:{kind: "now"},
+            isIndexed: true,
         }),
 
     },
