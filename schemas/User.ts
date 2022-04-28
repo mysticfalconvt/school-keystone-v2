@@ -17,9 +17,12 @@ export const User = list({
   ui: {
     // hide the backend UI from regular users
     isHidden: !isAdmin,
+    hideDelete: true,
+    description: 'Users of the site',
     listView: {
       initialColumns: ['name', 'email', 'taTeacher' ],
       pageSize: 100,
+  
     },
   },
   fields: {
@@ -53,7 +56,13 @@ export const User = list({
     studentCellPhoneViolation: relationship({ ref: 'CellPhoneViolation.student', many: true }),
     teacherCellPhoneViolation: relationship({ ref: 'CellPhoneViolation.teacher', many: true }),
     teacherPbisCards: relationship({ ref: 'PbisCard.teacher', many: true }),
-    studentPbisCards: relationship({ ref: 'PbisCard.student', many: true }),
+    studentPbisCards: relationship({ 
+      ref: 'PbisCard.student',
+       many: true,
+      ui:{
+        displayMode: 'count',
+      }
+      }),
     teacherDiscipline: relationship({ ref: 'Discipline.teacher', many: true }),
     studentDiscipline: relationship({ ref: 'Discipline.student', many: true }),
     callbackItems: relationship({ ref: 'Callback.student', many: true }),

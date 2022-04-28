@@ -25,10 +25,50 @@ export const PbisCollection = list({
             defaultValue: {kind: "now"},
             
         }),
-        personalLevelWinners: text(),
-        randomDrawingWinners: text(),
-        taTeamsLevels: text(),
-        taTeamNewLevelWinners: text(),
+        personalLevelWinners: text({
+            ui: {
+                itemView: {
+                    fieldMode: 'hidden',
+                },
+                listView: {
+                    fieldMode: 'hidden',
+                }
+                
+            },
+        }),
+        randomDrawingWinners: text({
+            ui: {
+                itemView: {
+                    fieldMode: 'hidden',
+                },
+                listView: {
+                    fieldMode: 'hidden',
+                }
+                
+            },
+        }),
+        taTeamsLevels: text({
+            ui: {
+                itemView: {
+                    fieldMode: 'hidden',
+                },
+                listView: {
+                    fieldMode: 'hidden',
+                }
+                
+            },
+        }),
+        taTeamNewLevelWinners: text({
+            ui: {
+                itemView: {
+                    fieldMode: 'hidden',
+                },
+                listView: {
+                    fieldMode: 'hidden',
+                }
+                
+            },
+        }),
         currentPbisTeamGoal: text({ defaultValue: '0',validation: { isRequired: true} }),
         collectedCards: text(),
 
