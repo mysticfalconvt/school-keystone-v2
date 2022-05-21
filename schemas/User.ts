@@ -17,7 +17,7 @@ export const User = list({
   ui: {
     // hide the backend UI from regular users
     isHidden: !isAdmin,
-    hideDelete: true,
+    hideDelete: !isAdmin,
     description: 'Users of the site',
     listView: {
       initialColumns: ['name', 'email', 'taTeacher' ],
