@@ -4,7 +4,7 @@ function CustomLogo() {
      <h1>
          <a href="/">
              
-             NCUJHS
+             NCUJHS.TECH
              </a>
          </h1>
   );
