@@ -86,6 +86,36 @@ async function updateStudentSchedules(root: any,
         studentUpdateResults.block5Teacher = { connect: { id: block5Teacher[0].id } };
       }
     }
+    if (student.block6) {
+      const block6Teacher = await context.query.User.findMany({
+        where: { email: {equals: student.block6} }, query: graphql`
+      id
+    email
+    ` });
+      if (block6Teacher.length > 0) {
+        studentUpdateResults.block6Teacher = { connect: { id: block6Teacher[0].id } };
+      }
+    }
+    if (student.block7) {
+      const block7Teacher = await context.query.User.findMany({
+        where: { email: {equals: student.block7} }, query: graphql`
+      id
+    email
+    ` });
+      if (block7Teacher.length > 0) {
+        studentUpdateResults.block7Teacher = { connect: { id: block7Teacher[0].id } };
+      }
+    }
+    if (student.block8) {
+      const block8Teacher = await context.query.User.findMany({
+        where: { email: {equals: student.block8} }, query: graphql`
+      id
+    email
+    ` });
+      if (block8Teacher.length > 0) {
+        studentUpdateResults.block8Teacher = { connect: { id: block8Teacher[0].id } };
+      }
+    }
     if (student.ta) {
       const taTeacher = await context.query.User.findMany({
         where: { email: {equals: student.ta} }, query: graphql`

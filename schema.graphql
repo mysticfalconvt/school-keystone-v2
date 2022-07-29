@@ -273,6 +273,30 @@ type User {
     skip: Int! = 0
   ): [User!]
   block5StudentsCount(where: UserWhereInput! = {}): Int
+  block6Teacher: User
+  block6Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block6StudentsCount(where: UserWhereInput! = {}): Int
+  block7Teacher: User
+  block7Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block7StudentsCount(where: UserWhereInput! = {}): Int
+  block8Teacher: User
+  block8Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block8StudentsCount(where: UserWhereInput! = {}): Int
   taTeam: PbisTeam
   studentFocusTeacher(
     where: StudentFocusWhereInput! = {}
@@ -386,6 +410,15 @@ type User {
   block5Assignment: String
   block5ClassName: String
   block5AssignmentLastUpdated: DateTime
+  block6Assignment: String
+  block6ClassName: String
+  block6AssignmentLastUpdated: DateTime
+  block7Assignment: String
+  block7ClassName: String
+  block7AssignmentLastUpdated: DateTime
+  block8Assignment: String
+  block8ClassName: String
+  block8AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: PasswordState
   passwordResetIssuedAt: DateTime
@@ -446,6 +479,12 @@ input UserWhereInput {
   block4Students: UserManyRelationFilter
   block5Teacher: UserWhereInput
   block5Students: UserManyRelationFilter
+  block6Teacher: UserWhereInput
+  block6Students: UserManyRelationFilter
+  block7Teacher: UserWhereInput
+  block7Students: UserManyRelationFilter
+  block8Teacher: UserWhereInput
+  block8Students: UserManyRelationFilter
   taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
   studentFocusStudent: StudentFocusManyRelationFilter
@@ -487,6 +526,15 @@ input UserWhereInput {
   block5Assignment: StringFilter
   block5ClassName: StringFilter
   block5AssignmentLastUpdated: DateTimeNullableFilter
+  block6Assignment: StringFilter
+  block6ClassName: StringFilter
+  block6AssignmentLastUpdated: DateTimeNullableFilter
+  block7Assignment: StringFilter
+  block7ClassName: StringFilter
+  block7AssignmentLastUpdated: DateTimeNullableFilter
+  block8Assignment: StringFilter
+  block8ClassName: StringFilter
+  block8AssignmentLastUpdated: DateTimeNullableFilter
   sortingHat: StringFilter
   passwordResetToken: PasswordFilter
   passwordResetIssuedAt: DateTimeNullableFilter
@@ -659,6 +707,15 @@ input UserOrderByInput {
   block5Assignment: OrderDirection
   block5ClassName: OrderDirection
   block5AssignmentLastUpdated: OrderDirection
+  block6Assignment: OrderDirection
+  block6ClassName: OrderDirection
+  block6AssignmentLastUpdated: OrderDirection
+  block7Assignment: OrderDirection
+  block7ClassName: OrderDirection
+  block7AssignmentLastUpdated: OrderDirection
+  block8Assignment: OrderDirection
+  block8ClassName: OrderDirection
+  block8AssignmentLastUpdated: OrderDirection
   sortingHat: OrderDirection
   passwordResetIssuedAt: OrderDirection
   passwordResetRedeemedAt: OrderDirection
@@ -708,6 +765,12 @@ input UserUpdateInput {
   block4Students: UserRelateToManyForUpdateInput
   block5Teacher: UserRelateToOneForUpdateInput
   block5Students: UserRelateToManyForUpdateInput
+  block6Teacher: UserRelateToOneForUpdateInput
+  block6Students: UserRelateToManyForUpdateInput
+  block7Teacher: UserRelateToOneForUpdateInput
+  block7Students: UserRelateToManyForUpdateInput
+  block8Teacher: UserRelateToOneForUpdateInput
+  block8Students: UserRelateToManyForUpdateInput
   taTeam: PbisTeamRelateToOneForUpdateInput
   studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
   studentFocusStudent: StudentFocusRelateToManyForUpdateInput
@@ -749,6 +812,15 @@ input UserUpdateInput {
   block5Assignment: String
   block5ClassName: String
   block5AssignmentLastUpdated: DateTime
+  block6Assignment: String
+  block6ClassName: String
+  block6AssignmentLastUpdated: DateTime
+  block7Assignment: String
+  block7ClassName: String
+  block7AssignmentLastUpdated: DateTime
+  block8Assignment: String
+  block8ClassName: String
+  block8AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
@@ -866,6 +938,12 @@ input UserCreateInput {
   block4Students: UserRelateToManyForCreateInput
   block5Teacher: UserRelateToOneForCreateInput
   block5Students: UserRelateToManyForCreateInput
+  block6Teacher: UserRelateToOneForCreateInput
+  block6Students: UserRelateToManyForCreateInput
+  block7Teacher: UserRelateToOneForCreateInput
+  block7Students: UserRelateToManyForCreateInput
+  block8Teacher: UserRelateToOneForCreateInput
+  block8Students: UserRelateToManyForCreateInput
   taTeam: PbisTeamRelateToOneForCreateInput
   studentFocusTeacher: StudentFocusRelateToManyForCreateInput
   studentFocusStudent: StudentFocusRelateToManyForCreateInput
@@ -907,6 +985,15 @@ input UserCreateInput {
   block5Assignment: String
   block5ClassName: String
   block5AssignmentLastUpdated: DateTime
+  block6Assignment: String
+  block6ClassName: String
+  block6AssignmentLastUpdated: DateTime
+  block7Assignment: String
+  block7ClassName: String
+  block7AssignmentLastUpdated: DateTime
+  block8Assignment: String
+  block8ClassName: String
+  block8AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime

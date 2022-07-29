@@ -48,6 +48,12 @@ export const User = list({
     block4Students: relationship({ ref: 'User.block4Teacher', many: true }),
     block5Teacher: relationship({ ref: 'User.block5Students', many: false }),
     block5Students: relationship({ ref: 'User.block5Teacher', many: true }),
+    block6Teacher: relationship({ ref: 'User.block6Students', many: false }),
+    block6Students: relationship({ ref: 'User.block6Teacher', many: true }),
+    block7Teacher: relationship({ ref: 'User.block7Students', many: false }),
+    block7Students: relationship({ ref: 'User.block7Teacher', many: true }),
+    block8Teacher: relationship({ ref: 'User.block8Students', many: false }),
+    block8Students: relationship({ ref: 'User.block8Teacher', many: true }),
 
     //other relationships
     taTeam: relationship({ ref: 'PbisTeam.taTeacher' }),
@@ -104,7 +110,16 @@ export const User = list({
     block5Assignment: text({ defaultValue: 'Current Assignment for Block 5 goes here' }),
     block5ClassName: text({ defaultValue: 'Class Name Goes Here' }),
     block5AssignmentLastUpdated: timestamp(),
-
+    block6Assignment: text({ defaultValue: 'Current Assignment for Block 6 goes here' }),
+    block6ClassName: text({ defaultValue: 'Class Name Goes Here' }),
+    block6AssignmentLastUpdated: timestamp(),
+    block7Assignment: text({ defaultValue: 'Current Assignment for Block 7 goes here' }),
+    block7ClassName: text({ defaultValue: 'Class Name Goes Here' }),
+    block7AssignmentLastUpdated: timestamp(),
+    block8Assignment: text({ defaultValue: 'Current Assignment for Block 8 goes here' }),
+    block8ClassName: text({ defaultValue: 'Class Name Goes Here' }),
+    block8AssignmentLastUpdated: timestamp(),
+    
     // Sorting Hat
     sortingHat: text({ defaultValue: '' }),
 
