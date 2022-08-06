@@ -17,11 +17,11 @@ async function addEvents(root: any,
   console.log('Adding Events');
   const eventUpdateResults = [];
   const eventList = JSON.parse(eventData);
+  console.log('eventList', eventList);
   //go through each student and update their schedule or create a new student
   await Promise.all(eventList.map(async event => {
-    const singleEventUpdateResults = {};
 
-    const createdEvent = await context.lists.Calendar.createOne({
+    const createdEvent = await context.query.Calendar.createOne({
       data: {
         ...event
       },

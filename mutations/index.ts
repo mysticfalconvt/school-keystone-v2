@@ -19,9 +19,9 @@ export const extendGraphqlSchema = graphQLSchemaExtension({
       recalculatePBIS(userId: ID): User
       updateStudentSchedules(studentScheduleData: String): User
       addStaff(staffData: String): User
-      # addEvents(eventData: String): User
+      addEvents(eventData: String): User
       sendEmail(emailData: String):User
-      # addBirthdays(birthdayData: String): Birthday
+      addBirthdays(birthdayData: String): Birthday
     }
   `,
   resolvers: {
@@ -30,9 +30,9 @@ export const extendGraphqlSchema = graphQLSchemaExtension({
       recalculatePBIS,
       updateStudentSchedules,
       addStaff,
-      // addEvents,
+      addEvents,
       sendEmail,
-      // addBirthdays,
+      addBirthdays,
     },
   },
 });

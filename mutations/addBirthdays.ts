@@ -20,8 +20,8 @@ async function addBirthdays(root: any,
     // console.log(birthdayList);
     //go through each student and update their schedule or create a new student
     await Promise.all(birthdayList.map(async singleBirthday => {
-        const student = await context.lists.User.findMany({
-            where: { email: singleBirthday.email.toLowerCase() }, resolveFields: graphql`
+        const student = await context.query.User.findMany({
+            where: { email: {equals: singleBirthday.email.toLowerCase()} }, resolveFields: graphql`
       id
     email
     birthday{
@@ -31,7 +31,7 @@ async function addBirthdays(root: any,
         // console.log(student);
         if (student.length > 0 && !student[0].birthday) {
 
-            const createdBirthday = await context.lists.Birthday.createOne({
+            const createdBirthday = await context.query.Birthday.createOne({
                 data: {
                     date: singleBirthday.date,
                     student: { connect: { id: student[0].id } }
