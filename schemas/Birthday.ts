@@ -21,7 +21,7 @@ export const Birthday = list({
     fields: {
         cakeType: text(),
         date: timestamp({
-            validation: {isRequired: true},
+            // validation: {isRequired: true},
             isIndexed: true,
         }),
         hasChosen: checkbox({

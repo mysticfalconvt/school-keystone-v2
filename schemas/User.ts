@@ -126,11 +126,17 @@ export const User = list({
 
   },
   hooks: {
-    // log session on read
-    // beforeOperation: (args) => {
-    //   console.log('read', args);
-      
-    // }
+    afterOperation: async ({operation, item, context}) => {
+      if(operation = "create" && item.isStudent){
+        const createBirtday = await context.query.Birthday.createOne({
+          data: {
+           
+            student: { connect: { id: item.id } }
+        },
+        resolveFields: 'id'
+      });
+      };
+    }
   },
 
 });

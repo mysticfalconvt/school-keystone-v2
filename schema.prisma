@@ -149,13 +149,13 @@ model User {
 }
 
 model Birthday {
-  id           String   @id @default(cuid())
-  cakeType     String   @default("")
-  date         DateTime
-  hasChosen    Boolean  @default(false)
-  hasDelivered Boolean  @default(false)
-  student      User?    @relation("Birthday_student", fields: [studentId], references: [id])
-  studentId    String?  @unique @map("student")
+  id           String    @id @default(cuid())
+  cakeType     String    @default("")
+  date         DateTime?
+  hasChosen    Boolean   @default(false)
+  hasDelivered Boolean   @default(false)
+  student      User?     @relation("Birthday_student", fields: [studentId], references: [id])
+  studentId    String?   @unique @map("student")
 
   @@index([date])
 }
