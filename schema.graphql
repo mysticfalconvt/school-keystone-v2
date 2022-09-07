@@ -2048,6 +2048,61 @@ input TrimesterAwardCreateInput {
   teacher: UserRelateToOneForCreateInput
 }
 
+type Video {
+  id: ID!
+  name: String
+  description: String
+  onHomePage: Boolean
+  type: String
+  link: String
+}
+
+input VideoWhereUniqueInput {
+  id: ID
+}
+
+input VideoWhereInput {
+  AND: [VideoWhereInput!]
+  OR: [VideoWhereInput!]
+  NOT: [VideoWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  description: StringFilter
+  onHomePage: BooleanFilter
+  type: StringFilter
+  link: StringFilter
+}
+
+input VideoOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  description: OrderDirection
+  onHomePage: OrderDirection
+  type: OrderDirection
+  link: OrderDirection
+}
+
+input VideoUpdateInput {
+  name: String
+  description: String
+  onHomePage: Boolean
+  type: String
+  link: String
+}
+
+input VideoUpdateArgs {
+  where: VideoWhereUniqueInput!
+  data: VideoUpdateInput!
+}
+
+input VideoCreateInput {
+  name: String
+  description: String
+  onHomePage: Boolean
+  type: String
+  link: String
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -2219,6 +2274,12 @@ type Mutation {
   deleteTrimesterAwards(
     where: [TrimesterAwardWhereUniqueInput!]!
   ): [TrimesterAward]
+  createVideo(data: VideoCreateInput!): Video
+  createVideos(data: [VideoCreateInput!]!): [Video]
+  updateVideo(where: VideoWhereUniqueInput!, data: VideoUpdateInput!): Video
+  updateVideos(data: [VideoUpdateArgs!]!): [Video]
+  deleteVideo(where: VideoWhereUniqueInput!): Video
+  deleteVideos(where: [VideoWhereUniqueInput!]!): [Video]
   endSession: Boolean!
   authenticateUserWithPassword(
     email: String!
@@ -2405,6 +2466,14 @@ type Query {
   ): [TrimesterAward!]
   trimesterAward(where: TrimesterAwardWhereUniqueInput!): TrimesterAward
   trimesterAwardsCount(where: TrimesterAwardWhereInput! = {}): Int
+  videos(
+    where: VideoWhereInput! = {}
+    orderBy: [VideoOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [Video!]
+  video(where: VideoWhereUniqueInput!): Video
+  videosCount(where: VideoWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(

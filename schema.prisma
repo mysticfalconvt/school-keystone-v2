@@ -418,3 +418,12 @@ model TrimesterAward {
   @@index([studentId])
   @@index([teacherId])
 }
+
+model Video {
+  id          String  @id @default(cuid())
+  name        String  @default("")
+  description String  @default("")
+  onHomePage  Boolean @default(false)
+  type        String
+  link        String  @default("")
+}
