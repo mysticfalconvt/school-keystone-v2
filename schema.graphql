@@ -49,6 +49,7 @@ type User {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  canHaveSpecialGroups: Boolean
   block1Teacher: User
   block1Students(
     where: UserWhereInput! = {}
@@ -113,6 +114,13 @@ type User {
     skip: Int! = 0
   ): [User!]
   block8StudentsCount(where: UserWhereInput! = {}): Int
+  specialGroupStudents(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  specialGroupStudentsCount(where: UserWhereInput! = {}): Int
   taTeam: PbisTeam
   studentFocusTeacher(
     where: StudentFocusWhereInput! = {}
@@ -285,6 +293,7 @@ input UserWhereInput {
   isGuidance: BooleanFilter
   isSuperAdmin: BooleanFilter
   canManagePbis: BooleanFilter
+  canHaveSpecialGroups: BooleanFilter
   block1Teacher: UserWhereInput
   block1Students: UserManyRelationFilter
   block2Teacher: UserWhereInput
@@ -301,6 +310,7 @@ input UserWhereInput {
   block7Students: UserManyRelationFilter
   block8Teacher: UserWhereInput
   block8Students: UserManyRelationFilter
+  specialGroupStudents: UserManyRelationFilter
   taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
   studentFocusStudent: StudentFocusManyRelationFilter
@@ -500,6 +510,7 @@ input UserOrderByInput {
   isGuidance: OrderDirection
   isSuperAdmin: OrderDirection
   canManagePbis: OrderDirection
+  canHaveSpecialGroups: OrderDirection
   individualPbisLevel: OrderDirection
   callbackCount: OrderDirection
   totalCallbackCount: OrderDirection
@@ -571,6 +582,7 @@ input UserUpdateInput {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  canHaveSpecialGroups: Boolean
   block1Teacher: UserRelateToOneForUpdateInput
   block1Students: UserRelateToManyForUpdateInput
   block2Teacher: UserRelateToOneForUpdateInput
@@ -587,6 +599,7 @@ input UserUpdateInput {
   block7Students: UserRelateToManyForUpdateInput
   block8Teacher: UserRelateToOneForUpdateInput
   block8Students: UserRelateToManyForUpdateInput
+  specialGroupStudents: UserRelateToManyForUpdateInput
   taTeam: PbisTeamRelateToOneForUpdateInput
   studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
   studentFocusStudent: StudentFocusRelateToManyForUpdateInput
@@ -744,6 +757,7 @@ input UserCreateInput {
   isGuidance: Boolean
   isSuperAdmin: Boolean
   canManagePbis: Boolean
+  canHaveSpecialGroups: Boolean
   block1Teacher: UserRelateToOneForCreateInput
   block1Students: UserRelateToManyForCreateInput
   block2Teacher: UserRelateToOneForCreateInput
@@ -760,6 +774,7 @@ input UserCreateInput {
   block7Students: UserRelateToManyForCreateInput
   block8Teacher: UserRelateToOneForCreateInput
   block8Students: UserRelateToManyForCreateInput
+  specialGroupStudents: UserRelateToManyForCreateInput
   taTeam: PbisTeamRelateToOneForCreateInput
   studentFocusTeacher: StudentFocusRelateToManyForCreateInput
   studentFocusStudent: StudentFocusRelateToManyForCreateInput

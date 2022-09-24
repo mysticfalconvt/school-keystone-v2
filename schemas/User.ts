@@ -57,6 +57,8 @@ export const User = list({
     block8Teacher: relationship({ ref: "User.block8Students", many: false }),
     block8Students: relationship({ ref: "User.block8Teacher", many: true }),
 
+    specialGroupStudents: relationship({ ref: "User", many: true }),
+
     //other relationships
     taTeam: relationship({ ref: "PbisTeam.taTeacher" }),
     studentFocusTeacher: relationship({

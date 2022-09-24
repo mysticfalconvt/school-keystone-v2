@@ -43,6 +43,7 @@ model User {
   isGuidance                         Boolean              @default(false)
   isSuperAdmin                       Boolean              @default(false)
   canManagePbis                      Boolean              @default(false)
+  canHaveSpecialGroups               Boolean              @default(false)
   block1Teacher                      User?                @relation("User_block1Teacher", fields: [block1TeacherId], references: [id])
   block1TeacherId                    String?              @map("block1Teacher")
   block1Students                     User[]               @relation("User_block1Teacher")
@@ -67,6 +68,7 @@ model User {
   block8Teacher                      User?                @relation("User_block8Teacher", fields: [block8TeacherId], references: [id])
   block8TeacherId                    String?              @map("block8Teacher")
   block8Students                     User[]               @relation("User_block8Teacher")
+  specialGroupStudents               User[]               @relation("User_specialGroupStudents")
   taTeam                             PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
   taTeamId                           String?              @map("taTeam")
   studentFocusTeacher                StudentFocus[]       @relation("StudentFocus_teacher")
@@ -124,6 +126,7 @@ model User {
   passwordResetToken                 String?
   passwordResetIssuedAt              DateTime?
   passwordResetRedeemedAt            DateTime?
+  from_User_specialGroupStudents     User[]               @relation("User_specialGroupStudents")
   from_BugReport_submittedBy         BugReport[]          @relation("BugReport_submittedBy")
   from_Bullying_studentOffender      Bullying[]           @relation("Bullying_studentOffender")
   from_Bullying_teacherAuthor        Bullying[]           @relation("Bullying_teacherAuthor")
