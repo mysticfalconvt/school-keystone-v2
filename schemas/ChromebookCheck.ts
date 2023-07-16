@@ -1,6 +1,4 @@
 import {
-  integer,
-  select,
   text,
   relationship,
   timestamp,
@@ -9,7 +7,7 @@ import {
 import { list } from "@keystone-6/core";
 import { isSignedIn } from "../access";
 
-export const SchoolPbisInfo = list({
+export const ChromebookCheck = list({
   access: {
     operation: {
       query: isSignedIn,
@@ -18,18 +16,23 @@ export const SchoolPbisInfo = list({
       update: isSignedIn,
     },
   },
+  ui: {
+    listView: {
+      initialColumns: ["time", "student"],
+      pageSize: 100,
+    },
+  },
   fields: {
-    teamName: text(),
-
-    uncountedCards: integer({ defaultValue: 0 }),
-    countedCards: integer({ defaultValue: 0 }),
-    currentLevel: integer({ defaultValue: 0 }),
-    numberOfStudents: integer(),
-    averageCardsPerStudent: integer({ defaultValue: 0 }),
-
-    dateModified: timestamp({
+    time: timestamp({
       validation: { isRequired: true },
       defaultValue: { kind: "now" },
     }),
+    teacher: relationship({
+      ref: "User",
+    }),
+    student: relationship({
+      ref: "User.chromebookCheck",
+    }),
+    message: text(),
   },
 });

@@ -7,7 +7,6 @@ import {
   checkbox,
 } from "@keystone-6/core/fields";
 import { list } from "@keystone-6/core";
-import { check } from "prettier";
 import { isSignedIn } from "../access";
 
 export const Discipline = list({

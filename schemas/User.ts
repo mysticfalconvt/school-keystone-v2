@@ -109,8 +109,18 @@ export const User = list({
       ref: "User.previousTaWinner",
       many: false,
     }),
+    randomDrawingWins: relationship({
+      ref: "RandomDrawingWin.student",
+      many: true,
+    }),
     birthday: relationship({ ref: "Birthday.student", many: false }),
     individualPbisLevel: integer({ defaultValue: 0 }),
+    taTeamPbisLevel: integer({ defaultValue: 0 }),
+    taTeamAveragePbisCardsPerStudent: integer({ defaultValue: 0 }),
+    chromebookCheck: relationship({
+      ref: "ChromebookCheck.student",
+      many: true,
+    }),
 
     // Important Info
     callbackCount: integer({ defaultValue: 0 }),

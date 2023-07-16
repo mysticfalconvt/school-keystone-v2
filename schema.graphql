@@ -210,8 +210,24 @@ type User {
   previousTaWinner: User
   studentIsCurrentWinner: User
   studentIsPreviousWinner: User
+  randomDrawingWins(
+    where: RandomDrawingWinWhereInput! = {}
+    orderBy: [RandomDrawingWinOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [RandomDrawingWin!]
+  randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
   birthday: Birthday
   individualPbisLevel: Int
+  taTeamPbisLevel: Int
+  taTeamAveragePbisCardsPerStudent: Int
+  chromebookCheck(
+    where: ChromebookCheckWhereInput! = {}
+    orderBy: [ChromebookCheckOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [ChromebookCheck!]
+  chromebookCheckCount(where: ChromebookCheckWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -328,8 +344,12 @@ input UserWhereInput {
   previousTaWinner: UserWhereInput
   studentIsCurrentWinner: UserWhereInput
   studentIsPreviousWinner: UserWhereInput
+  randomDrawingWins: RandomDrawingWinManyRelationFilter
   birthday: BirthdayWhereInput
   individualPbisLevel: IntNullableFilter
+  taTeamPbisLevel: IntNullableFilter
+  taTeamAveragePbisCardsPerStudent: IntNullableFilter
+  chromebookCheck: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
   PbisCardCount: IntNullableFilter
@@ -459,6 +479,12 @@ input MessageManyRelationFilter {
   none: MessageWhereInput
 }
 
+input RandomDrawingWinManyRelationFilter {
+  every: RandomDrawingWinWhereInput
+  some: RandomDrawingWinWhereInput
+  none: RandomDrawingWinWhereInput
+}
+
 input IntNullableFilter {
   equals: Int
   in: [Int!]
@@ -468,6 +494,12 @@ input IntNullableFilter {
   gt: Int
   gte: Int
   not: IntNullableFilter
+}
+
+input ChromebookCheckManyRelationFilter {
+  every: ChromebookCheckWhereInput
+  some: ChromebookCheckWhereInput
+  none: ChromebookCheckWhereInput
 }
 
 input DateTimeNullableFilter {
@@ -512,6 +544,8 @@ input UserOrderByInput {
   canManagePbis: OrderDirection
   canHaveSpecialGroups: OrderDirection
   individualPbisLevel: OrderDirection
+  taTeamPbisLevel: OrderDirection
+  taTeamAveragePbisCardsPerStudent: OrderDirection
   callbackCount: OrderDirection
   totalCallbackCount: OrderDirection
   PbisCardCount: OrderDirection
@@ -617,8 +651,12 @@ input UserUpdateInput {
   previousTaWinner: UserRelateToOneForUpdateInput
   studentIsCurrentWinner: UserRelateToOneForUpdateInput
   studentIsPreviousWinner: UserRelateToOneForUpdateInput
+  randomDrawingWins: RandomDrawingWinRelateToManyForUpdateInput
   birthday: BirthdayRelateToOneForUpdateInput
   individualPbisLevel: Int
+  taTeamPbisLevel: Int
+  taTeamAveragePbisCardsPerStudent: Int
+  chromebookCheck: ChromebookCheckRelateToManyForUpdateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -717,10 +755,24 @@ input MessageRelateToManyForUpdateInput {
   connect: [MessageWhereUniqueInput!]
 }
 
+input RandomDrawingWinRelateToManyForUpdateInput {
+  disconnect: [RandomDrawingWinWhereUniqueInput!]
+  set: [RandomDrawingWinWhereUniqueInput!]
+  create: [RandomDrawingWinCreateInput!]
+  connect: [RandomDrawingWinWhereUniqueInput!]
+}
+
 input BirthdayRelateToOneForUpdateInput {
   create: BirthdayCreateInput
   connect: BirthdayWhereUniqueInput
   disconnect: Boolean
+}
+
+input ChromebookCheckRelateToManyForUpdateInput {
+  disconnect: [ChromebookCheckWhereUniqueInput!]
+  set: [ChromebookCheckWhereUniqueInput!]
+  create: [ChromebookCheckCreateInput!]
+  connect: [ChromebookCheckWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -792,8 +844,12 @@ input UserCreateInput {
   previousTaWinner: UserRelateToOneForCreateInput
   studentIsCurrentWinner: UserRelateToOneForCreateInput
   studentIsPreviousWinner: UserRelateToOneForCreateInput
+  randomDrawingWins: RandomDrawingWinRelateToManyForCreateInput
   birthday: BirthdayRelateToOneForCreateInput
   individualPbisLevel: Int
+  taTeamPbisLevel: Int
+  taTeamAveragePbisCardsPerStudent: Int
+  chromebookCheck: ChromebookCheckRelateToManyForCreateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -876,9 +932,19 @@ input MessageRelateToManyForCreateInput {
   connect: [MessageWhereUniqueInput!]
 }
 
+input RandomDrawingWinRelateToManyForCreateInput {
+  create: [RandomDrawingWinCreateInput!]
+  connect: [RandomDrawingWinWhereUniqueInput!]
+}
+
 input BirthdayRelateToOneForCreateInput {
   create: BirthdayCreateInput
   connect: BirthdayWhereUniqueInput
+}
+
+input ChromebookCheckRelateToManyForCreateInput {
+  create: [ChromebookCheckCreateInput!]
+  connect: [ChromebookCheckWhereUniqueInput!]
 }
 
 type Birthday {
@@ -1345,6 +1411,54 @@ input CellPhoneViolationCreateInput {
   student: UserRelateToOneForCreateInput
   teacher: UserRelateToOneForCreateInput
   dateGiven: DateTime
+}
+
+type ChromebookCheck {
+  id: ID!
+  time: DateTime
+  teacher: User
+  student: User
+  message: String
+}
+
+input ChromebookCheckWhereUniqueInput {
+  id: ID
+}
+
+input ChromebookCheckWhereInput {
+  AND: [ChromebookCheckWhereInput!]
+  OR: [ChromebookCheckWhereInput!]
+  NOT: [ChromebookCheckWhereInput!]
+  id: IDFilter
+  time: DateTimeFilter
+  teacher: UserWhereInput
+  student: UserWhereInput
+  message: StringFilter
+}
+
+input ChromebookCheckOrderByInput {
+  id: OrderDirection
+  time: OrderDirection
+  message: OrderDirection
+}
+
+input ChromebookCheckUpdateInput {
+  time: DateTime
+  teacher: UserRelateToOneForUpdateInput
+  student: UserRelateToOneForUpdateInput
+  message: String
+}
+
+input ChromebookCheckUpdateArgs {
+  where: ChromebookCheckWhereUniqueInput!
+  data: ChromebookCheckUpdateInput!
+}
+
+input ChromebookCheckCreateInput {
+  time: DateTime
+  teacher: UserRelateToOneForCreateInput
+  student: UserRelateToOneForCreateInput
+  message: String
 }
 
 type Discipline {
@@ -1898,6 +2012,133 @@ input PbisTeamCreateInput {
   lastModifiedBy: UserRelateToOneForCreateInput
 }
 
+type PbisCollectionDate {
+  id: ID!
+  collectionDate: DateTime
+  randomDrawingWinners(
+    where: RandomDrawingWinWhereInput! = {}
+    orderBy: [RandomDrawingWinOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [RandomDrawingWin!]
+  randomDrawingWinnersCount(where: RandomDrawingWinWhereInput! = {}): Int
+  personalLevelWinners(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  personalLevelWinnersCount(where: UserWhereInput! = {}): Int
+  taNewLevelWinners(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  taNewLevelWinnersCount(where: UserWhereInput! = {}): Int
+  collectedCards: String
+  lastModifiedBy: User
+}
+
+input PbisCollectionDateWhereUniqueInput {
+  id: ID
+}
+
+input PbisCollectionDateWhereInput {
+  AND: [PbisCollectionDateWhereInput!]
+  OR: [PbisCollectionDateWhereInput!]
+  NOT: [PbisCollectionDateWhereInput!]
+  id: IDFilter
+  collectionDate: DateTimeFilter
+  randomDrawingWinners: RandomDrawingWinManyRelationFilter
+  personalLevelWinners: UserManyRelationFilter
+  taNewLevelWinners: UserManyRelationFilter
+  collectedCards: StringFilter
+  lastModifiedBy: UserWhereInput
+}
+
+input PbisCollectionDateOrderByInput {
+  id: OrderDirection
+  collectionDate: OrderDirection
+  collectedCards: OrderDirection
+}
+
+input PbisCollectionDateUpdateInput {
+  collectionDate: DateTime
+  randomDrawingWinners: RandomDrawingWinRelateToManyForUpdateInput
+  personalLevelWinners: UserRelateToManyForUpdateInput
+  taNewLevelWinners: UserRelateToManyForUpdateInput
+  collectedCards: String
+  lastModifiedBy: UserRelateToOneForUpdateInput
+}
+
+input PbisCollectionDateUpdateArgs {
+  where: PbisCollectionDateWhereUniqueInput!
+  data: PbisCollectionDateUpdateInput!
+}
+
+input PbisCollectionDateCreateInput {
+  collectionDate: DateTime
+  randomDrawingWinners: RandomDrawingWinRelateToManyForCreateInput
+  personalLevelWinners: UserRelateToManyForCreateInput
+  taNewLevelWinners: UserRelateToManyForCreateInput
+  collectedCards: String
+  lastModifiedBy: UserRelateToOneForCreateInput
+}
+
+type RandomDrawingWin {
+  id: ID!
+  student: User
+  collectionDate: PbisCollectionDate
+  lastModifiedBy: User
+}
+
+input RandomDrawingWinWhereUniqueInput {
+  id: ID
+}
+
+input RandomDrawingWinWhereInput {
+  AND: [RandomDrawingWinWhereInput!]
+  OR: [RandomDrawingWinWhereInput!]
+  NOT: [RandomDrawingWinWhereInput!]
+  id: IDFilter
+  student: UserWhereInput
+  collectionDate: PbisCollectionDateWhereInput
+  lastModifiedBy: UserWhereInput
+}
+
+input RandomDrawingWinOrderByInput {
+  id: OrderDirection
+}
+
+input RandomDrawingWinUpdateInput {
+  student: UserRelateToOneForUpdateInput
+  collectionDate: PbisCollectionDateRelateToOneForUpdateInput
+  lastModifiedBy: UserRelateToOneForUpdateInput
+}
+
+input PbisCollectionDateRelateToOneForUpdateInput {
+  create: PbisCollectionDateCreateInput
+  connect: PbisCollectionDateWhereUniqueInput
+  disconnect: Boolean
+}
+
+input RandomDrawingWinUpdateArgs {
+  where: RandomDrawingWinWhereUniqueInput!
+  data: RandomDrawingWinUpdateInput!
+}
+
+input RandomDrawingWinCreateInput {
+  student: UserRelateToOneForCreateInput
+  collectionDate: PbisCollectionDateRelateToOneForCreateInput
+  lastModifiedBy: UserRelateToOneForCreateInput
+}
+
+input PbisCollectionDateRelateToOneForCreateInput {
+  create: PbisCollectionDateCreateInput
+  connect: PbisCollectionDateWhereUniqueInput
+}
+
 type SortingHatQuestion {
   id: ID!
   question: String
@@ -2197,6 +2438,21 @@ type Mutation {
   deleteCellPhoneViolations(
     where: [CellPhoneViolationWhereUniqueInput!]!
   ): [CellPhoneViolation]
+  createChromebookCheck(data: ChromebookCheckCreateInput!): ChromebookCheck
+  createChromebookChecks(
+    data: [ChromebookCheckCreateInput!]!
+  ): [ChromebookCheck]
+  updateChromebookCheck(
+    where: ChromebookCheckWhereUniqueInput!
+    data: ChromebookCheckUpdateInput!
+  ): ChromebookCheck
+  updateChromebookChecks(data: [ChromebookCheckUpdateArgs!]!): [ChromebookCheck]
+  deleteChromebookCheck(
+    where: ChromebookCheckWhereUniqueInput!
+  ): ChromebookCheck
+  deleteChromebookChecks(
+    where: [ChromebookCheckWhereUniqueInput!]!
+  ): [ChromebookCheck]
   createDiscipline(data: DisciplineCreateInput!): Discipline
   createDisciplines(data: [DisciplineCreateInput!]!): [Discipline]
   updateDiscipline(
@@ -2250,6 +2506,42 @@ type Mutation {
   updatePbisTeams(data: [PbisTeamUpdateArgs!]!): [PbisTeam]
   deletePbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   deletePbisTeams(where: [PbisTeamWhereUniqueInput!]!): [PbisTeam]
+  createPbisCollectionDate(
+    data: PbisCollectionDateCreateInput!
+  ): PbisCollectionDate
+  createPbisCollectionDates(
+    data: [PbisCollectionDateCreateInput!]!
+  ): [PbisCollectionDate]
+  updatePbisCollectionDate(
+    where: PbisCollectionDateWhereUniqueInput!
+    data: PbisCollectionDateUpdateInput!
+  ): PbisCollectionDate
+  updatePbisCollectionDates(
+    data: [PbisCollectionDateUpdateArgs!]!
+  ): [PbisCollectionDate]
+  deletePbisCollectionDate(
+    where: PbisCollectionDateWhereUniqueInput!
+  ): PbisCollectionDate
+  deletePbisCollectionDates(
+    where: [PbisCollectionDateWhereUniqueInput!]!
+  ): [PbisCollectionDate]
+  createRandomDrawingWin(data: RandomDrawingWinCreateInput!): RandomDrawingWin
+  createRandomDrawingWins(
+    data: [RandomDrawingWinCreateInput!]!
+  ): [RandomDrawingWin]
+  updateRandomDrawingWin(
+    where: RandomDrawingWinWhereUniqueInput!
+    data: RandomDrawingWinUpdateInput!
+  ): RandomDrawingWin
+  updateRandomDrawingWins(
+    data: [RandomDrawingWinUpdateArgs!]!
+  ): [RandomDrawingWin]
+  deleteRandomDrawingWin(
+    where: RandomDrawingWinWhereUniqueInput!
+  ): RandomDrawingWin
+  deleteRandomDrawingWins(
+    where: [RandomDrawingWinWhereUniqueInput!]!
+  ): [RandomDrawingWin]
   createSortingHatQuestion(
     data: SortingHatQuestionCreateInput!
   ): SortingHatQuestion
@@ -2407,6 +2699,14 @@ type Query {
     where: CellPhoneViolationWhereUniqueInput!
   ): CellPhoneViolation
   cellPhoneViolationsCount(where: CellPhoneViolationWhereInput! = {}): Int
+  chromebookChecks(
+    where: ChromebookCheckWhereInput! = {}
+    orderBy: [ChromebookCheckOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [ChromebookCheck!]
+  chromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
+  chromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
   disciplines(
     where: DisciplineWhereInput! = {}
     orderBy: [DisciplineOrderByInput!]! = []
@@ -2455,6 +2755,24 @@ type Query {
   ): [PbisTeam!]
   pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int
+  pbisCollectionDates(
+    where: PbisCollectionDateWhereInput! = {}
+    orderBy: [PbisCollectionDateOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [PbisCollectionDate!]
+  pbisCollectionDate(
+    where: PbisCollectionDateWhereUniqueInput!
+  ): PbisCollectionDate
+  pbisCollectionDatesCount(where: PbisCollectionDateWhereInput! = {}): Int
+  randomDrawingWins(
+    where: RandomDrawingWinWhereInput! = {}
+    orderBy: [RandomDrawingWinOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [RandomDrawingWin!]
+  randomDrawingWin(where: RandomDrawingWinWhereUniqueInput!): RandomDrawingWin
+  randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
   sortingHatQuestions(
     where: SortingHatQuestionWhereInput! = {}
     orderBy: [SortingHatQuestionOrderByInput!]! = []

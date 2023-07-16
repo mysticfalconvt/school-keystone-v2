@@ -24,9 +24,12 @@ import { Link } from "./schemas/Link";
 import { Message } from "./schemas/Message";
 import { PbisCard } from "./schemas/PbisCard";
 import { PbisTeam } from "./schemas/PbisTeam";
+import { PbisCollectionDate } from "./schemas/PbisCollectionDate";
+import { RandomDrawingWin } from "./schemas/RandomDrawingWin";
 import { StudentFocus } from "./schemas/StudentFocus";
 import { CellPhoneViolation } from "./schemas/CellPhoneViolation";
 import { Callback } from "./schemas/Callback";
+import { ChromebookCheck } from "./schemas/ChromebookCheck";
 import { Discipline } from "./schemas/Discipline";
 import { PbisCollection } from "./schemas/PbisCollection";
 // import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
@@ -75,12 +78,15 @@ export default withAuth(
       Callback,
       Calendar,
       CellPhoneViolation,
+      ChromebookCheck,
       Discipline,
       Link,
       Message,
       PbisCard,
       PbisCollection,
       PbisTeam,
+      PbisCollectionDate,
+      RandomDrawingWin,
       // SchoolPbisInfo,
       SortingHatQuestion,
       StudentFocus,
