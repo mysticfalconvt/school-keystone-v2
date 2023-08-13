@@ -56,6 +56,16 @@ export const User = list({
     block7Students: relationship({ ref: "User.block7Teacher", many: true }),
     block8Teacher: relationship({ ref: "User.block8Students", many: false }),
     block8Students: relationship({ ref: "User.block8Teacher", many: true }),
+    block9Teacher: relationship({ ref: "User.block9Students", many: false }),
+    block9Students: relationship({ ref: "User.block9Teacher", many: true }),
+    block10Teacher: relationship({
+      ref: "User.block10Students",
+      many: false,
+    }),
+    block10Students: relationship({
+      ref: "User.block10Teacher",
+      many: true,
+    }),
 
     specialGroupStudents: relationship({ ref: "User", many: true }),
 
@@ -172,6 +182,16 @@ export const User = list({
     }),
     block8ClassName: text({ defaultValue: "Class Name Goes Here" }),
     block8AssignmentLastUpdated: timestamp(),
+    block9Assignment: text({
+      defaultValue: "Current Assignment for Block 9 goes here",
+    }),
+    block9ClassName: text({ defaultValue: "Class Name Goes Here" }),
+    block9AssignmentLastUpdated: timestamp(),
+    block10Assignment: text({
+      defaultValue: "Current Assignment for Block 10 goes here",
+    }),
+    block10ClassName: text({ defaultValue: "Class Name Goes Here" }),
+    block10AssignmentLastUpdated: timestamp(),
 
     // Sorting Hat
     sortingHat: text({ defaultValue: "" }),

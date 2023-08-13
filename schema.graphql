@@ -114,6 +114,22 @@ type User {
     skip: Int! = 0
   ): [User!]
   block8StudentsCount(where: UserWhereInput! = {}): Int
+  block9Teacher: User
+  block9Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block9StudentsCount(where: UserWhereInput! = {}): Int
+  block10Teacher: User
+  block10Students(
+    where: UserWhereInput! = {}
+    orderBy: [UserOrderByInput!]! = []
+    take: Int
+    skip: Int! = 0
+  ): [User!]
+  block10StudentsCount(where: UserWhereInput! = {}): Int
   specialGroupStudents(
     where: UserWhereInput! = {}
     orderBy: [UserOrderByInput!]! = []
@@ -259,6 +275,12 @@ type User {
   block8Assignment: String
   block8ClassName: String
   block8AssignmentLastUpdated: DateTime
+  block9Assignment: String
+  block9ClassName: String
+  block9AssignmentLastUpdated: DateTime
+  block10Assignment: String
+  block10ClassName: String
+  block10AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: PasswordState
   passwordResetIssuedAt: DateTime
@@ -326,6 +348,10 @@ input UserWhereInput {
   block7Students: UserManyRelationFilter
   block8Teacher: UserWhereInput
   block8Students: UserManyRelationFilter
+  block9Teacher: UserWhereInput
+  block9Students: UserManyRelationFilter
+  block10Teacher: UserWhereInput
+  block10Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
   taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
@@ -381,6 +407,12 @@ input UserWhereInput {
   block8Assignment: StringFilter
   block8ClassName: StringFilter
   block8AssignmentLastUpdated: DateTimeNullableFilter
+  block9Assignment: StringFilter
+  block9ClassName: StringFilter
+  block9AssignmentLastUpdated: DateTimeNullableFilter
+  block10Assignment: StringFilter
+  block10ClassName: StringFilter
+  block10AssignmentLastUpdated: DateTimeNullableFilter
   sortingHat: StringFilter
   passwordResetToken: PasswordFilter
   passwordResetIssuedAt: DateTimeNullableFilter
@@ -577,6 +609,12 @@ input UserOrderByInput {
   block8Assignment: OrderDirection
   block8ClassName: OrderDirection
   block8AssignmentLastUpdated: OrderDirection
+  block9Assignment: OrderDirection
+  block9ClassName: OrderDirection
+  block9AssignmentLastUpdated: OrderDirection
+  block10Assignment: OrderDirection
+  block10ClassName: OrderDirection
+  block10AssignmentLastUpdated: OrderDirection
   sortingHat: OrderDirection
   passwordResetIssuedAt: OrderDirection
   passwordResetRedeemedAt: OrderDirection
@@ -633,6 +671,10 @@ input UserUpdateInput {
   block7Students: UserRelateToManyForUpdateInput
   block8Teacher: UserRelateToOneForUpdateInput
   block8Students: UserRelateToManyForUpdateInput
+  block9Teacher: UserRelateToOneForUpdateInput
+  block9Students: UserRelateToManyForUpdateInput
+  block10Teacher: UserRelateToOneForUpdateInput
+  block10Students: UserRelateToManyForUpdateInput
   specialGroupStudents: UserRelateToManyForUpdateInput
   taTeam: PbisTeamRelateToOneForUpdateInput
   studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
@@ -688,6 +730,12 @@ input UserUpdateInput {
   block8Assignment: String
   block8ClassName: String
   block8AssignmentLastUpdated: DateTime
+  block9Assignment: String
+  block9ClassName: String
+  block9AssignmentLastUpdated: DateTime
+  block10Assignment: String
+  block10ClassName: String
+  block10AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
@@ -826,6 +874,10 @@ input UserCreateInput {
   block7Students: UserRelateToManyForCreateInput
   block8Teacher: UserRelateToOneForCreateInput
   block8Students: UserRelateToManyForCreateInput
+  block9Teacher: UserRelateToOneForCreateInput
+  block9Students: UserRelateToManyForCreateInput
+  block10Teacher: UserRelateToOneForCreateInput
+  block10Students: UserRelateToManyForCreateInput
   specialGroupStudents: UserRelateToManyForCreateInput
   taTeam: PbisTeamRelateToOneForCreateInput
   studentFocusTeacher: StudentFocusRelateToManyForCreateInput
@@ -881,6 +933,12 @@ input UserCreateInput {
   block8Assignment: String
   block8ClassName: String
   block8AssignmentLastUpdated: DateTime
+  block9Assignment: String
+  block9ClassName: String
+  block9AssignmentLastUpdated: DateTime
+  block10Assignment: String
+  block10ClassName: String
+  block10AssignmentLastUpdated: DateTime
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
