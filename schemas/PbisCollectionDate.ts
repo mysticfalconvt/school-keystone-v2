@@ -34,6 +34,10 @@ export const PbisCollectionDate = list({
       ref: "User",
       many: true,
     }),
+    staffRandomWinners: relationship({
+      ref: "User",
+      many: true,
+    }),
     collectedCards: text(),
     lastModifiedBy: relationship({ ref: "User" }),
   },

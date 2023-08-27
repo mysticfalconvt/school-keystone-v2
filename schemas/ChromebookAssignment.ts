@@ -7,7 +7,7 @@ import {
 import { list } from "@keystone-6/core";
 import { isSignedIn } from "../access";
 
-export const ChromebookCheck = list({
+export const ChromebookAssignment = list({
   access: {
     operation: {
       query: isSignedIn,
@@ -18,18 +18,21 @@ export const ChromebookCheck = list({
   },
   ui: {
     listView: {
-      initialColumns: ["time", "assignment"],
+      initialColumns: ["number", "student", "checkLog"],
       pageSize: 100,
     },
   },
   fields: {
-    time: timestamp({
-      validation: { isRequired: true },
-      defaultValue: { kind: "now" },
+    teacher: relationship({
+      ref: "User",
     }),
-    assignment: relationship({
-      ref: "ChromebookAssignment.checkLog",
+    student: relationship({
+      ref: "User.chromebookCheck",
     }),
-    message: text(),
+    number: text(),
+    checkLog: relationship({
+      ref: "ChromebookCheck.assignment",
+      many: true,
+    }),
   },
 });

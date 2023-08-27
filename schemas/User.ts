@@ -128,7 +128,7 @@ export const User = list({
     taTeamPbisLevel: integer({ defaultValue: 0 }),
     taTeamAveragePbisCardsPerStudent: integer({ defaultValue: 0 }),
     chromebookCheck: relationship({
-      ref: "ChromebookCheck.student",
+      ref: "ChromebookAssignment.student",
       many: true,
     }),
 

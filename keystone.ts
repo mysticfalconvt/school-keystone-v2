@@ -30,6 +30,7 @@ import { StudentFocus } from "./schemas/StudentFocus";
 import { CellPhoneViolation } from "./schemas/CellPhoneViolation";
 import { Callback } from "./schemas/Callback";
 import { ChromebookCheck } from "./schemas/ChromebookCheck";
+import { ChromebookAssignment } from "./schemas/ChromebookAssignment";
 import { Discipline } from "./schemas/Discipline";
 import { PbisCollection } from "./schemas/PbisCollection";
 // import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
@@ -79,6 +80,7 @@ export default withAuth(
       Calendar,
       CellPhoneViolation,
       ChromebookCheck,
+      ChromebookAssignment,
       Discipline,
       Link,
       Message,
