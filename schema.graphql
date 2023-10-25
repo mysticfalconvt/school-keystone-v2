@@ -1799,6 +1799,7 @@ type Link {
   forParents: Boolean
   onHomePage: Boolean
   forPbis: Boolean
+  forEPortfolio: Boolean
   modifiedBy: User
   modified: DateTime
   link: String
@@ -1820,6 +1821,7 @@ input LinkWhereInput {
   forParents: BooleanFilter
   onHomePage: BooleanFilter
   forPbis: BooleanFilter
+  forEPortfolio: BooleanFilter
   modifiedBy: UserWhereInput
   modified: DateTimeFilter
   link: StringFilter
@@ -1834,6 +1836,7 @@ input LinkOrderByInput {
   forParents: OrderDirection
   onHomePage: OrderDirection
   forPbis: OrderDirection
+  forEPortfolio: OrderDirection
   modified: OrderDirection
   link: OrderDirection
 }
@@ -1846,6 +1849,7 @@ input LinkUpdateInput {
   forParents: Boolean
   onHomePage: Boolean
   forPbis: Boolean
+  forEPortfolio: Boolean
   modifiedBy: UserRelateToOneForUpdateInput
   modified: DateTime
   link: String
@@ -1864,6 +1868,7 @@ input LinkCreateInput {
   forParents: Boolean
   onHomePage: Boolean
   forPbis: Boolean
+  forEPortfolio: Boolean
   modifiedBy: UserRelateToOneForCreateInput
   modified: DateTime
   link: String

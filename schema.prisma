@@ -345,18 +345,19 @@ model Discipline {
 }
 
 model Link {
-  id           String   @id @default(cuid())
-  name         String   @default("")
-  description  String   @default("")
-  forTeachers  Boolean  @default(false)
-  forStudents  Boolean  @default(false)
-  forParents   Boolean  @default(false)
-  onHomePage   Boolean  @default(false)
-  forPbis      Boolean  @default(false)
-  modifiedBy   User?    @relation("Link_modifiedBy", fields: [modifiedById], references: [id])
-  modifiedById String?  @map("modifiedBy")
-  modified     DateTime @default(now())
-  link         String   @default("")
+  id            String   @id @default(cuid())
+  name          String   @default("")
+  description   String   @default("")
+  forTeachers   Boolean  @default(false)
+  forStudents   Boolean  @default(false)
+  forParents    Boolean  @default(false)
+  onHomePage    Boolean  @default(false)
+  forPbis       Boolean  @default(false)
+  forEPortfolio Boolean  @default(false)
+  modifiedBy    User?    @relation("Link_modifiedBy", fields: [modifiedById], references: [id])
+  modifiedById  String?  @map("modifiedBy")
+  modified      DateTime @default(now())
+  link          String   @default("")
 
   @@index([modifiedById])
 }
