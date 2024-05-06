@@ -7,27 +7,12 @@ type User {
   preferredName: String
   email: String
   password: PasswordState
-  taStudents(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  taStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   taStudentsCount(where: UserWhereInput! = {}): Int
   taTeacher: User
-  parent(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  parent(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   parentCount(where: UserWhereInput! = {}): Int
-  children(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  children(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   childrenCount(where: UserWhereInput! = {}): Int
   canManageCalendar: Boolean
   canSeeOtherUsers: Boolean
@@ -51,198 +36,73 @@ type User {
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
   block1Teacher: User
-  block1Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block1Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block1StudentsCount(where: UserWhereInput! = {}): Int
   block2Teacher: User
-  block2Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block2Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block2StudentsCount(where: UserWhereInput! = {}): Int
   block3Teacher: User
-  block3Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block3Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block3StudentsCount(where: UserWhereInput! = {}): Int
   block4Teacher: User
-  block4Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block4Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block4StudentsCount(where: UserWhereInput! = {}): Int
   block5Teacher: User
-  block5Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block5Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block5StudentsCount(where: UserWhereInput! = {}): Int
   block6Teacher: User
-  block6Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block6Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block6StudentsCount(where: UserWhereInput! = {}): Int
   block7Teacher: User
-  block7Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block7Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block7StudentsCount(where: UserWhereInput! = {}): Int
   block8Teacher: User
-  block8Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block8Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block8StudentsCount(where: UserWhereInput! = {}): Int
   block9Teacher: User
-  block9Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block9Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block9StudentsCount(where: UserWhereInput! = {}): Int
   block10Teacher: User
-  block10Students(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  block10Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block10StudentsCount(where: UserWhereInput! = {}): Int
-  specialGroupStudents(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  specialGroupStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   specialGroupStudentsCount(where: UserWhereInput! = {}): Int
   taTeam: PbisTeam
-  studentFocusTeacher(
-    where: StudentFocusWhereInput! = {}
-    orderBy: [StudentFocusOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [StudentFocus!]
+  studentFocusTeacher(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
   studentFocusTeacherCount(where: StudentFocusWhereInput! = {}): Int
-  studentFocusStudent(
-    where: StudentFocusWhereInput! = {}
-    orderBy: [StudentFocusOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [StudentFocus!]
+  studentFocusStudent(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
   studentFocusStudentCount(where: StudentFocusWhereInput! = {}): Int
-  studentCellPhoneViolation(
-    where: CellPhoneViolationWhereInput! = {}
-    orderBy: [CellPhoneViolationOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [CellPhoneViolation!]
+  studentCellPhoneViolation(where: CellPhoneViolationWhereInput! = {}, orderBy: [CellPhoneViolationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CellPhoneViolationWhereUniqueInput): [CellPhoneViolation!]
   studentCellPhoneViolationCount(where: CellPhoneViolationWhereInput! = {}): Int
-  teacherCellPhoneViolation(
-    where: CellPhoneViolationWhereInput! = {}
-    orderBy: [CellPhoneViolationOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [CellPhoneViolation!]
+  teacherCellPhoneViolation(where: CellPhoneViolationWhereInput! = {}, orderBy: [CellPhoneViolationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CellPhoneViolationWhereUniqueInput): [CellPhoneViolation!]
   teacherCellPhoneViolationCount(where: CellPhoneViolationWhereInput! = {}): Int
-  teacherPbisCards(
-    where: PbisCardWhereInput! = {}
-    orderBy: [PbisCardOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisCard!]
+  teacherPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   teacherPbisCardsCount(where: PbisCardWhereInput! = {}): Int
-  studentPbisCards(
-    where: PbisCardWhereInput! = {}
-    orderBy: [PbisCardOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisCard!]
+  studentPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   studentPbisCardsCount(where: PbisCardWhereInput! = {}): Int
-  teacherDiscipline(
-    where: DisciplineWhereInput! = {}
-    orderBy: [DisciplineOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Discipline!]
+  teacherDiscipline(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   teacherDisciplineCount(where: DisciplineWhereInput! = {}): Int
-  studentDiscipline(
-    where: DisciplineWhereInput! = {}
-    orderBy: [DisciplineOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Discipline!]
+  studentDiscipline(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   studentDisciplineCount(where: DisciplineWhereInput! = {}): Int
-  callbackItems(
-    where: CallbackWhereInput! = {}
-    orderBy: [CallbackOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Callback!]
+  callbackItems(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbackItemsCount(where: CallbackWhereInput! = {}): Int
-  callbackAssigned(
-    where: CallbackWhereInput! = {}
-    orderBy: [CallbackOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Callback!]
+  callbackAssigned(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbackAssignedCount(where: CallbackWhereInput! = {}): Int
-  messageSender(
-    where: MessageWhereInput! = {}
-    orderBy: [MessageOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Message!]
+  messageSender(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
   messageSenderCount(where: MessageWhereInput! = {}): Int
-  messageReceiver(
-    where: MessageWhereInput! = {}
-    orderBy: [MessageOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Message!]
+  messageReceiver(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
   messageReceiverCount(where: MessageWhereInput! = {}): Int
   currentTaWinner: User
   previousTaWinner: User
   studentIsCurrentWinner: User
   studentIsPreviousWinner: User
-  randomDrawingWins(
-    where: RandomDrawingWinWhereInput! = {}
-    orderBy: [RandomDrawingWinOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [RandomDrawingWin!]
+  randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
   birthday: Birthday
   individualPbisLevel: Int
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
-  chromebookCheck(
-    where: ChromebookAssignmentWhereInput! = {}
-    orderBy: [ChromebookAssignmentOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [ChromebookAssignment!]
+  chromebookCheck(where: ChromebookAssignmentWhereInput! = {}, orderBy: [ChromebookAssignmentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookAssignmentWhereUniqueInput): [ChromebookAssignment!]
   chromebookCheckCount(where: ChromebookAssignmentWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
@@ -291,8 +151,7 @@ type PasswordState {
   isSet: Boolean!
 }
 
-scalar DateTime
-  @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 input UserWhereUniqueInput {
   id: ID
@@ -1185,21 +1044,7 @@ input StringNullableFilter {
   startsWith: String
   endsWith: String
   mode: QueryMode
-  not: NestedStringNullableFilter
-}
-
-input NestedStringNullableFilter {
-  equals: String
-  in: [String!]
-  notIn: [String!]
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  contains: String
-  startsWith: String
-  endsWith: String
-  not: NestedStringNullableFilter
+  not: StringNullableFilter
 }
 
 input BullyingOrderByInput {
@@ -1531,12 +1376,7 @@ type ChromebookAssignment {
   teacher: User
   student: User
   number: String
-  checkLog(
-    where: ChromebookCheckWhereInput! = {}
-    orderBy: [ChromebookCheckOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [ChromebookCheck!]
+  checkLog(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
   checkLogCount(where: ChromebookCheckWhereInput! = {}): Int
 }
 
@@ -2077,12 +1917,7 @@ input PbisCollectionCreateInput {
 type PbisTeam {
   id: ID!
   teamName: String
-  taTeacher(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  taTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   taTeacherCount(where: UserWhereInput! = {}): Int
   uncountedCards: Int
   countedCards: Int
@@ -2156,33 +1991,13 @@ input PbisTeamCreateInput {
 type PbisCollectionDate {
   id: ID!
   collectionDate: DateTime
-  randomDrawingWinners(
-    where: RandomDrawingWinWhereInput! = {}
-    orderBy: [RandomDrawingWinOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [RandomDrawingWin!]
+  randomDrawingWinners(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinnersCount(where: RandomDrawingWinWhereInput! = {}): Int
-  personalLevelWinners(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  personalLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   personalLevelWinnersCount(where: UserWhereInput! = {}): Int
-  taNewLevelWinners(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  taNewLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   taNewLevelWinnersCount(where: UserWhereInput! = {}): Int
-  staffRandomWinners(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  staffRandomWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   staffRandomWinnersCount(where: UserWhereInput! = {}): Int
   collectedCards: String
   lastModifiedBy: User
@@ -2513,10 +2328,7 @@ input VideoCreateInput {
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON
-  @specifiedBy(
-    url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
-  )
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type Mutation {
   createUser(data: UserCreateInput!): User
@@ -2527,108 +2339,55 @@ type Mutation {
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
   createBirthday(data: BirthdayCreateInput!): Birthday
   createBirthdays(data: [BirthdayCreateInput!]!): [Birthday]
-  updateBirthday(
-    where: BirthdayWhereUniqueInput!
-    data: BirthdayUpdateInput!
-  ): Birthday
+  updateBirthday(where: BirthdayWhereUniqueInput!, data: BirthdayUpdateInput!): Birthday
   updateBirthdays(data: [BirthdayUpdateArgs!]!): [Birthday]
   deleteBirthday(where: BirthdayWhereUniqueInput!): Birthday
   deleteBirthdays(where: [BirthdayWhereUniqueInput!]!): [Birthday]
   createBugReport(data: BugReportCreateInput!): BugReport
   createBugReports(data: [BugReportCreateInput!]!): [BugReport]
-  updateBugReport(
-    where: BugReportWhereUniqueInput!
-    data: BugReportUpdateInput!
-  ): BugReport
+  updateBugReport(where: BugReportWhereUniqueInput!, data: BugReportUpdateInput!): BugReport
   updateBugReports(data: [BugReportUpdateArgs!]!): [BugReport]
   deleteBugReport(where: BugReportWhereUniqueInput!): BugReport
   deleteBugReports(where: [BugReportWhereUniqueInput!]!): [BugReport]
   createBullying(data: BullyingCreateInput!): Bullying
   createBullyings(data: [BullyingCreateInput!]!): [Bullying]
-  updateBullying(
-    where: BullyingWhereUniqueInput!
-    data: BullyingUpdateInput!
-  ): Bullying
+  updateBullying(where: BullyingWhereUniqueInput!, data: BullyingUpdateInput!): Bullying
   updateBullyings(data: [BullyingUpdateArgs!]!): [Bullying]
   deleteBullying(where: BullyingWhereUniqueInput!): Bullying
   deleteBullyings(where: [BullyingWhereUniqueInput!]!): [Bullying]
   createCallback(data: CallbackCreateInput!): Callback
   createCallbacks(data: [CallbackCreateInput!]!): [Callback]
-  updateCallback(
-    where: CallbackWhereUniqueInput!
-    data: CallbackUpdateInput!
-  ): Callback
+  updateCallback(where: CallbackWhereUniqueInput!, data: CallbackUpdateInput!): Callback
   updateCallbacks(data: [CallbackUpdateArgs!]!): [Callback]
   deleteCallback(where: CallbackWhereUniqueInput!): Callback
   deleteCallbacks(where: [CallbackWhereUniqueInput!]!): [Callback]
   createCalendar(data: CalendarCreateInput!): Calendar
   createCalendars(data: [CalendarCreateInput!]!): [Calendar]
-  updateCalendar(
-    where: CalendarWhereUniqueInput!
-    data: CalendarUpdateInput!
-  ): Calendar
+  updateCalendar(where: CalendarWhereUniqueInput!, data: CalendarUpdateInput!): Calendar
   updateCalendars(data: [CalendarUpdateArgs!]!): [Calendar]
   deleteCalendar(where: CalendarWhereUniqueInput!): Calendar
   deleteCalendars(where: [CalendarWhereUniqueInput!]!): [Calendar]
-  createCellPhoneViolation(
-    data: CellPhoneViolationCreateInput!
-  ): CellPhoneViolation
-  createCellPhoneViolations(
-    data: [CellPhoneViolationCreateInput!]!
-  ): [CellPhoneViolation]
-  updateCellPhoneViolation(
-    where: CellPhoneViolationWhereUniqueInput!
-    data: CellPhoneViolationUpdateInput!
-  ): CellPhoneViolation
-  updateCellPhoneViolations(
-    data: [CellPhoneViolationUpdateArgs!]!
-  ): [CellPhoneViolation]
-  deleteCellPhoneViolation(
-    where: CellPhoneViolationWhereUniqueInput!
-  ): CellPhoneViolation
-  deleteCellPhoneViolations(
-    where: [CellPhoneViolationWhereUniqueInput!]!
-  ): [CellPhoneViolation]
+  createCellPhoneViolation(data: CellPhoneViolationCreateInput!): CellPhoneViolation
+  createCellPhoneViolations(data: [CellPhoneViolationCreateInput!]!): [CellPhoneViolation]
+  updateCellPhoneViolation(where: CellPhoneViolationWhereUniqueInput!, data: CellPhoneViolationUpdateInput!): CellPhoneViolation
+  updateCellPhoneViolations(data: [CellPhoneViolationUpdateArgs!]!): [CellPhoneViolation]
+  deleteCellPhoneViolation(where: CellPhoneViolationWhereUniqueInput!): CellPhoneViolation
+  deleteCellPhoneViolations(where: [CellPhoneViolationWhereUniqueInput!]!): [CellPhoneViolation]
   createChromebookCheck(data: ChromebookCheckCreateInput!): ChromebookCheck
-  createChromebookChecks(
-    data: [ChromebookCheckCreateInput!]!
-  ): [ChromebookCheck]
-  updateChromebookCheck(
-    where: ChromebookCheckWhereUniqueInput!
-    data: ChromebookCheckUpdateInput!
-  ): ChromebookCheck
+  createChromebookChecks(data: [ChromebookCheckCreateInput!]!): [ChromebookCheck]
+  updateChromebookCheck(where: ChromebookCheckWhereUniqueInput!, data: ChromebookCheckUpdateInput!): ChromebookCheck
   updateChromebookChecks(data: [ChromebookCheckUpdateArgs!]!): [ChromebookCheck]
-  deleteChromebookCheck(
-    where: ChromebookCheckWhereUniqueInput!
-  ): ChromebookCheck
-  deleteChromebookChecks(
-    where: [ChromebookCheckWhereUniqueInput!]!
-  ): [ChromebookCheck]
-  createChromebookAssignment(
-    data: ChromebookAssignmentCreateInput!
-  ): ChromebookAssignment
-  createChromebookAssignments(
-    data: [ChromebookAssignmentCreateInput!]!
-  ): [ChromebookAssignment]
-  updateChromebookAssignment(
-    where: ChromebookAssignmentWhereUniqueInput!
-    data: ChromebookAssignmentUpdateInput!
-  ): ChromebookAssignment
-  updateChromebookAssignments(
-    data: [ChromebookAssignmentUpdateArgs!]!
-  ): [ChromebookAssignment]
-  deleteChromebookAssignment(
-    where: ChromebookAssignmentWhereUniqueInput!
-  ): ChromebookAssignment
-  deleteChromebookAssignments(
-    where: [ChromebookAssignmentWhereUniqueInput!]!
-  ): [ChromebookAssignment]
+  deleteChromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
+  deleteChromebookChecks(where: [ChromebookCheckWhereUniqueInput!]!): [ChromebookCheck]
+  createChromebookAssignment(data: ChromebookAssignmentCreateInput!): ChromebookAssignment
+  createChromebookAssignments(data: [ChromebookAssignmentCreateInput!]!): [ChromebookAssignment]
+  updateChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!, data: ChromebookAssignmentUpdateInput!): ChromebookAssignment
+  updateChromebookAssignments(data: [ChromebookAssignmentUpdateArgs!]!): [ChromebookAssignment]
+  deleteChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
+  deleteChromebookAssignments(where: [ChromebookAssignmentWhereUniqueInput!]!): [ChromebookAssignment]
   createDiscipline(data: DisciplineCreateInput!): Discipline
   createDisciplines(data: [DisciplineCreateInput!]!): [Discipline]
-  updateDiscipline(
-    where: DisciplineWhereUniqueInput!
-    data: DisciplineUpdateInput!
-  ): Discipline
+  updateDiscipline(where: DisciplineWhereUniqueInput!, data: DisciplineUpdateInput!): Discipline
   updateDisciplines(data: [DisciplineUpdateArgs!]!): [Discipline]
   deleteDiscipline(where: DisciplineWhereUniqueInput!): Discipline
   deleteDisciplines(where: [DisciplineWhereUniqueInput!]!): [Discipline]
@@ -2640,117 +2399,58 @@ type Mutation {
   deleteLinks(where: [LinkWhereUniqueInput!]!): [Link]
   createMessage(data: MessageCreateInput!): Message
   createMessages(data: [MessageCreateInput!]!): [Message]
-  updateMessage(
-    where: MessageWhereUniqueInput!
-    data: MessageUpdateInput!
-  ): Message
+  updateMessage(where: MessageWhereUniqueInput!, data: MessageUpdateInput!): Message
   updateMessages(data: [MessageUpdateArgs!]!): [Message]
   deleteMessage(where: MessageWhereUniqueInput!): Message
   deleteMessages(where: [MessageWhereUniqueInput!]!): [Message]
   createPbisCard(data: PbisCardCreateInput!): PbisCard
   createPbisCards(data: [PbisCardCreateInput!]!): [PbisCard]
-  updatePbisCard(
-    where: PbisCardWhereUniqueInput!
-    data: PbisCardUpdateInput!
-  ): PbisCard
+  updatePbisCard(where: PbisCardWhereUniqueInput!, data: PbisCardUpdateInput!): PbisCard
   updatePbisCards(data: [PbisCardUpdateArgs!]!): [PbisCard]
   deletePbisCard(where: PbisCardWhereUniqueInput!): PbisCard
   deletePbisCards(where: [PbisCardWhereUniqueInput!]!): [PbisCard]
   createPbisCollection(data: PbisCollectionCreateInput!): PbisCollection
   createPbisCollections(data: [PbisCollectionCreateInput!]!): [PbisCollection]
-  updatePbisCollection(
-    where: PbisCollectionWhereUniqueInput!
-    data: PbisCollectionUpdateInput!
-  ): PbisCollection
+  updatePbisCollection(where: PbisCollectionWhereUniqueInput!, data: PbisCollectionUpdateInput!): PbisCollection
   updatePbisCollections(data: [PbisCollectionUpdateArgs!]!): [PbisCollection]
   deletePbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
-  deletePbisCollections(
-    where: [PbisCollectionWhereUniqueInput!]!
-  ): [PbisCollection]
+  deletePbisCollections(where: [PbisCollectionWhereUniqueInput!]!): [PbisCollection]
   createPbisTeam(data: PbisTeamCreateInput!): PbisTeam
   createPbisTeams(data: [PbisTeamCreateInput!]!): [PbisTeam]
-  updatePbisTeam(
-    where: PbisTeamWhereUniqueInput!
-    data: PbisTeamUpdateInput!
-  ): PbisTeam
+  updatePbisTeam(where: PbisTeamWhereUniqueInput!, data: PbisTeamUpdateInput!): PbisTeam
   updatePbisTeams(data: [PbisTeamUpdateArgs!]!): [PbisTeam]
   deletePbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   deletePbisTeams(where: [PbisTeamWhereUniqueInput!]!): [PbisTeam]
-  createPbisCollectionDate(
-    data: PbisCollectionDateCreateInput!
-  ): PbisCollectionDate
-  createPbisCollectionDates(
-    data: [PbisCollectionDateCreateInput!]!
-  ): [PbisCollectionDate]
-  updatePbisCollectionDate(
-    where: PbisCollectionDateWhereUniqueInput!
-    data: PbisCollectionDateUpdateInput!
-  ): PbisCollectionDate
-  updatePbisCollectionDates(
-    data: [PbisCollectionDateUpdateArgs!]!
-  ): [PbisCollectionDate]
-  deletePbisCollectionDate(
-    where: PbisCollectionDateWhereUniqueInput!
-  ): PbisCollectionDate
-  deletePbisCollectionDates(
-    where: [PbisCollectionDateWhereUniqueInput!]!
-  ): [PbisCollectionDate]
+  createPbisCollectionDate(data: PbisCollectionDateCreateInput!): PbisCollectionDate
+  createPbisCollectionDates(data: [PbisCollectionDateCreateInput!]!): [PbisCollectionDate]
+  updatePbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!, data: PbisCollectionDateUpdateInput!): PbisCollectionDate
+  updatePbisCollectionDates(data: [PbisCollectionDateUpdateArgs!]!): [PbisCollectionDate]
+  deletePbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!): PbisCollectionDate
+  deletePbisCollectionDates(where: [PbisCollectionDateWhereUniqueInput!]!): [PbisCollectionDate]
   createRandomDrawingWin(data: RandomDrawingWinCreateInput!): RandomDrawingWin
-  createRandomDrawingWins(
-    data: [RandomDrawingWinCreateInput!]!
-  ): [RandomDrawingWin]
-  updateRandomDrawingWin(
-    where: RandomDrawingWinWhereUniqueInput!
-    data: RandomDrawingWinUpdateInput!
-  ): RandomDrawingWin
-  updateRandomDrawingWins(
-    data: [RandomDrawingWinUpdateArgs!]!
-  ): [RandomDrawingWin]
-  deleteRandomDrawingWin(
-    where: RandomDrawingWinWhereUniqueInput!
-  ): RandomDrawingWin
-  deleteRandomDrawingWins(
-    where: [RandomDrawingWinWhereUniqueInput!]!
-  ): [RandomDrawingWin]
-  createSortingHatQuestion(
-    data: SortingHatQuestionCreateInput!
-  ): SortingHatQuestion
-  createSortingHatQuestions(
-    data: [SortingHatQuestionCreateInput!]!
-  ): [SortingHatQuestion]
-  updateSortingHatQuestion(
-    where: SortingHatQuestionWhereUniqueInput!
-    data: SortingHatQuestionUpdateInput!
-  ): SortingHatQuestion
-  updateSortingHatQuestions(
-    data: [SortingHatQuestionUpdateArgs!]!
-  ): [SortingHatQuestion]
-  deleteSortingHatQuestion(
-    where: SortingHatQuestionWhereUniqueInput!
-  ): SortingHatQuestion
-  deleteSortingHatQuestions(
-    where: [SortingHatQuestionWhereUniqueInput!]!
-  ): [SortingHatQuestion]
+  createRandomDrawingWins(data: [RandomDrawingWinCreateInput!]!): [RandomDrawingWin]
+  updateRandomDrawingWin(where: RandomDrawingWinWhereUniqueInput!, data: RandomDrawingWinUpdateInput!): RandomDrawingWin
+  updateRandomDrawingWins(data: [RandomDrawingWinUpdateArgs!]!): [RandomDrawingWin]
+  deleteRandomDrawingWin(where: RandomDrawingWinWhereUniqueInput!): RandomDrawingWin
+  deleteRandomDrawingWins(where: [RandomDrawingWinWhereUniqueInput!]!): [RandomDrawingWin]
+  createSortingHatQuestion(data: SortingHatQuestionCreateInput!): SortingHatQuestion
+  createSortingHatQuestions(data: [SortingHatQuestionCreateInput!]!): [SortingHatQuestion]
+  updateSortingHatQuestion(where: SortingHatQuestionWhereUniqueInput!, data: SortingHatQuestionUpdateInput!): SortingHatQuestion
+  updateSortingHatQuestions(data: [SortingHatQuestionUpdateArgs!]!): [SortingHatQuestion]
+  deleteSortingHatQuestion(where: SortingHatQuestionWhereUniqueInput!): SortingHatQuestion
+  deleteSortingHatQuestions(where: [SortingHatQuestionWhereUniqueInput!]!): [SortingHatQuestion]
   createStudentFocus(data: StudentFocusCreateInput!): StudentFocus
   createStudentFoci(data: [StudentFocusCreateInput!]!): [StudentFocus]
-  updateStudentFocus(
-    where: StudentFocusWhereUniqueInput!
-    data: StudentFocusUpdateInput!
-  ): StudentFocus
+  updateStudentFocus(where: StudentFocusWhereUniqueInput!, data: StudentFocusUpdateInput!): StudentFocus
   updateStudentFoci(data: [StudentFocusUpdateArgs!]!): [StudentFocus]
   deleteStudentFocus(where: StudentFocusWhereUniqueInput!): StudentFocus
   deleteStudentFoci(where: [StudentFocusWhereUniqueInput!]!): [StudentFocus]
   createTrimesterAward(data: TrimesterAwardCreateInput!): TrimesterAward
   createTrimesterAwards(data: [TrimesterAwardCreateInput!]!): [TrimesterAward]
-  updateTrimesterAward(
-    where: TrimesterAwardWhereUniqueInput!
-    data: TrimesterAwardUpdateInput!
-  ): TrimesterAward
+  updateTrimesterAward(where: TrimesterAwardWhereUniqueInput!, data: TrimesterAwardUpdateInput!): TrimesterAward
   updateTrimesterAwards(data: [TrimesterAwardUpdateArgs!]!): [TrimesterAward]
   deleteTrimesterAward(where: TrimesterAwardWhereUniqueInput!): TrimesterAward
-  deleteTrimesterAwards(
-    where: [TrimesterAwardWhereUniqueInput!]!
-  ): [TrimesterAward]
+  deleteTrimesterAwards(where: [TrimesterAwardWhereUniqueInput!]!): [TrimesterAward]
   createVideo(data: VideoCreateInput!): Video
   createVideos(data: [VideoCreateInput!]!): [Video]
   updateVideo(where: VideoWhereUniqueInput!, data: VideoUpdateInput!): Video
@@ -2758,31 +2458,14 @@ type Mutation {
   deleteVideo(where: VideoWhereUniqueInput!): Video
   deleteVideos(where: [VideoWhereUniqueInput!]!): [Video]
   endSession: Boolean!
-  authenticateUserWithPassword(
-    email: String!
-    password: String!
-  ): UserAuthenticationWithPasswordResult
-  createInitialUser(
-    data: CreateInitialUserInput!
-  ): UserAuthenticationWithPasswordSuccess!
+  authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
+  createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
   sendUserPasswordResetLink(email: String!): Boolean!
-  redeemUserPasswordResetToken(
-    email: String!
-    token: String!
-    password: String!
-  ): RedeemUserPasswordResetTokenResult
-  recalculateCallback(callbackID: ID): User
-  recalculatePBIS(userId: ID): User
-  updateStudentSchedules(studentScheduleData: String): User
-  addStaff(staffData: String): User
-  addEvents(eventData: String): User
-  sendEmail(emailData: String): User
-  addBirthdays(birthdayData: String): Birthday
+  redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
+  recalculateCallback(callbackId: ID!): Callback
 }
 
-union UserAuthenticationWithPasswordResult =
-    UserAuthenticationWithPasswordSuccess
-  | UserAuthenticationWithPasswordFailure
+union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
 
 type UserAuthenticationWithPasswordSuccess {
   sessionToken: String!
@@ -2811,188 +2494,72 @@ enum PasswordResetRedemptionErrorCode {
 }
 
 type Query {
-  users(
-    where: UserWhereInput! = {}
-    orderBy: [UserOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [User!]
+  users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   user(where: UserWhereUniqueInput!): User
   usersCount(where: UserWhereInput! = {}): Int
-  birthdays(
-    where: BirthdayWhereInput! = {}
-    orderBy: [BirthdayOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Birthday!]
+  birthdays(where: BirthdayWhereInput! = {}, orderBy: [BirthdayOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BirthdayWhereUniqueInput): [Birthday!]
   birthday(where: BirthdayWhereUniqueInput!): Birthday
   birthdaysCount(where: BirthdayWhereInput! = {}): Int
-  bugReports(
-    where: BugReportWhereInput! = {}
-    orderBy: [BugReportOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [BugReport!]
+  bugReports(where: BugReportWhereInput! = {}, orderBy: [BugReportOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BugReportWhereUniqueInput): [BugReport!]
   bugReport(where: BugReportWhereUniqueInput!): BugReport
   bugReportsCount(where: BugReportWhereInput! = {}): Int
-  bullyings(
-    where: BullyingWhereInput! = {}
-    orderBy: [BullyingOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Bullying!]
+  bullyings(where: BullyingWhereInput! = {}, orderBy: [BullyingOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BullyingWhereUniqueInput): [Bullying!]
   bullying(where: BullyingWhereUniqueInput!): Bullying
   bullyingsCount(where: BullyingWhereInput! = {}): Int
-  callbacks(
-    where: CallbackWhereInput! = {}
-    orderBy: [CallbackOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Callback!]
+  callbacks(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callback(where: CallbackWhereUniqueInput!): Callback
   callbacksCount(where: CallbackWhereInput! = {}): Int
-  calendars(
-    where: CalendarWhereInput! = {}
-    orderBy: [CalendarOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Calendar!]
+  calendars(where: CalendarWhereInput! = {}, orderBy: [CalendarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CalendarWhereUniqueInput): [Calendar!]
   calendar(where: CalendarWhereUniqueInput!): Calendar
   calendarsCount(where: CalendarWhereInput! = {}): Int
-  cellPhoneViolations(
-    where: CellPhoneViolationWhereInput! = {}
-    orderBy: [CellPhoneViolationOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [CellPhoneViolation!]
-  cellPhoneViolation(
-    where: CellPhoneViolationWhereUniqueInput!
-  ): CellPhoneViolation
+  cellPhoneViolations(where: CellPhoneViolationWhereInput! = {}, orderBy: [CellPhoneViolationOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CellPhoneViolationWhereUniqueInput): [CellPhoneViolation!]
+  cellPhoneViolation(where: CellPhoneViolationWhereUniqueInput!): CellPhoneViolation
   cellPhoneViolationsCount(where: CellPhoneViolationWhereInput! = {}): Int
-  chromebookChecks(
-    where: ChromebookCheckWhereInput! = {}
-    orderBy: [ChromebookCheckOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [ChromebookCheck!]
+  chromebookChecks(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
   chromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
   chromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
-  chromebookAssignments(
-    where: ChromebookAssignmentWhereInput! = {}
-    orderBy: [ChromebookAssignmentOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [ChromebookAssignment!]
-  chromebookAssignment(
-    where: ChromebookAssignmentWhereUniqueInput!
-  ): ChromebookAssignment
+  chromebookAssignments(where: ChromebookAssignmentWhereInput! = {}, orderBy: [ChromebookAssignmentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookAssignmentWhereUniqueInput): [ChromebookAssignment!]
+  chromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
   chromebookAssignmentsCount(where: ChromebookAssignmentWhereInput! = {}): Int
-  disciplines(
-    where: DisciplineWhereInput! = {}
-    orderBy: [DisciplineOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Discipline!]
+  disciplines(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   discipline(where: DisciplineWhereUniqueInput!): Discipline
   disciplinesCount(where: DisciplineWhereInput! = {}): Int
-  links(
-    where: LinkWhereInput! = {}
-    orderBy: [LinkOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Link!]
+  links(where: LinkWhereInput! = {}, orderBy: [LinkOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LinkWhereUniqueInput): [Link!]
   link(where: LinkWhereUniqueInput!): Link
   linksCount(where: LinkWhereInput! = {}): Int
-  messages(
-    where: MessageWhereInput! = {}
-    orderBy: [MessageOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Message!]
+  messages(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
   message(where: MessageWhereUniqueInput!): Message
   messagesCount(where: MessageWhereInput! = {}): Int
-  pbisCards(
-    where: PbisCardWhereInput! = {}
-    orderBy: [PbisCardOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisCard!]
+  pbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   pbisCard(where: PbisCardWhereUniqueInput!): PbisCard
   pbisCardsCount(where: PbisCardWhereInput! = {}): Int
-  pbisCollections(
-    where: PbisCollectionWhereInput! = {}
-    orderBy: [PbisCollectionOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisCollection!]
+  pbisCollections(where: PbisCollectionWhereInput! = {}, orderBy: [PbisCollectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionWhereUniqueInput): [PbisCollection!]
   pbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
   pbisCollectionsCount(where: PbisCollectionWhereInput! = {}): Int
-  pbisTeams(
-    where: PbisTeamWhereInput! = {}
-    orderBy: [PbisTeamOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisTeam!]
+  pbisTeams(where: PbisTeamWhereInput! = {}, orderBy: [PbisTeamOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisTeamWhereUniqueInput): [PbisTeam!]
   pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int
-  pbisCollectionDates(
-    where: PbisCollectionDateWhereInput! = {}
-    orderBy: [PbisCollectionDateOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [PbisCollectionDate!]
-  pbisCollectionDate(
-    where: PbisCollectionDateWhereUniqueInput!
-  ): PbisCollectionDate
+  pbisCollectionDates(where: PbisCollectionDateWhereInput! = {}, orderBy: [PbisCollectionDateOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionDateWhereUniqueInput): [PbisCollectionDate!]
+  pbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!): PbisCollectionDate
   pbisCollectionDatesCount(where: PbisCollectionDateWhereInput! = {}): Int
-  randomDrawingWins(
-    where: RandomDrawingWinWhereInput! = {}
-    orderBy: [RandomDrawingWinOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [RandomDrawingWin!]
+  randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWin(where: RandomDrawingWinWhereUniqueInput!): RandomDrawingWin
   randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
-  sortingHatQuestions(
-    where: SortingHatQuestionWhereInput! = {}
-    orderBy: [SortingHatQuestionOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [SortingHatQuestion!]
-  sortingHatQuestion(
-    where: SortingHatQuestionWhereUniqueInput!
-  ): SortingHatQuestion
+  sortingHatQuestions(where: SortingHatQuestionWhereInput! = {}, orderBy: [SortingHatQuestionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SortingHatQuestionWhereUniqueInput): [SortingHatQuestion!]
+  sortingHatQuestion(where: SortingHatQuestionWhereUniqueInput!): SortingHatQuestion
   sortingHatQuestionsCount(where: SortingHatQuestionWhereInput! = {}): Int
-  studentFoci(
-    where: StudentFocusWhereInput! = {}
-    orderBy: [StudentFocusOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [StudentFocus!]
+  studentFoci(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
   studentFocus(where: StudentFocusWhereUniqueInput!): StudentFocus
   studentFociCount(where: StudentFocusWhereInput! = {}): Int
-  trimesterAwards(
-    where: TrimesterAwardWhereInput! = {}
-    orderBy: [TrimesterAwardOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [TrimesterAward!]
+  trimesterAwards(where: TrimesterAwardWhereInput! = {}, orderBy: [TrimesterAwardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TrimesterAwardWhereUniqueInput): [TrimesterAward!]
   trimesterAward(where: TrimesterAwardWhereUniqueInput!): TrimesterAward
   trimesterAwardsCount(where: TrimesterAwardWhereInput! = {}): Int
-  videos(
-    where: VideoWhereInput! = {}
-    orderBy: [VideoOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Video!]
+  videos(where: VideoWhereInput! = {}, orderBy: [VideoOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: VideoWhereUniqueInput): [Video!]
   video(where: VideoWhereUniqueInput!): Video
   videosCount(where: VideoWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
-  validateUserPasswordResetToken(
-    email: String!
-    token: String!
-  ): ValidateUserPasswordResetTokenResult
+  validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
 }
 
 union AuthenticatedItem = User
@@ -3007,8 +2574,6 @@ type KeystoneMeta {
 }
 
 type KeystoneAdminMeta {
-  enableSignout: Boolean!
-  enableSessionItem: Boolean!
   lists: [KeystoneAdminUIListMeta!]!
   list(key: String!): KeystoneAdminUIListMeta
 }
@@ -3028,8 +2593,10 @@ type KeystoneAdminUIListMeta {
   pageSize: Int!
   labelField: String!
   fields: [KeystoneAdminUIFieldMeta!]!
+  groups: [KeystoneAdminUIFieldGroupMeta!]!
   initialSort: KeystoneAdminUISort
   isHidden: Boolean!
+  isSingleton: Boolean!
 }
 
 type KeystoneAdminUIFieldMeta {
@@ -3038,6 +2605,7 @@ type KeystoneAdminUIFieldMeta {
   description: String
   isOrderable: Boolean!
   isFilterable: Boolean!
+  isNonNull: [KeystoneAdminUIFieldMetaIsNonNull!]
   fieldMeta: JSON
   viewsIndex: Int!
   customViewsIndex: Int
@@ -3045,6 +2613,12 @@ type KeystoneAdminUIFieldMeta {
   listView: KeystoneAdminUIFieldMetaListView!
   itemView(id: ID): KeystoneAdminUIFieldMetaItemView
   search: QueryMode
+}
+
+enum KeystoneAdminUIFieldMetaIsNonNull {
+  read
+  create
+  update
 }
 
 type KeystoneAdminUIFieldMetaCreateView {
@@ -3067,12 +2641,24 @@ enum KeystoneAdminUIFieldMetaListViewFieldMode {
 
 type KeystoneAdminUIFieldMetaItemView {
   fieldMode: KeystoneAdminUIFieldMetaItemViewFieldMode
+  fieldPosition: KeystoneAdminUIFieldMetaItemViewFieldPosition
 }
 
 enum KeystoneAdminUIFieldMetaItemViewFieldMode {
   edit
   read
   hidden
+}
+
+enum KeystoneAdminUIFieldMetaItemViewFieldPosition {
+  form
+  sidebar
+}
+
+type KeystoneAdminUIFieldGroupMeta {
+  label: String!
+  description: String
+  fields: [KeystoneAdminUIFieldMeta!]!
 }
 
 type KeystoneAdminUISort {

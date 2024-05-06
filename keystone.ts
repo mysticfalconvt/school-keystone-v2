@@ -9,7 +9,7 @@ You can find all the config options in our docs here: https://keystonejs.com/doc
 import "dotenv/config";
 
 // config from Keystone
-import { config } from "@keystone-6/core";
+import { config, graphql } from "@keystone-6/core";
 
 // Look in the schema file for how we define our lists, and how users interact with them through graphql or the Admin UI
 import { lists } from "./schema";
@@ -49,8 +49,16 @@ const databaseURL =
 if (databaseURL.includes("local")) console.log(databaseURL);
 
 // extend gql with custom mutations
-import { extendGraphqlSchema } from "./mutations";
+// import { extendGraphqlSchema } from "./mutations";
 import { isAdmin } from "./access";
+import { extendGraphqlSchema } from "./mutations";
+import { recalculateCallback } from "./mutations/recalculateCallback";
+import recalculatePbis from "./mutations/recalculatePBIS";
+import updateStudentSchedules from "./mutations/updateStudentSchedules";
+import addStaff from "./mutations/AddStaff";
+import addEvents from "./mutations/addEvents";
+import sendEmail from "./mutations/sendEmail";
+import addBirthdays from "./mutations/addBirthdays";
 
 export default withAuth(
   // Using the config function helps typescript guide you to the available options.
@@ -64,7 +72,14 @@ export default withAuth(
     server: {
       // the port to run the server on
       port: Number(process.env.PORT) || 4000,
-      cors: { origin: true, credentials: true },
+      cors: {
+        origin: [
+          "http://localhost:3000",
+          "http://localhost:7777",
+          "https://ncujhs.tech",
+        ],
+        credentials: true,
+      },
     },
     // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
     ui: {
@@ -96,9 +111,15 @@ export default withAuth(
       Video,
     },
     session,
-    extendGraphqlSchema,
     graphql: {
-      playground: isAdmin,
+      playground: true,
+      extendGraphqlSchema: graphql.extend((base) => {
+        return {
+          mutation: {
+            recalculateCallback: recalculateCallback(base),
+          },
+        };
+      }),
     },
   })
 );
