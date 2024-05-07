@@ -22,7 +22,6 @@ export const recalculateCallback = (base: any) =>
       }
       `,
       });
-      console.log(callback);
       const studentId = callback.student.id;
       const teacherId = callback.teacher.id;
       // const taTeacherId = callback.student.taTeacher.id
@@ -80,8 +79,6 @@ export const recalculateCallback = (base: any) =>
           totalCallbackCount: teacher.callbackTotal,
         },
       });
-      console.log(updateStudentCallbacks);
-      console.log(updateTeacherCallbacks);
 
       return updateStudentCallbacks;
     },

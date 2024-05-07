@@ -1,32 +1,32 @@
-import { KeystoneContext, SessionStore } from "@keystone-6/core/types";
-import { Session } from "../types";
-import {
-  UserUpdateInput,
-  PbisTeamUpdateInput,
-} from "../.keystone/schema-types";
-import { User } from "../schemas/User";
-import { Callback } from "../schemas/Callback";
 import { sendAnEmail } from "../lib/mail";
+import { graphql } from "@keystone-6/core";
 
-const graphql = String.raw;
+// const graphql = String.raw;
 
-async function sendEmail(
-  root: any,
-  { emailData }: { emailData: string },
+export const sendEmail = (base: any) =>
+  graphql.field({
+    type: base.object("User"),
+    args: {
+      emailData: graphql.arg({ type: graphql.JSON }),
+    },
+    resolve: async (source, args, context) => {
+      console.log("Sending an Email", args.emailData);
+      const email = args.emailData as {
+        toAddress: string;
+        fromAddress: string;
+        subject?: string;
+        body: string;
+      };
+      if (!email) return null;
+      // if not json parsable then return null
+      if (typeof email !== "object") return null;
 
-  context: KeystoneContext
-): Promise<UserUpdateInput> {
-  //console log all the inputs
-  console.log("Sending an Email");
-  const email = JSON.parse(emailData);
-  // console.log('to', email);
-  const to = email.toAddress;
-  const from = email.fromAddress;
-  const subject = email.subject || "Email from NCUJHS.Tech";
-  const body = email.body;
-  await sendAnEmail(to, from, subject, body);
+      const to = email.toAddress;
+      const from = email.fromAddress;
+      const subject = email.subject || "Email from NCUJHS.Tech";
+      const body = email.body;
+      await sendAnEmail(to, from, subject, body);
 
-  return { id: "yes" };
-}
-
-export default sendEmail;
+      return { id: "yes" };
+    },
+  });

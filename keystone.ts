@@ -57,7 +57,7 @@ import recalculatePbis from "./mutations/recalculatePBIS";
 import updateStudentSchedules from "./mutations/updateStudentSchedules";
 import addStaff from "./mutations/AddStaff";
 import addEvents from "./mutations/addEvents";
-import sendEmail from "./mutations/sendEmail";
+import { sendEmail } from "./mutations/sendEmail";
 import addBirthdays from "./mutations/addBirthdays";
 
 export default withAuth(
@@ -104,7 +104,6 @@ export default withAuth(
       PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
-      // SchoolPbisInfo,
       SortingHatQuestion,
       StudentFocus,
       TrimesterAward,
@@ -117,6 +116,7 @@ export default withAuth(
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
+            sendEmail: sendEmail(base),
           },
         };
       }),

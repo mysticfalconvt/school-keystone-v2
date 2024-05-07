@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core23 = require("@keystone-6/core");
+var import_core24 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -69,6 +69,23 @@ async function sendPasswordResetEmail(resetToken, to) {
       <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Click Here to reset</a>
     `)
   });
+  if (process.env.MAIL_USER.includes("ethereal.email")) {
+    console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
+  }
+}
+async function sendAnEmail(to, from, subject, body) {
+  console.log(process.env.MAIL_HOST);
+  console.log(process.env.MAIL_USER);
+  console.log(process.env.MAIL_PASS);
+  console.log(process.env.MAIL_PORT);
+  const info = await transport.sendMail({
+    to,
+    from: process.env.MAIL_USER,
+    replyTo: from,
+    subject,
+    html: makeANiceEmail(body)
+  });
+  console.log(info);
   if (process.env.MAIL_USER.includes("ethereal.email")) {
     console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
@@ -1405,7 +1422,6 @@ var recalculateCallback = (base) => import_core22.graphql.field({
       }
       `
     });
-    console.log(callback);
     const studentId = callback.student.id;
     const teacherId = callback.teacher.id;
     const student = await context.query.User.findOne({
@@ -1453,9 +1469,30 @@ var recalculateCallback = (base) => import_core22.graphql.field({
         totalCallbackCount: teacher.callbackTotal
       }
     });
-    console.log(updateStudentCallbacks);
-    console.log(updateTeacherCallbacks);
     return updateStudentCallbacks;
+  }
+});
+
+// mutations/sendEmail.ts
+var import_core23 = require("@keystone-6/core");
+var sendEmail = (base) => import_core23.graphql.field({
+  type: base.object("User"),
+  args: {
+    emailData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
+  },
+  resolve: async (source, args, context) => {
+    console.log("Sending an Email", args.emailData);
+    const email = args.emailData;
+    if (!email)
+      return null;
+    if (typeof email !== "object")
+      return null;
+    const to = email.toAddress;
+    const from = email.fromAddress;
+    const subject = email.subject || "Email from NCUJHS.Tech";
+    const body = email.body;
+    await sendAnEmail(to, from, subject, body);
+    return { id: "yes" };
   }
 });
 
@@ -1465,7 +1502,7 @@ if (databaseURL.includes("local"))
   console.log(databaseURL);
 var keystone_default = withAuth(
   // Using the config function helps typescript guide you to the available options.
-  (0, import_core23.config)({
+  (0, import_core24.config)({
     // the db sets the database provider - we're using sqlite for the fastest startup experience
     db: {
       provider: "postgresql",
@@ -1507,7 +1544,6 @@ var keystone_default = withAuth(
       PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
-      // SchoolPbisInfo,
       SortingHatQuestion,
       StudentFocus,
       TrimesterAward,
@@ -1516,10 +1552,11 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: true,
-      extendGraphqlSchema: import_core23.graphql.extend((base) => {
+      extendGraphqlSchema: import_core24.graphql.extend((base) => {
         return {
           mutation: {
-            recalculateCallback: recalculateCallback(base)
+            recalculateCallback: recalculateCallback(base),
+            sendEmail: sendEmail(base)
           }
         };
       })
