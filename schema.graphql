@@ -2463,7 +2463,8 @@ type Mutation {
   sendUserPasswordResetLink(email: String!): Boolean!
   redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
   recalculateCallback(callbackId: ID!): Callback
-  sendEmail(emailData: JSON): User
+  sendEmail(emailData: JSON): Boolean
+  updateStudentSchedules(studentScheduleData: JSON): String
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure

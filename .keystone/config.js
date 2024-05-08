@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core24 = require("@keystone-6/core");
+var import_core25 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -1473,26 +1473,241 @@ var recalculateCallback = (base) => import_core22.graphql.field({
   }
 });
 
-// mutations/sendEmail.ts
+// mutations/updateStudentSchedules.ts
 var import_core23 = require("@keystone-6/core");
-var sendEmail = (base) => import_core23.graphql.field({
-  type: base.object("User"),
+var gql2 = String.raw;
+var updateStudentSchedules = (base) => import_core23.graphql.field({
+  type: import_core23.graphql.String,
   args: {
-    emailData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
+    studentScheduleData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
+  },
+  resolve: async (source, args, context) => {
+    console.log("Updating Student Schedules");
+    const allStudentUpdateResults = [];
+    if (!args.studentScheduleData)
+      return null;
+    const studentDataList = args.studentScheduleData;
+    await Promise.all(
+      studentDataList.map(async (student) => {
+        const studentUpdateResults = {};
+        const studentInfo = await context.query.User.findMany({
+          where: { email: { equals: student.email } },
+          query: gql2`
+              id
+              email
+              name
+          `
+        });
+        studentUpdateResults.email = student.email;
+        if (student.block1) {
+          const block1Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block1 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block1Teacher.length > 0) {
+            studentUpdateResults.block1Teacher = {
+              connect: { id: block1Teacher[0].id }
+            };
+          }
+        }
+        if (student.block2) {
+          const block2Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block2 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block2Teacher.length > 0) {
+            studentUpdateResults.block2Teacher = {
+              connect: { id: block2Teacher[0].id }
+            };
+          }
+        }
+        if (student.block3) {
+          const block3Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block3 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block3Teacher.length > 0) {
+            studentUpdateResults.block3Teacher = {
+              connect: { id: block3Teacher[0].id }
+            };
+          }
+        }
+        if (student.block4) {
+          const block4Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block4 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block4Teacher.length > 0) {
+            studentUpdateResults.block4Teacher = {
+              connect: { id: block4Teacher[0].id }
+            };
+          }
+        }
+        if (student.block5) {
+          const block5Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block5 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block5Teacher.length > 0) {
+            studentUpdateResults.block5Teacher = {
+              connect: { id: block5Teacher[0].id }
+            };
+          }
+        }
+        if (student.block6) {
+          const block6Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block6 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block6Teacher.length > 0) {
+            studentUpdateResults.block6Teacher = {
+              connect: { id: block6Teacher[0].id }
+            };
+          }
+        }
+        if (student.block7) {
+          const block7Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block7 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block7Teacher.length > 0) {
+            studentUpdateResults.block7Teacher = {
+              connect: { id: block7Teacher[0].id }
+            };
+          }
+        }
+        if (student.block8) {
+          const block8Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block8 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block8Teacher.length > 0) {
+            studentUpdateResults.block8Teacher = {
+              connect: { id: block8Teacher[0].id }
+            };
+          }
+        }
+        if (student.block9) {
+          const block9Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block9 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block9Teacher.length > 0) {
+            studentUpdateResults.block9Teacher = {
+              connect: { id: block9Teacher[0].id }
+            };
+          }
+        }
+        if (student.block10) {
+          const block10Teacher = await context.query.User.findMany({
+            where: { email: { equals: student.block10 } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (block10Teacher.length > 0) {
+            studentUpdateResults.block10Teacher = {
+              connect: { id: block10Teacher[0].id }
+            };
+          }
+        }
+        if (student.ta) {
+          const taTeacher = await context.query.User.findMany({
+            where: { email: { equals: student.ta } },
+            query: gql2`
+      id
+    email
+    `
+          });
+          if (taTeacher.length > 0) {
+            studentUpdateResults.taTeacher = {
+              connect: { id: taTeacher[0].id }
+            };
+          }
+        }
+        if (!studentInfo[0]?.id) {
+          console.log(`Creating new user ${student.email}`);
+          const nameArray = student.email.split("@")[0].split(".");
+          studentUpdateResults.name = nameArray.join(" ");
+          studentUpdateResults.isStudent = true;
+          studentUpdateResults.password = "password";
+          const createdStudent = await context.query.User.createOne({
+            data: {
+              ...studentUpdateResults
+            },
+            query: "id"
+          });
+        }
+        if (studentInfo[0]?.id) {
+          console.log(`Updating user ${student.email}`);
+          const updatedStudent = await context.query.User.updateOne({
+            where: { id: studentInfo[0].id },
+            data: {
+              ...studentUpdateResults
+            }
+          });
+        }
+        studentUpdateResults.existed = !!studentInfo[0];
+        allStudentUpdateResults.push(studentUpdateResults);
+      })
+    );
+    const name = JSON.stringify(allStudentUpdateResults);
+    return name;
+  }
+});
+
+// mutations/sendEmail.ts
+var import_core24 = require("@keystone-6/core");
+var sendEmail = (base) => import_core24.graphql.field({
+  type: import_core24.graphql.Boolean,
+  args: {
+    emailData: import_core24.graphql.arg({ type: import_core24.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Sending an Email", args.emailData);
+    const session2 = await context.session;
+    const isAllowed = isSignedIn({ session: session2, context });
+    if (!isAllowed)
+      return false;
     const email = args.emailData;
     if (!email)
-      return null;
+      return false;
     if (typeof email !== "object")
-      return null;
+      return false;
     const to = email.toAddress;
     const from = email.fromAddress;
     const subject = email.subject || "Email from NCUJHS.Tech";
     const body = email.body;
     await sendAnEmail(to, from, subject, body);
-    return { id: "yes" };
+    return true;
   }
 });
 
@@ -1501,9 +1716,7 @@ var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || 
 if (databaseURL.includes("local"))
   console.log(databaseURL);
 var keystone_default = withAuth(
-  // Using the config function helps typescript guide you to the available options.
-  (0, import_core24.config)({
-    // the db sets the database provider - we're using sqlite for the fastest startup experience
+  (0, import_core25.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -1551,12 +1764,13 @@ var keystone_default = withAuth(
     },
     session,
     graphql: {
-      playground: true,
-      extendGraphqlSchema: import_core24.graphql.extend((base) => {
+      playground: process.env.NODE_ENV === "development",
+      extendGraphqlSchema: import_core25.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
-            sendEmail: sendEmail(base)
+            sendEmail: sendEmail(base),
+            updateStudentSchedules: updateStudentSchedules(base)
           }
         };
       })

@@ -1,20 +1,10 @@
-/*
-Welcome to Keystone! This file is what keystone uses to start the app.
-
-It looks at the default export, and expects a Keystone config object.
-
-You can find all the config options in our docs here: https://keystonejs.com/docs/apis/config
-*/
-// dotenv
 import "dotenv/config";
 
 // config from Keystone
 import { config, graphql } from "@keystone-6/core";
 
 // Look in the schema file for how we define our lists, and how users interact with them through graphql or the Admin UI
-import { lists } from "./schema";
 
-// Keystone auth is configured separately - check out the basic auth setup we are importing from our auth file.
 import { withAuth, session } from "./auth";
 
 // Schemas from individual files
@@ -48,22 +38,16 @@ const databaseURL =
   "postgres://postgres:postgres@localhost:5432/postgres";
 if (databaseURL.includes("local")) console.log(databaseURL);
 
-// extend gql with custom mutations
-// import { extendGraphqlSchema } from "./mutations";
-import { isAdmin } from "./access";
-import { extendGraphqlSchema } from "./mutations";
 import { recalculateCallback } from "./mutations/recalculateCallback";
 import recalculatePbis from "./mutations/recalculatePBIS";
-import updateStudentSchedules from "./mutations/updateStudentSchedules";
+import { updateStudentSchedules } from "./mutations/updateStudentSchedules";
 import addStaff from "./mutations/AddStaff";
 import addEvents from "./mutations/addEvents";
 import { sendEmail } from "./mutations/sendEmail";
 import addBirthdays from "./mutations/addBirthdays";
 
 export default withAuth(
-  // Using the config function helps typescript guide you to the available options.
   config({
-    // the db sets the database provider - we're using sqlite for the fastest startup experience
     db: {
       provider: "postgresql",
       url: databaseURL,
@@ -111,12 +95,13 @@ export default withAuth(
     },
     session,
     graphql: {
-      playground: true,
+      playground: process.env.NODE_ENV === "development",
       extendGraphqlSchema: graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
             sendEmail: sendEmail(base),
+            updateStudentSchedules: updateStudentSchedules(base),
           },
         };
       }),
