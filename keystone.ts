@@ -41,7 +41,7 @@ if (databaseURL.includes("local")) console.log(databaseURL);
 import { recalculateCallback } from "./mutations/recalculateCallback";
 import recalculatePbis from "./mutations/recalculatePBIS";
 import { updateStudentSchedules } from "./mutations/updateStudentSchedules";
-import addStaff from "./mutations/AddStaff";
+import { addStaff } from "./mutations/AddStaff";
 import addEvents from "./mutations/addEvents";
 import { sendEmail } from "./mutations/sendEmail";
 import addBirthdays from "./mutations/addBirthdays";
@@ -102,6 +102,7 @@ export default withAuth(
             recalculateCallback: recalculateCallback(base),
             sendEmail: sendEmail(base),
             updateStudentSchedules: updateStudentSchedules(base),
+            addStaff: addStaff(base),
           },
         };
       }),

@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core25 = require("@keystone-6/core");
+var import_core26 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -42,6 +42,14 @@ var transport = (0, import_nodemailer.createTransport)({
   },
   tls: {
     ciphers: "SSLv3"
+  }
+});
+var devTransport = (0, import_nodemailer.createTransport)({
+  host: process.env.MAIL_HOST,
+  port: Number(process.env.MAIL_PORT),
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
   }
 });
 function makeANiceEmail(text22) {
@@ -78,16 +86,27 @@ async function sendAnEmail(to, from, subject, body) {
   console.log(process.env.MAIL_USER);
   console.log(process.env.MAIL_PASS);
   console.log(process.env.MAIL_PORT);
-  const info = await transport.sendMail({
-    to,
-    from: process.env.MAIL_USER,
-    replyTo: from,
-    subject,
-    html: makeANiceEmail(body)
-  });
-  console.log(info);
-  if (process.env.MAIL_USER.includes("ethereal.email")) {
-    console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
+  if (process.env.NODE_ENV === "development") {
+    const info = await devTransport.sendMail({
+      to,
+      from: process.env.MAIL_USER,
+      replyTo: from,
+      subject,
+      html: makeANiceEmail(body)
+    });
+    console.log(info);
+  } else {
+    const info = await transport.sendMail({
+      to,
+      from: process.env.MAIL_USER,
+      replyTo: from,
+      subject,
+      html: makeANiceEmail(body)
+    });
+    console.log(info);
+    if (process.env.MAIL_USER.includes("ethereal.email")) {
+      console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
+    }
   }
 }
 
@@ -1684,12 +1703,74 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
   }
 });
 
-// mutations/sendEmail.ts
+// mutations/AddStaff.ts
 var import_core24 = require("@keystone-6/core");
-var sendEmail = (base) => import_core24.graphql.field({
-  type: import_core24.graphql.Boolean,
+var gql3 = String.raw;
+var addStaff = (base) => import_core24.graphql.field({
+  type: import_core24.graphql.String,
   args: {
-    emailData: import_core24.graphql.arg({ type: import_core24.graphql.JSON })
+    staffData: import_core24.graphql.arg({ type: import_core24.graphql.JSON })
+  },
+  resolve: async (source, args, context) => {
+    console.log("Adding Staff");
+    const allStaffUpdateResults = [];
+    if (!args.staffData || typeof args.staffData === "string")
+      return null;
+    const staffDataList = args.staffData;
+    await Promise.all(
+      staffDataList.map(async (staffMember) => {
+        const studentUpdateResults = {};
+        const studentInfo = await context.query.User.findMany({
+          where: { email: { equals: staffMember.email.toLowerCase() } },
+          query: gql3`
+              id
+              email
+              name
+          `
+        });
+        studentUpdateResults.email = staffMember.email.toLowerCase();
+        if (!studentInfo[0]?.id) {
+          console.log(`Creating new user ${staffMember.email}`);
+          const nameArray = staffMember.email.split("@")[0].split(".");
+          studentUpdateResults.name = nameArray.join(" ");
+          studentUpdateResults.isStudent = false;
+          studentUpdateResults.canManageCalendar = true;
+          studentUpdateResults.canSeeOtherUsers = true;
+          studentUpdateResults.canManageUsers = true;
+          studentUpdateResults.canManageRoles = true;
+          studentUpdateResults.canManageLinks = true;
+          studentUpdateResults.canManageDiscipline = false;
+          studentUpdateResults.canSeeAllDiscipline = false;
+          studentUpdateResults.canSeeAllTeacherEvents = true;
+          studentUpdateResults.canSeeStudentEvents = false;
+          studentUpdateResults.canSeeOwnCallback = true;
+          studentUpdateResults.canSeeAllCallback = true;
+          studentUpdateResults.hasTA = staffMember.hasta ? true : false;
+          studentUpdateResults.hasClasses = staffMember.hasclasses ? true : false;
+          studentUpdateResults.isStaff = true;
+          studentUpdateResults.isTeacher = staffMember.isteacher ? true : false;
+          studentUpdateResults.password = "password";
+          const createdStudent = await context.query.User.createOne({
+            data: {
+              ...studentUpdateResults
+            }
+          });
+        }
+        studentUpdateResults.existed = !!studentInfo[0];
+        allStaffUpdateResults.push(studentUpdateResults);
+      })
+    );
+    const name = JSON.stringify(allStaffUpdateResults);
+    return name;
+  }
+});
+
+// mutations/sendEmail.ts
+var import_core25 = require("@keystone-6/core");
+var sendEmail = (base) => import_core25.graphql.field({
+  type: import_core25.graphql.Boolean,
+  args: {
+    emailData: import_core25.graphql.arg({ type: import_core25.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Sending an Email", args.emailData);
@@ -1716,7 +1797,7 @@ var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || 
 if (databaseURL.includes("local"))
   console.log(databaseURL);
 var keystone_default = withAuth(
-  (0, import_core25.config)({
+  (0, import_core26.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -1765,12 +1846,13 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === "development",
-      extendGraphqlSchema: import_core25.graphql.extend((base) => {
+      extendGraphqlSchema: import_core26.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
             sendEmail: sendEmail(base),
-            updateStudentSchedules: updateStudentSchedules(base)
+            updateStudentSchedules: updateStudentSchedules(base),
+            addStaff: addStaff(base)
           }
         };
       })

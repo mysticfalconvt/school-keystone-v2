@@ -2465,6 +2465,7 @@ type Mutation {
   recalculateCallback(callbackId: ID!): Callback
   sendEmail(emailData: JSON): Boolean
   updateStudentSchedules(studentScheduleData: JSON): String
+  addStaff(staffData: JSON): String
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
