@@ -47,8 +47,9 @@ export const updateStudentSchedules = (base: any) =>
       console.log("Updating Student Schedules");
       const allStudentUpdateResults: StudentUpdateResultData[] = [];
       if (!args.studentScheduleData) return null;
-      const studentDataList = args.studentScheduleData as StudentData[];
-
+      const studentDataList = JSON.parse(
+        args.studentScheduleData as string
+      ) as StudentData[];
       //go through each student and update their schedule or create a new student
       await Promise.all(
         studentDataList.map(async (student) => {
@@ -224,7 +225,6 @@ export const updateStudentSchedules = (base: any) =>
 
           //if user is new create new user
           if (!studentInfo[0]?.id) {
-            console.log(`Creating new user ${student.email}`);
             //get name as a string from email separated by .
             const nameArray = student.email.split("@")[0].split(".");
             //join the names together
@@ -241,7 +241,6 @@ export const updateStudentSchedules = (base: any) =>
 
           //if user exists update their schedule
           if (studentInfo[0]?.id) {
-            console.log(`Updating user ${student.email}`);
             const updatedStudent = await context.query.User.updateOne({
               where: { id: studentInfo[0].id },
               data: {

@@ -1505,7 +1505,9 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
     const allStudentUpdateResults = [];
     if (!args.studentScheduleData)
       return null;
-    const studentDataList = args.studentScheduleData;
+    const studentDataList = JSON.parse(
+      args.studentScheduleData
+    );
     await Promise.all(
       studentDataList.map(async (student) => {
         const studentUpdateResults = {};
@@ -1673,7 +1675,6 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
           }
         }
         if (!studentInfo[0]?.id) {
-          console.log(`Creating new user ${student.email}`);
           const nameArray = student.email.split("@")[0].split(".");
           studentUpdateResults.name = nameArray.join(" ");
           studentUpdateResults.isStudent = true;
@@ -1686,7 +1687,6 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
           });
         }
         if (studentInfo[0]?.id) {
-          console.log(`Updating user ${student.email}`);
           const updatedStudent = await context.query.User.updateOne({
             where: { id: studentInfo[0].id },
             data: {
