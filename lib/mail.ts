@@ -14,6 +14,15 @@ const transport = createTransport({
   },
 });
 
+const devTransport = createTransport({
+  host: process.env.MAIL_HOST,
+  port: Number(process.env.MAIL_PORT),
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
+
 function makeANiceEmail(text: string) {
   return `
     <div className="email" style="
@@ -78,15 +87,26 @@ export async function sendAnEmail(
   // console.log('from', from);
   // console.log('subject', subject);
   // console.log('body', body);
-  const info = (await transport.sendMail({
-    to,
-    from: process.env.MAIL_USER,
-    replyTo: from,
-    subject,
-    html: makeANiceEmail(body),
-  })) as MailResponse;
-  console.log(info);
-  if (process.env.MAIL_USER.includes("ethereal.email")) {
-    console.log(`💌 Message Sent!  Preview it at ${getTestMessageUrl(info)}`);
+  if (process.env.NODE_ENV === "development") {
+    const info = await devTransport.sendMail({
+      to,
+      from: process.env.MAIL_USER,
+      replyTo: from,
+      subject,
+      html: makeANiceEmail(body),
+    });
+    console.log(info);
+  } else {
+    const info = (await transport.sendMail({
+      to,
+      from: process.env.MAIL_USER,
+      replyTo: from,
+      subject,
+      html: makeANiceEmail(body),
+    })) as MailResponse;
+    console.log(info);
+    if (process.env.MAIL_USER.includes("ethereal.email")) {
+      console.log(`💌 Message Sent!  Preview it at ${getTestMessageUrl(info)}`);
+    }
   }
 }

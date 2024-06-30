@@ -1,32 +1,37 @@
-import { KeystoneContext, SessionStore } from "@keystone-6/core/types";
-import { Session } from "../types";
-import {
-  UserUpdateInput,
-  PbisTeamUpdateInput,
-} from "../.keystone/schema-types";
-import { User } from "../schemas/User";
-import { Callback } from "../schemas/Callback";
+import { isSignedIn } from "../access";
 import { sendAnEmail } from "../lib/mail";
+import { graphql } from "@keystone-6/core";
 
-const graphql = String.raw;
+// const graphql = String.raw;
 
-async function sendEmail(
-  root: any,
-  { emailData }: { emailData: string },
+export const sendEmail = (base: any) =>
+  graphql.field({
+    type: graphql.Boolean,
 
-  context: KeystoneContext
-): Promise<UserUpdateInput> {
-  //console log all the inputs
-  console.log("Sending an Email");
-  const email = JSON.parse(emailData);
-  // console.log('to', email);
-  const to = email.toAddress;
-  const from = email.fromAddress;
-  const subject = email.subject || "Email from NCUJHS.Tech";
-  const body = email.body;
-  await sendAnEmail(to, from, subject, body);
+    args: {
+      emailData: graphql.arg({ type: graphql.JSON }),
+    },
+    resolve: async (source, args, context) => {
+      console.log("Sending an Email", args.emailData);
+      const session = await context.session;
+      const isAllowed = isSignedIn({ session, context });
+      if (!isAllowed) return false;
+      const email = args.emailData as {
+        toAddress: string;
+        fromAddress: string;
+        subject?: string;
+        body: string;
+      };
+      if (!email) return false;
+      // if not json parsable then return null
+      if (typeof email !== "object") return false;
 
-  return { id: "yes" };
-}
+      const to = email.toAddress;
+      const from = email.fromAddress;
+      const subject = email.subject || "Email from NCUJHS.Tech";
+      const body = email.body;
+      await sendAnEmail(to, from, subject, body);
 
-export default sendEmail;
+      return true;
+    },
+  });
