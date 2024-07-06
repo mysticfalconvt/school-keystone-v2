@@ -61,6 +61,7 @@ export default withAuth(
           "http://localhost:3000",
           "http://localhost:7777",
           "https://ncujhs.tech",
+          "https://www.ncujhs.tech",
         ],
         credentials: true,
       },
