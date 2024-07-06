@@ -1810,7 +1810,9 @@ var keystone_default = withAuth(
         origin: [
           "http://localhost:3000",
           "http://localhost:7777",
-          "https://ncujhs.tech"
+          "https://ncujhs.tech",
+          "https://www.ncujhs.tech",
+          "https://www.ncujhs.tech/"
         ],
         credentials: true
       }
