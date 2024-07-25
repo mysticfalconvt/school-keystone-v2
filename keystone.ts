@@ -63,6 +63,7 @@ export default withAuth(
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
           "https://www.ncujhs.tech/",
+          "https://old.ncujhs.tech",
         ],
         credentials: true,
       },

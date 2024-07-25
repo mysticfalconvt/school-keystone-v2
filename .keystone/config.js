@@ -1812,7 +1812,8 @@ var keystone_default = withAuth(
           "http://localhost:7777",
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
-          "https://www.ncujhs.tech/"
+          "https://www.ncujhs.tech/",
+          "https://old.ncujhs.tech"
         ],
         credentials: true
       }
