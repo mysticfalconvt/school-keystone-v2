@@ -73,6 +73,41 @@ export async function sendPasswordResetEmail(
   }
 }
 
+export async function sendMagicLinkEmail(
+  token: string,
+  email: string
+): Promise<void> {
+  // email the user a token
+  if (process.env.NODE_ENV === "development") {
+    const info = (await devTransport.sendMail({
+      to: email,
+      from: process.env.MAIL_USER,
+      subject: "Your Magic Link",
+      html: makeANiceEmail(`
+        <br/>
+        Here is your link to login:
+        <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
+        <br/>
+        <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
+      `),
+    })) as MailResponse;
+    console.log(info);
+  } else {
+    const info = (await transport.sendMail({
+      to: email,
+      from: process.env.MAIL_USER,
+      subject: "Your Magic Link",
+      html: makeANiceEmail(`
+      <br/>
+      Here is your link to login:
+      <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
+      <br/>
+      <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
+    `),
+    })) as MailResponse;
+  }
+}
+
 export async function sendAnEmail(
   to: string,
   from: string,

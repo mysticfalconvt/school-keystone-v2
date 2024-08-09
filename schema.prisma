@@ -141,6 +141,9 @@ model User {
   passwordResetToken                           String?
   passwordResetIssuedAt                        DateTime?
   passwordResetRedeemedAt                      DateTime?
+  magicAuthToken                               String?
+  magicAuthIssuedAt                            DateTime?
+  magicAuthRedeemedAt                          DateTime?
   from_User_specialGroupStudents               User[]                 @relation("User_specialGroupStudents")
   from_BugReport_submittedBy                   BugReport[]            @relation("BugReport_submittedBy")
   from_Bullying_studentOffender                Bullying[]             @relation("Bullying_studentOffender")

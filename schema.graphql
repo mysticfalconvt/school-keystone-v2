@@ -145,6 +145,9 @@ type User {
   passwordResetToken: PasswordState
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
+  magicAuthToken: PasswordState
+  magicAuthIssuedAt: DateTime
+  magicAuthRedeemedAt: DateTime
 }
 
 type PasswordState {
@@ -276,6 +279,9 @@ input UserWhereInput {
   passwordResetToken: PasswordFilter
   passwordResetIssuedAt: DateTimeNullableFilter
   passwordResetRedeemedAt: DateTimeNullableFilter
+  magicAuthToken: PasswordFilter
+  magicAuthIssuedAt: DateTimeNullableFilter
+  magicAuthRedeemedAt: DateTimeNullableFilter
 }
 
 input IDFilter {
@@ -477,6 +483,8 @@ input UserOrderByInput {
   sortingHat: OrderDirection
   passwordResetIssuedAt: OrderDirection
   passwordResetRedeemedAt: OrderDirection
+  magicAuthIssuedAt: OrderDirection
+  magicAuthRedeemedAt: OrderDirection
 }
 
 enum OrderDirection {
@@ -599,6 +607,9 @@ input UserUpdateInput {
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
+  magicAuthToken: String
+  magicAuthIssuedAt: DateTime
+  magicAuthRedeemedAt: DateTime
 }
 
 input UserRelateToManyForUpdateInput {
@@ -802,6 +813,9 @@ input UserCreateInput {
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
+  magicAuthToken: String
+  magicAuthIssuedAt: DateTime
+  magicAuthRedeemedAt: DateTime
 }
 
 input UserRelateToManyForCreateInput {
@@ -2462,6 +2476,8 @@ type Mutation {
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
   sendUserPasswordResetLink(email: String!): Boolean!
   redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
+  sendUserMagicAuthLink(email: String!): Boolean!
+  redeemUserMagicAuthToken(email: String!, token: String!): RedeemUserMagicAuthTokenResult!
   recalculateCallback(callbackId: ID!): Callback
   sendEmail(emailData: JSON): Boolean
   updateStudentSchedules(studentScheduleData: JSON): String
@@ -2491,6 +2507,24 @@ type RedeemUserPasswordResetTokenResult {
 }
 
 enum PasswordResetRedemptionErrorCode {
+  FAILURE
+  TOKEN_EXPIRED
+  TOKEN_REDEEMED
+}
+
+union RedeemUserMagicAuthTokenResult = RedeemUserMagicAuthTokenSuccess | RedeemUserMagicAuthTokenFailure
+
+type RedeemUserMagicAuthTokenSuccess {
+  token: String!
+  item: User!
+}
+
+type RedeemUserMagicAuthTokenFailure {
+  code: MagicLinkRedemptionErrorCode!
+  message: String!
+}
+
+enum MagicLinkRedemptionErrorCode {
   FAILURE
   TOKEN_EXPIRED
   TOKEN_REDEEMED
