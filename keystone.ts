@@ -60,11 +60,14 @@ export default withAuth(
         origin: [
           "http://localhost:3000",
           "http://localhost:7777",
+          "http://localhost:7878",
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
           "https://www.ncujhs.tech/",
           "https://old.ncujhs.tech",
+          "https://old.ncujhs.tech/",
         ],
+
         credentials: true,
       },
     },

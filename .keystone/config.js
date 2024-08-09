@@ -81,6 +81,36 @@ async function sendPasswordResetEmail(resetToken, to) {
     console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
 }
+async function sendMagicLinkEmail(token, email) {
+  if (process.env.NODE_ENV === "development") {
+    const info = await devTransport.sendMail({
+      to: email,
+      from: process.env.MAIL_USER,
+      subject: "Your Magic Link",
+      html: makeANiceEmail(`
+        <br/>
+        Here is your link to login:
+        <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
+        <br/>
+        <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
+      `)
+    });
+    console.log(info);
+  } else {
+    const info = await transport.sendMail({
+      to: email,
+      from: process.env.MAIL_USER,
+      subject: "Your Magic Link",
+      html: makeANiceEmail(`
+      <br/>
+      Here is your link to login:
+      <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
+      <br/>
+      <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
+    `)
+    });
+  }
+}
 async function sendAnEmail(to, from, subject, body) {
   console.log(process.env.MAIL_HOST);
   console.log(process.env.MAIL_USER);
@@ -137,6 +167,14 @@ var { withAuth } = (0, import_auth.createAuth)({
     async sendToken(args) {
       await sendPasswordResetEmail(args.token, args.identity);
     }
+  },
+  magicAuthLink: {
+    sendToken: async ({ itemId, identity, token, context }) => {
+      if (itemId && identity && token) {
+        await sendMagicLinkEmail(token, identity);
+      }
+    },
+    tokensValidForMins: 60
   }
 });
 var sessionMaxAge = 60 * 60 * 24 * 30;
@@ -1810,10 +1848,12 @@ var keystone_default = withAuth(
         origin: [
           "http://localhost:3000",
           "http://localhost:7777",
+          "http://localhost:7878",
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
           "https://www.ncujhs.tech/",
-          "https://old.ncujhs.tech"
+          "https://old.ncujhs.tech",
+          "https://old.ncujhs.tech/"
         ],
         credentials: true
       }
