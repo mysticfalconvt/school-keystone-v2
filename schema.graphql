@@ -102,8 +102,8 @@ type User {
   individualPbisLevel: Int
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
-  chromebookCheck(where: ChromebookAssignmentWhereInput! = {}, orderBy: [ChromebookAssignmentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookAssignmentWhereUniqueInput): [ChromebookAssignment!]
-  chromebookCheckCount(where: ChromebookAssignmentWhereInput! = {}): Int
+  chromebookCheck(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
+  chromebookCheckCount(where: ChromebookCheckWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -237,7 +237,7 @@ input UserWhereInput {
   individualPbisLevel: IntNullableFilter
   taTeamPbisLevel: IntNullableFilter
   taTeamAveragePbisCardsPerStudent: IntNullableFilter
-  chromebookCheck: ChromebookAssignmentManyRelationFilter
+  chromebookCheck: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
   PbisCardCount: IntNullableFilter
@@ -393,10 +393,10 @@ input IntNullableFilter {
   not: IntNullableFilter
 }
 
-input ChromebookAssignmentManyRelationFilter {
-  every: ChromebookAssignmentWhereInput
-  some: ChromebookAssignmentWhereInput
-  none: ChromebookAssignmentWhereInput
+input ChromebookCheckManyRelationFilter {
+  every: ChromebookCheckWhereInput
+  some: ChromebookCheckWhereInput
+  none: ChromebookCheckWhereInput
 }
 
 input DateTimeNullableFilter {
@@ -565,7 +565,7 @@ input UserUpdateInput {
   individualPbisLevel: Int
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
-  chromebookCheck: ChromebookAssignmentRelateToManyForUpdateInput
+  chromebookCheck: ChromebookCheckRelateToManyForUpdateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -686,11 +686,11 @@ input BirthdayRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input ChromebookAssignmentRelateToManyForUpdateInput {
-  disconnect: [ChromebookAssignmentWhereUniqueInput!]
-  set: [ChromebookAssignmentWhereUniqueInput!]
-  create: [ChromebookAssignmentCreateInput!]
-  connect: [ChromebookAssignmentWhereUniqueInput!]
+input ChromebookCheckRelateToManyForUpdateInput {
+  disconnect: [ChromebookCheckWhereUniqueInput!]
+  set: [ChromebookCheckWhereUniqueInput!]
+  create: [ChromebookCheckCreateInput!]
+  connect: [ChromebookCheckWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -771,7 +771,7 @@ input UserCreateInput {
   individualPbisLevel: Int
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
-  chromebookCheck: ChromebookAssignmentRelateToManyForCreateInput
+  chromebookCheck: ChromebookCheckRelateToManyForCreateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -873,9 +873,9 @@ input BirthdayRelateToOneForCreateInput {
   connect: BirthdayWhereUniqueInput
 }
 
-input ChromebookAssignmentRelateToManyForCreateInput {
-  create: [ChromebookAssignmentCreateInput!]
-  connect: [ChromebookAssignmentWhereUniqueInput!]
+input ChromebookCheckRelateToManyForCreateInput {
+  create: [ChromebookCheckCreateInput!]
+  connect: [ChromebookCheckWhereUniqueInput!]
 }
 
 type Birthday {
@@ -1333,7 +1333,7 @@ input CellPhoneViolationCreateInput {
 type ChromebookCheck {
   id: ID!
   time: DateTime
-  assignment: ChromebookAssignment
+  student: User
   message: String
 }
 
@@ -1347,7 +1347,7 @@ input ChromebookCheckWhereInput {
   NOT: [ChromebookCheckWhereInput!]
   id: IDFilter
   time: DateTimeFilter
-  assignment: ChromebookAssignmentWhereInput
+  student: UserWhereInput
   message: StringFilter
 }
 
@@ -1359,14 +1359,8 @@ input ChromebookCheckOrderByInput {
 
 input ChromebookCheckUpdateInput {
   time: DateTime
-  assignment: ChromebookAssignmentRelateToOneForUpdateInput
+  student: UserRelateToOneForUpdateInput
   message: String
-}
-
-input ChromebookAssignmentRelateToOneForUpdateInput {
-  create: ChromebookAssignmentCreateInput
-  connect: ChromebookAssignmentWhereUniqueInput
-  disconnect: Boolean
 }
 
 input ChromebookCheckUpdateArgs {
@@ -1376,22 +1370,12 @@ input ChromebookCheckUpdateArgs {
 
 input ChromebookCheckCreateInput {
   time: DateTime
-  assignment: ChromebookAssignmentRelateToOneForCreateInput
+  student: UserRelateToOneForCreateInput
   message: String
-}
-
-input ChromebookAssignmentRelateToOneForCreateInput {
-  create: ChromebookAssignmentCreateInput
-  connect: ChromebookAssignmentWhereUniqueInput
 }
 
 type ChromebookAssignment {
   id: ID!
-  teacher: User
-  student: User
-  number: String
-  checkLog(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
-  checkLogCount(where: ChromebookCheckWhereInput! = {}): Int
 }
 
 input ChromebookAssignmentWhereUniqueInput {
@@ -1403,52 +1387,10 @@ input ChromebookAssignmentWhereInput {
   OR: [ChromebookAssignmentWhereInput!]
   NOT: [ChromebookAssignmentWhereInput!]
   id: IDFilter
-  teacher: UserWhereInput
-  student: UserWhereInput
-  number: StringFilter
-  checkLog: ChromebookCheckManyRelationFilter
-}
-
-input ChromebookCheckManyRelationFilter {
-  every: ChromebookCheckWhereInput
-  some: ChromebookCheckWhereInput
-  none: ChromebookCheckWhereInput
 }
 
 input ChromebookAssignmentOrderByInput {
   id: OrderDirection
-  number: OrderDirection
-}
-
-input ChromebookAssignmentUpdateInput {
-  teacher: UserRelateToOneForUpdateInput
-  student: UserRelateToOneForUpdateInput
-  number: String
-  checkLog: ChromebookCheckRelateToManyForUpdateInput
-}
-
-input ChromebookCheckRelateToManyForUpdateInput {
-  disconnect: [ChromebookCheckWhereUniqueInput!]
-  set: [ChromebookCheckWhereUniqueInput!]
-  create: [ChromebookCheckCreateInput!]
-  connect: [ChromebookCheckWhereUniqueInput!]
-}
-
-input ChromebookAssignmentUpdateArgs {
-  where: ChromebookAssignmentWhereUniqueInput!
-  data: ChromebookAssignmentUpdateInput!
-}
-
-input ChromebookAssignmentCreateInput {
-  teacher: UserRelateToOneForCreateInput
-  student: UserRelateToOneForCreateInput
-  number: String
-  checkLog: ChromebookCheckRelateToManyForCreateInput
-}
-
-input ChromebookCheckRelateToManyForCreateInput {
-  create: [ChromebookCheckCreateInput!]
-  connect: [ChromebookCheckWhereUniqueInput!]
 }
 
 type Discipline {
@@ -2393,10 +2335,6 @@ type Mutation {
   updateChromebookChecks(data: [ChromebookCheckUpdateArgs!]!): [ChromebookCheck]
   deleteChromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
   deleteChromebookChecks(where: [ChromebookCheckWhereUniqueInput!]!): [ChromebookCheck]
-  createChromebookAssignment(data: ChromebookAssignmentCreateInput!): ChromebookAssignment
-  createChromebookAssignments(data: [ChromebookAssignmentCreateInput!]!): [ChromebookAssignment]
-  updateChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!, data: ChromebookAssignmentUpdateInput!): ChromebookAssignment
-  updateChromebookAssignments(data: [ChromebookAssignmentUpdateArgs!]!): [ChromebookAssignment]
   deleteChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
   deleteChromebookAssignments(where: [ChromebookAssignmentWhereUniqueInput!]!): [ChromebookAssignment]
   createDiscipline(data: DisciplineCreateInput!): Discipline

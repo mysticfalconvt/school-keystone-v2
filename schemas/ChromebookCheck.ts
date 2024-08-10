@@ -27,8 +27,8 @@ export const ChromebookCheck = list({
       validation: { isRequired: true },
       defaultValue: { kind: "now" },
     }),
-    assignment: relationship({
-      ref: "ChromebookAssignment.checkLog",
+    student: relationship({
+      ref: "User.chromebookCheck",
     }),
     message: text(),
   },

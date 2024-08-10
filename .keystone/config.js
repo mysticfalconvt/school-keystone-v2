@@ -52,7 +52,7 @@ var devTransport = (0, import_nodemailer.createTransport)({
     pass: process.env.MAIL_PASS
   }
 });
-function makeANiceEmail(text22) {
+function makeANiceEmail(text21) {
   return `
     <div className="email" style="
       border: 1px solid black;
@@ -62,7 +62,7 @@ function makeANiceEmail(text22) {
       font-size: 20px;
     ">
       <h2>Hello There!</h2>
-      <p>${text22}</p>
+      <p>${text21}</p>
 
       <p>NCUJHS.Tech</p>
     </div>
@@ -409,7 +409,7 @@ var User = (0, import_core.list)({
     taTeamPbisLevel: (0, import_fields2.integer)({ defaultValue: 0 }),
     taTeamAveragePbisCardsPerStudent: (0, import_fields2.integer)({ defaultValue: 0 }),
     chromebookCheck: (0, import_fields2.relationship)({
-      ref: "ChromebookAssignment.student",
+      ref: "ChromebookCheck.student",
       many: true
     }),
     // Important Info
@@ -953,15 +953,14 @@ var ChromebookCheck = (0, import_core12.list)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    assignment: (0, import_fields14.relationship)({
-      ref: "ChromebookAssignment.checkLog"
+    student: (0, import_fields14.relationship)({
+      ref: "User.chromebookCheck"
     }),
     message: (0, import_fields14.text)()
   }
 });
 
 // schemas/ChromebookAssignment.ts
-var import_fields15 = require("@keystone-6/core/fields");
 var import_core13 = require("@keystone-6/core");
 var ChromebookAssignment = (0, import_core13.list)({
   access: {
@@ -979,22 +978,22 @@ var ChromebookAssignment = (0, import_core13.list)({
     }
   },
   fields: {
-    teacher: (0, import_fields15.relationship)({
-      ref: "User"
-    }),
-    student: (0, import_fields15.relationship)({
-      ref: "User.chromebookCheck"
-    }),
-    number: (0, import_fields15.text)(),
-    checkLog: (0, import_fields15.relationship)({
-      ref: "ChromebookCheck.assignment",
-      many: true
-    })
+    // teacher: relationship({
+    //   ref: "User",
+    // }),
+    // student: relationship({
+    //   ref: "User.chromebookCheck",
+    // }),
+    // number: text(),
+    // checkLog: relationship({
+    //   ref: "ChromebookCheck.assignment",
+    //   many: true,
+    // }),
   }
 });
 
 // schemas/Discipline.ts
-var import_fields16 = require("@keystone-6/core/fields");
+var import_fields15 = require("@keystone-6/core/fields");
 var import_core14 = require("@keystone-6/core");
 var Discipline = (0, import_core14.list)({
   access: {
@@ -1013,17 +1012,17 @@ var Discipline = (0, import_core14.list)({
     }
   },
   fields: {
-    teacherComments: (0, import_fields16.text)({
+    teacherComments: (0, import_fields15.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    adminComments: (0, import_fields16.text)({
+    adminComments: (0, import_fields15.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    classType: (0, import_fields16.select)({
+    classType: (0, import_fields15.select)({
       options: [
         { label: "Math", value: "Math" },
         { label: "Language Arts", value: "Language Arts" },
@@ -1040,7 +1039,7 @@ var Discipline = (0, import_core14.list)({
         // createView: { fieldMode: 'hidden' },
       }
     }),
-    location: (0, import_fields16.select)({
+    location: (0, import_fields15.select)({
       options: [
         { label: "Classroom", value: "Classroom" },
         { label: "Gym", value: "Gym" },
@@ -1057,7 +1056,7 @@ var Discipline = (0, import_core14.list)({
         // createView: { fieldMode: 'hidden' },
       }
     }),
-    timeOfDay: (0, import_fields16.select)({
+    timeOfDay: (0, import_fields15.select)({
       options: [
         { label: "Morning TA", value: "Morning TA" },
         { label: "Block 1", value: "Block 1" },
@@ -1080,51 +1079,51 @@ var Discipline = (0, import_core14.list)({
       },
       isIndexed: true
     }),
-    student: (0, import_fields16.relationship)({
+    student: (0, import_fields15.relationship)({
       ref: "User.studentDiscipline"
     }),
-    teacher: (0, import_fields16.relationship)({
+    teacher: (0, import_fields15.relationship)({
       ref: "User.teacherDiscipline"
     }),
-    date: (0, import_fields16.timestamp)({
+    date: (0, import_fields15.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    addressed: (0, import_fields16.timestamp)({
+    addressed: (0, import_fields15.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    inappropriateLanguage: (0, import_fields16.checkbox)(),
-    physicalConduct: (0, import_fields16.checkbox)(),
-    nonCompliance: (0, import_fields16.checkbox)(),
-    disruption: (0, import_fields16.checkbox)(),
-    propertyMisuse: (0, import_fields16.checkbox)(),
-    otherConduct: (0, import_fields16.checkbox)(),
+    inappropriateLanguage: (0, import_fields15.checkbox)(),
+    physicalConduct: (0, import_fields15.checkbox)(),
+    nonCompliance: (0, import_fields15.checkbox)(),
+    disruption: (0, import_fields15.checkbox)(),
+    propertyMisuse: (0, import_fields15.checkbox)(),
+    otherConduct: (0, import_fields15.checkbox)(),
     // Teacher Actions
-    VerbalWarning: (0, import_fields16.checkbox)(),
-    buddyRoom: (0, import_fields16.checkbox)(),
-    conferenceWithStudent: (0, import_fields16.checkbox)(),
-    ParentContact: (0, import_fields16.checkbox)(),
-    PlanningRoomReferral: (0, import_fields16.checkbox)(),
-    FollowupPlan: (0, import_fields16.checkbox)(),
-    LossOfPrivilege: (0, import_fields16.checkbox)(),
-    DetentionWithTeacher: (0, import_fields16.checkbox)(),
-    IndividualizedInstruction: (0, import_fields16.checkbox)(),
-    GuidanceReferral: (0, import_fields16.checkbox)(),
-    ReferToAdministrator: (0, import_fields16.checkbox)(),
-    OtherAction: (0, import_fields16.checkbox)(),
+    VerbalWarning: (0, import_fields15.checkbox)(),
+    buddyRoom: (0, import_fields15.checkbox)(),
+    conferenceWithStudent: (0, import_fields15.checkbox)(),
+    ParentContact: (0, import_fields15.checkbox)(),
+    PlanningRoomReferral: (0, import_fields15.checkbox)(),
+    FollowupPlan: (0, import_fields15.checkbox)(),
+    LossOfPrivilege: (0, import_fields15.checkbox)(),
+    DetentionWithTeacher: (0, import_fields15.checkbox)(),
+    IndividualizedInstruction: (0, import_fields15.checkbox)(),
+    GuidanceReferral: (0, import_fields15.checkbox)(),
+    ReferToAdministrator: (0, import_fields15.checkbox)(),
+    OtherAction: (0, import_fields15.checkbox)(),
     // Others Involved
-    none: (0, import_fields16.checkbox)(),
-    peers: (0, import_fields16.checkbox)(),
-    teacherInvolved: (0, import_fields16.checkbox)(),
-    substitute: (0, import_fields16.checkbox)(),
-    unknown: (0, import_fields16.checkbox)(),
-    othersInvolved: (0, import_fields16.checkbox)()
+    none: (0, import_fields15.checkbox)(),
+    peers: (0, import_fields15.checkbox)(),
+    teacherInvolved: (0, import_fields15.checkbox)(),
+    substitute: (0, import_fields15.checkbox)(),
+    unknown: (0, import_fields15.checkbox)(),
+    othersInvolved: (0, import_fields15.checkbox)()
   }
 });
 
 // schemas/PbisCollection.ts
-var import_fields17 = require("@keystone-6/core/fields");
+var import_fields16 = require("@keystone-6/core/fields");
 var import_core15 = require("@keystone-6/core");
 var PbisCollection = (0, import_core15.list)({
   access: {
@@ -1142,12 +1141,12 @@ var PbisCollection = (0, import_core15.list)({
     }
   },
   fields: {
-    name: (0, import_fields17.text)(),
-    collectionDate: (0, import_fields17.timestamp)({
+    name: (0, import_fields16.text)(),
+    collectionDate: (0, import_fields16.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    personalLevelWinners: (0, import_fields17.text)({
+    personalLevelWinners: (0, import_fields16.text)({
       ui: {
         itemView: {
           fieldMode: "hidden"
@@ -1157,7 +1156,7 @@ var PbisCollection = (0, import_core15.list)({
         }
       }
     }),
-    randomDrawingWinners: (0, import_fields17.text)({
+    randomDrawingWinners: (0, import_fields16.text)({
       ui: {
         itemView: {
           fieldMode: "hidden"
@@ -1167,7 +1166,7 @@ var PbisCollection = (0, import_core15.list)({
         }
       }
     }),
-    taTeamsLevels: (0, import_fields17.text)({
+    taTeamsLevels: (0, import_fields16.text)({
       ui: {
         itemView: {
           fieldMode: "hidden"
@@ -1177,7 +1176,7 @@ var PbisCollection = (0, import_core15.list)({
         }
       }
     }),
-    taTeamNewLevelWinners: (0, import_fields17.text)({
+    taTeamNewLevelWinners: (0, import_fields16.text)({
       ui: {
         itemView: {
           fieldMode: "hidden"
@@ -1187,21 +1186,21 @@ var PbisCollection = (0, import_core15.list)({
         }
       }
     }),
-    currentPbisTeamGoal: (0, import_fields17.text)({
+    currentPbisTeamGoal: (0, import_fields16.text)({
       defaultValue: "0",
       validation: { isRequired: true }
     }),
-    collectedCards: (0, import_fields17.text)(),
-    dateModified: (0, import_fields17.timestamp)({
+    collectedCards: (0, import_fields16.text)(),
+    dateModified: (0, import_fields16.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    lastModifiedBy: (0, import_fields17.relationship)({ ref: "User" })
+    lastModifiedBy: (0, import_fields16.relationship)({ ref: "User" })
   }
 });
 
 // schemas/Birthday.ts
-var import_fields18 = require("@keystone-6/core/fields");
+var import_fields17 = require("@keystone-6/core/fields");
 var import_core16 = require("@keystone-6/core");
 var Birthday = (0, import_core16.list)({
   access: {
@@ -1220,27 +1219,27 @@ var Birthday = (0, import_core16.list)({
     }
   },
   fields: {
-    cakeType: (0, import_fields18.text)(),
-    date: (0, import_fields18.timestamp)({
+    cakeType: (0, import_fields17.text)(),
+    date: (0, import_fields17.timestamp)({
       // validation: {isRequired: true},
       isIndexed: true
     }),
-    hasChosen: (0, import_fields18.checkbox)({
+    hasChosen: (0, import_fields17.checkbox)({
       defaultValue: false,
       label: "Has Chosen a Cake"
     }),
-    hasDelivered: (0, import_fields18.checkbox)({
+    hasDelivered: (0, import_fields17.checkbox)({
       defaultValue: false,
       label: "Has gotten their cake"
     }),
-    student: (0, import_fields18.relationship)({
+    student: (0, import_fields17.relationship)({
       ref: "User.birthday"
     })
   }
 });
 
 // schemas/BugReport.ts
-var import_fields19 = require("@keystone-6/core/fields");
+var import_fields18 = require("@keystone-6/core/fields");
 var import_core17 = require("@keystone-6/core");
 var BugReport = (0, import_core17.list)({
   access: {
@@ -1259,25 +1258,25 @@ var BugReport = (0, import_core17.list)({
     }
   },
   fields: {
-    name: (0, import_fields19.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields19.text)({
+    name: (0, import_fields18.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields18.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    submittedBy: (0, import_fields19.relationship)({
+    submittedBy: (0, import_fields18.relationship)({
       ref: "User"
     }),
-    date: (0, import_fields19.timestamp)({
+    date: (0, import_fields18.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    read: (0, import_fields19.checkbox)({ defaultValue: false })
+    read: (0, import_fields18.checkbox)({ defaultValue: false })
   }
 });
 
 // schemas/Bullying.ts
-var import_fields20 = require("@keystone-6/core/fields");
+var import_fields19 = require("@keystone-6/core/fields");
 var import_core18 = require("@keystone-6/core");
 var Bullying = (0, import_core18.list)({
   access: {
@@ -1296,49 +1295,49 @@ var Bullying = (0, import_core18.list)({
     }
   },
   fields: {
-    studentOffender: (0, import_fields20.relationship)({
+    studentOffender: (0, import_fields19.relationship)({
       ref: "User"
     }),
-    teacherAuthor: (0, import_fields20.relationship)({
+    teacherAuthor: (0, import_fields19.relationship)({
       ref: "User"
     }),
-    dateReported: (0, import_fields20.timestamp)({
+    dateReported: (0, import_fields19.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    dateOfEvent: (0, import_fields20.timestamp)({
+    dateOfEvent: (0, import_fields19.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    investigationDate: (0, import_fields20.timestamp)({
+    investigationDate: (0, import_fields19.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    studentReporter: (0, import_fields20.text)(),
-    employeeWitness: (0, import_fields20.text)(),
-    studentWitness: (0, import_fields20.text)(),
-    studentsInterviewed: (0, import_fields20.text)(),
-    initialActions: (0, import_fields20.text)(),
-    nextSteps: (0, import_fields20.text)(),
-    reporter: (0, import_fields20.text)(),
-    description: (0, import_fields20.text)(),
-    determination: (0, import_fields20.select)({
+    studentReporter: (0, import_fields19.text)(),
+    employeeWitness: (0, import_fields19.text)(),
+    studentWitness: (0, import_fields19.text)(),
+    studentsInterviewed: (0, import_fields19.text)(),
+    initialActions: (0, import_fields19.text)(),
+    nextSteps: (0, import_fields19.text)(),
+    reporter: (0, import_fields19.text)(),
+    description: (0, import_fields19.text)(),
+    determination: (0, import_fields19.select)({
       options: [
         { value: "No", label: "No" },
         { value: "Yes", label: "Yes" }
       ]
     }),
-    determinationDate: (0, import_fields20.timestamp)({
+    determinationDate: (0, import_fields19.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    determinationExplanation: (0, import_fields20.text)(),
-    assignmentInvestigator: (0, import_fields20.text)()
+    determinationExplanation: (0, import_fields19.text)(),
+    assignmentInvestigator: (0, import_fields19.text)()
   }
 });
 
 // schemas/SortingHatQuestion.ts
-var import_fields21 = require("@keystone-6/core/fields");
+var import_fields20 = require("@keystone-6/core/fields");
 var import_core19 = require("@keystone-6/core");
 var SortingHatQuestion = (0, import_core19.list)({
   access: {
@@ -1356,23 +1355,23 @@ var SortingHatQuestion = (0, import_core19.list)({
     }
   },
   fields: {
-    question: (0, import_fields21.text)({
+    question: (0, import_fields20.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    gryffindorChoice: (0, import_fields21.text)(),
-    hufflepuffChoice: (0, import_fields21.text)(),
-    ravenclawChoice: (0, import_fields21.text)(),
-    slytherinChoice: (0, import_fields21.text)(),
-    createdBy: (0, import_fields21.relationship)({
+    gryffindorChoice: (0, import_fields20.text)(),
+    hufflepuffChoice: (0, import_fields20.text)(),
+    ravenclawChoice: (0, import_fields20.text)(),
+    slytherinChoice: (0, import_fields20.text)(),
+    createdBy: (0, import_fields20.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/TrimesterAward.ts
-var import_fields22 = require("@keystone-6/core/fields");
+var import_fields21 = require("@keystone-6/core/fields");
 var import_core20 = require("@keystone-6/core");
 var TrimesterAward = (0, import_core20.list)({
   access: {
@@ -1391,7 +1390,7 @@ var TrimesterAward = (0, import_core20.list)({
     }
   },
   fields: {
-    howl: (0, import_fields22.select)({
+    howl: (0, import_fields21.select)({
       options: [
         { value: "Respect", label: "Respect" },
         { value: "Responsibility", label: "Responsibility" },
@@ -1399,7 +1398,7 @@ var TrimesterAward = (0, import_core20.list)({
       ],
       validation: { isRequired: true }
     }),
-    trimester: (0, import_fields22.select)({
+    trimester: (0, import_fields21.select)({
       options: [
         { value: "1", label: "1" },
         { value: "2", label: "2" },
@@ -1407,21 +1406,21 @@ var TrimesterAward = (0, import_core20.list)({
       ],
       isIndexed: true
     }),
-    date: (0, import_fields22.timestamp)({
+    date: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    student: (0, import_fields22.relationship)({
+    student: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    teacher: (0, import_fields22.relationship)({
+    teacher: (0, import_fields21.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/video.ts
-var import_fields23 = require("@keystone-6/core/fields");
+var import_fields22 = require("@keystone-6/core/fields");
 var import_core21 = require("@keystone-6/core");
 var Video = (0, import_core21.list)({
   access: {
@@ -1439,21 +1438,21 @@ var Video = (0, import_core21.list)({
     }
   },
   fields: {
-    name: (0, import_fields23.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields23.text)({
+    name: (0, import_fields22.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields22.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    onHomePage: (0, import_fields23.checkbox)({ defaultValue: false, label: "On Home Page" }),
-    type: (0, import_fields23.select)({
+    onHomePage: (0, import_fields22.checkbox)({ defaultValue: false, label: "On Home Page" }),
+    type: (0, import_fields22.select)({
       options: [
         { value: "google drive", label: "google drive" },
         { value: "youtube", label: "Youtube" }
       ],
       validation: { isRequired: true }
     }),
-    link: (0, import_fields23.text)()
+    link: (0, import_fields22.text)()
   }
 });
 

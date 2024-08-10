@@ -23,16 +23,16 @@ export const ChromebookAssignment = list({
     },
   },
   fields: {
-    teacher: relationship({
-      ref: "User",
-    }),
-    student: relationship({
-      ref: "User.chromebookCheck",
-    }),
-    number: text(),
-    checkLog: relationship({
-      ref: "ChromebookCheck.assignment",
-      many: true,
-    }),
+    // teacher: relationship({
+    //   ref: "User",
+    // }),
+    // student: relationship({
+    //   ref: "User.chromebookCheck",
+    // }),
+    // number: text(),
+    // checkLog: relationship({
+    //   ref: "ChromebookCheck.assignment",
+    //   many: true,
+    // }),
   },
 });
