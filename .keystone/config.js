@@ -1715,7 +1715,7 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
           const nameArray = student.email.split("@")[0].split(".");
           studentUpdateResults.name = nameArray.join(" ");
           studentUpdateResults.isStudent = true;
-          studentUpdateResults.password = "password";
+          studentUpdateResults.password = "notpassword";
           const createdStudent = await context.query.User.createOne({
             data: {
               ...studentUpdateResults
@@ -1786,7 +1786,7 @@ var addStaff = (base) => import_core24.graphql.field({
           studentUpdateResults.hasClasses = staffMember.hasclasses ? true : false;
           studentUpdateResults.isStaff = true;
           studentUpdateResults.isTeacher = staffMember.isteacher ? true : false;
-          studentUpdateResults.password = "password";
+          studentUpdateResults.password = "notPassword";
           const createdStudent = await context.query.User.createOne({
             data: {
               ...studentUpdateResults

@@ -230,7 +230,7 @@ export const updateStudentSchedules = (base: any) =>
             //join the names together
             studentUpdateResults.name = nameArray.join(" ");
             studentUpdateResults.isStudent = true;
-            studentUpdateResults.password = "password";
+            studentUpdateResults.password = "notpassword";
             const createdStudent = await context.query.User.createOne({
               data: {
                 ...studentUpdateResults,

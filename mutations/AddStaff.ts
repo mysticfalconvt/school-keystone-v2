@@ -90,7 +90,7 @@ export const addStaff = (base: any) =>
               ? true
               : false;
 
-            studentUpdateResults.password = "password";
+            studentUpdateResults.password = "notPassword";
             const createdStudent = await context.query.User.createOne({
               data: {
                 ...studentUpdateResults,
