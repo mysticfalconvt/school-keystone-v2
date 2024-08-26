@@ -1732,6 +1732,7 @@ var updateStudentSchedules = (base) => import_core23.graphql.field({
           });
         }
         studentUpdateResults.existed = !!studentInfo[0];
+        studentUpdateResults.name = studentInfo[0]?.name;
         allStudentUpdateResults.push(studentUpdateResults);
       })
     );
@@ -1848,6 +1849,7 @@ var keystone_default = withAuth(
           "http://localhost:3000",
           "http://localhost:7777",
           "http://localhost:7878",
+          "http://localhost:3000",
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
           "https://www.ncujhs.tech/",

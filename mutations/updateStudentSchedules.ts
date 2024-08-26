@@ -250,6 +250,7 @@ export const updateStudentSchedules = (base: any) =>
           }
           // save if student is new or updated and add data to array
           studentUpdateResults.existed = !!studentInfo[0];
+          studentUpdateResults.name = studentInfo[0]?.name;
           allStudentUpdateResults.push(studentUpdateResults);
         })
       );
