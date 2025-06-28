@@ -6,3 +6,4 @@ keystone.db
 
 .env
 testusers.json
+.DS_Store
