@@ -14,6 +14,8 @@ export type Session = {
   data: {
     name: string;
     isSuperAdmin: boolean;
+    isStaff?: boolean;
+    isTeacher?: boolean;
     role?: {
       id: string;
       name: string;
@@ -38,5 +40,5 @@ export type AccessControl = {
 export type ListAccessArgs = {
   itemId?: string;
   session?: Session;
-  context?: Context
+  context?: Context;
 };
