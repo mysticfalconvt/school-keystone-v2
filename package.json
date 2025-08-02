@@ -23,6 +23,9 @@
     "node": ">=16.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/nodemailer": "^6.4.17",
     "prisma": "^5.22.0"
   }
 }

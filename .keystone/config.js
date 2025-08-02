@@ -77,7 +77,7 @@ async function sendPasswordResetEmail(resetToken, to) {
       <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Click Here to reset</a>
     `)
   });
-  if (process.env.MAIL_USER.includes("ethereal.email")) {
+  if (process.env.MAIL_USER?.includes("ethereal.email")) {
     console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
 }
@@ -134,7 +134,7 @@ async function sendAnEmail(to, from, subject, body) {
       html: makeANiceEmail(body)
     });
     console.log(info);
-    if (process.env.MAIL_USER.includes("ethereal.email")) {
+    if (process.env.MAIL_USER?.includes("ethereal.email")) {
       console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
     }
   }
@@ -263,36 +263,80 @@ function callbackAccess({ session: session2, context, itemId }) {
   if (!isSignedIn({ session: session2, context, itemId })) {
     return false;
   }
+  if (session2?.data?.role?.canSeeAllCallback) {
+    return true;
+  }
   if (!itemId) {
     return true;
   }
   if (!session2?.itemId) {
     return false;
   }
-  return context.sudo().db.Callback.findUnique({
+  if (!context) return false;
+  return context.sudo().query.Callback.findOne({
     where: { id: itemId },
-    select: {
-      student: { select: { id: true } },
-      teacher: { select: { id: true } }
-    }
+    query: `
+        id
+        student {
+          id
+          taTeacher { id }
+          block1Teacher { id }
+          block2Teacher { id }
+          block3Teacher { id }
+          block4Teacher { id }
+          block5Teacher { id }
+          block6Teacher { id }
+          block7Teacher { id }
+          block8Teacher { id }
+          block9Teacher { id }
+          block10Teacher { id }
+        }
+        teacher { id }
+      `
   }).then((callback) => {
     if (!callback) return false;
     const userId = session2.itemId;
     const isStudent = callback.student?.id === userId;
     const isTeacher = callback.teacher?.id === userId;
-    return isStudent || isTeacher;
+    const isTaTeacher = callback.student?.taTeacher?.id === userId;
+    const isStaffTeacher = session2.data?.isStaff && callback.student && (callback.student.block1Teacher?.id === userId || callback.student.block2Teacher?.id === userId || callback.student.block3Teacher?.id === userId || callback.student.block4Teacher?.id === userId || callback.student.block5Teacher?.id === userId || callback.student.block6Teacher?.id === userId || callback.student.block7Teacher?.id === userId || callback.student.block8Teacher?.id === userId || callback.student.block9Teacher?.id === userId || callback.student.block10Teacher?.id === userId);
+    return isStudent || isTeacher || isTaTeacher || isStaffTeacher;
   });
 }
 function callbackFilter({ session: session2, context }) {
   if (!session2?.itemId) {
     return false;
   }
-  return {
+  if (session2?.data?.role?.canSeeAllCallback) {
+    return true;
+  }
+  const userId = session2.itemId;
+  const isStaff = session2.data?.isStaff;
+  const baseFilter = {
     OR: [
-      { student: { id: { equals: session2.itemId } } },
-      { teacher: { id: { equals: session2.itemId } } }
+      { student: { id: { equals: userId } } },
+      { teacher: { id: { equals: userId } } },
+      { student: { taTeacher: { id: { equals: userId } } } }
     ]
   };
+  if (isStaff) {
+    return {
+      OR: [
+        ...baseFilter.OR,
+        { student: { block1Teacher: { id: { equals: userId } } } },
+        { student: { block2Teacher: { id: { equals: userId } } } },
+        { student: { block3Teacher: { id: { equals: userId } } } },
+        { student: { block4Teacher: { id: { equals: userId } } } },
+        { student: { block5Teacher: { id: { equals: userId } } } },
+        { student: { block6Teacher: { id: { equals: userId } } } },
+        { student: { block7Teacher: { id: { equals: userId } } } },
+        { student: { block8Teacher: { id: { equals: userId } } } },
+        { student: { block9Teacher: { id: { equals: userId } } } },
+        { student: { block10Teacher: { id: { equals: userId } } } }
+      ]
+    };
+  }
+  return baseFilter;
 }
 var Callback = (0, import_core2.list)({
   access: {

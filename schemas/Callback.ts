@@ -31,29 +31,30 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
   }
 
   // Get the callback item to check relationships
+  if (!context) return false;
+
   return context
     .sudo()
-    .db.Callback.findUnique({
+    .query.Callback.findOne({
       where: { id: itemId },
-      select: {
-        student: {
-          select: {
-            id: true,
-            taTeacher: { select: { id: true } },
-            block1Teacher: { select: { id: true } },
-            block2Teacher: { select: { id: true } },
-            block3Teacher: { select: { id: true } },
-            block4Teacher: { select: { id: true } },
-            block5Teacher: { select: { id: true } },
-            block6Teacher: { select: { id: true } },
-            block7Teacher: { select: { id: true } },
-            block8Teacher: { select: { id: true } },
-            block9Teacher: { select: { id: true } },
-            block10Teacher: { select: { id: true } },
-          },
-        },
-        teacher: { select: { id: true } },
-      },
+      query: `
+        id
+        student {
+          id
+          taTeacher { id }
+          block1Teacher { id }
+          block2Teacher { id }
+          block3Teacher { id }
+          block4Teacher { id }
+          block5Teacher { id }
+          block6Teacher { id }
+          block7Teacher { id }
+          block8Teacher { id }
+          block9Teacher { id }
+          block10Teacher { id }
+        }
+        teacher { id }
+      `,
     })
     .then((callback: any) => {
       if (!callback) return false;

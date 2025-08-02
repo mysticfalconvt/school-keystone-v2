@@ -18,11 +18,11 @@ import { list } from '@keystone-6/core';
 // We're using some common fields in the starter. Check out https://keystonejs.com/docs/apis/fields#fields-api
 // for the full list of fields.
 import {
-  text,
-  relationship,
   password,
-  timestamp,
+  relationship,
   select,
+  text,
+  timestamp,
 } from '@keystone-6/core/fields';
 // The document field is a more complicated field, so it's in its own package
 // Keystone aims to have all the base field types, but you can make your own
@@ -42,6 +42,14 @@ import { Lists } from '.keystone/types';
 export const lists: Lists = {
   // Here we define the user list.
   User: list({
+    access: {
+      operation: {
+        query: () => true,
+        create: () => true,
+        delete: () => true,
+        update: () => true,
+      },
+    },
     // Here are the fields that `User` will have. We want an email and password so they can log in
     // a name so we can refer to them, and a way to connect users to posts.
     fields: {
@@ -69,6 +77,14 @@ export const lists: Lists = {
   // Our second list is the Posts list. We've got a few more fields here
   // so we have all the info we need for displaying posts.
   Post: list({
+    access: {
+      operation: {
+        query: () => true,
+        create: () => true,
+        delete: () => true,
+        update: () => true,
+      },
+    },
     fields: {
       title: text(),
       // Having the status here will make it easy for us to choose whether to display
@@ -130,6 +146,14 @@ export const lists: Lists = {
   }),
   // Our final list is the tag list. This field is just a name and a relationship to posts
   Tag: list({
+    access: {
+      operation: {
+        query: () => true,
+        create: () => true,
+        delete: () => true,
+        update: () => true,
+      },
+    },
     ui: {
       isHidden: true,
     },
