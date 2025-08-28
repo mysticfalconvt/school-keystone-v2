@@ -191,8 +191,18 @@ var import_core = require("@keystone-6/core");
 
 // access.ts
 function isSignedIn({ session: session2, context }) {
-  const isAuth = context?.req?.rawHeaders?.includes("test auth for keystone");
+  const authHeader = process.env.AUTH_HEADER_SECRET;
+  if (!authHeader) {
+    console.warn(
+      "AUTH_HEADER_SECRET environment variable is not set. Authentication header check will be disabled."
+    );
+    if (process.env.NODE_ENV === "production") {
+      console.error("AUTH_HEADER_SECRET is required in production environment");
+    }
+  }
+  const isAuth = authHeader ? context?.req?.rawHeaders?.includes(authHeader) : false;
   const hasSession = !!session2;
+  console.log("hasSession", hasSession, "isAuth", isAuth);
   const isAllowed = hasSession || isAuth;
   return !!isAllowed;
 }
@@ -1924,17 +1934,13 @@ var keystone_default = withAuth(
       port: Number(process.env.PORT) || 4e3,
       cors: {
         origin: [
-          "http://localhost:3000",
-          "http://localhost:7777",
-          "http://localhost:7878",
-          "http://localhost:7979",
-          "http://localhost:3000",
+          /^https?:\/\/localhost:\d+$/,
           "https://ncujhs.tech",
           "https://www.ncujhs.tech",
           "https://www.ncujhs.tech/",
           "https://old.ncujhs.tech",
           "https://old.ncujhs.tech/",
-          "localhost:3000"
+          "http://10.0.0.23:7979"
         ],
         credentials: true
       }
