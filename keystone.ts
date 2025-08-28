@@ -55,17 +55,13 @@ export default withAuth(
       port: Number(process.env.PORT) || 4000,
       cors: {
         origin: [
-          'http://localhost:3000',
-          'http://localhost:7777',
-          'http://localhost:7878',
-          'http://localhost:7979',
-          'http://localhost:3000',
+          /^https?:\/\/localhost:\d+$/,
           'https://ncujhs.tech',
           'https://www.ncujhs.tech',
           'https://www.ncujhs.tech/',
           'https://old.ncujhs.tech',
           'https://old.ncujhs.tech/',
-          'localhost:3000',
+          'http://10.0.0.23:7979',
         ],
 
         credentials: true,
