@@ -202,7 +202,6 @@ function isSignedIn({ session: session2, context }) {
   }
   const isAuth = authHeader ? context?.req?.rawHeaders?.includes(authHeader) : false;
   const hasSession = !!session2;
-  console.log("hasSession", hasSession, "isAuth", isAuth);
   const isAllowed = hasSession || isAuth;
   return !!isAllowed;
 }

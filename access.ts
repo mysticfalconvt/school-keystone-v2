@@ -28,7 +28,7 @@ export function isSignedIn({ session, context }: ListAccessArgs) {
   // console.log("isAuth", isAuth)
   const hasSession = !!session;
   // console.log(session?.data?.isSuperAdmin)
-  console.log('hasSession', hasSession, 'isAuth', isAuth);
+  // console.log('hasSession', hasSession, 'isAuth', isAuth);
   const isAllowed = hasSession || isAuth;
 
   // console.log("itemId", itemId)
