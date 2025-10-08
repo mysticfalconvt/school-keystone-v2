@@ -15,9 +15,9 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
     return false;
   }
 
-  // If user has canSeeAllCallback permission, allow access to everything
-  if (session?.data?.role?.canSeeAllCallback) {
-    return true;
+  // If user has canSeeAllCallback permission, only allow read access
+  if ((session?.data as any)?.canSeeAllCallback) {
+    return true; // This will be handled by the operation-specific logic below
   }
 
   // If no itemId is provided, this is a list query - allow access but filter will be applied
@@ -90,7 +90,7 @@ function callbackFilter({ session, context }: ListAccessArgs) {
   }
 
   // If user has canSeeAllCallback permission, show all callbacks
-  if (session?.data?.role?.canSeeAllCallback) {
+  if ((session?.data as any)?.canSeeAllCallback) {
     return true;
   }
 
@@ -132,9 +132,27 @@ export const Callback = list({
   access: {
     operation: {
       query: callbackAccess,
-      create: callbackAccess,
-      delete: callbackAccess,
-      update: callbackAccess,
+      create: ({ session, context, itemId }: ListAccessArgs) => {
+        // Users with canSeeAllCallback can only read, not create
+        if ((session?.data as any)?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session, context, itemId });
+      },
+      delete: ({ session, context, itemId }: ListAccessArgs) => {
+        // Users with canSeeAllCallback can only read, not delete
+        if ((session?.data as any)?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session, context, itemId });
+      },
+      update: ({ session, context, itemId }: ListAccessArgs) => {
+        // Users with canSeeAllCallback can only read, not update
+        if ((session?.data as any)?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session, context, itemId });
+      },
     },
     filter: {
       query: callbackFilter,

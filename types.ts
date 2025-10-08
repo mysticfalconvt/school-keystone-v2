@@ -19,6 +19,24 @@ export type Session = {
     isSuperAdmin: boolean;
     isStaff?: boolean;
     isTeacher?: boolean;
+    canSeeAllCallback?: boolean;
+    canManageCalendar?: boolean;
+    canSeeOtherUsers?: boolean;
+    canManageUsers?: boolean;
+    canManageRoles?: boolean;
+    canManageLinks?: boolean;
+    canManageDiscipline?: boolean;
+    canSeeAllDiscipline?: boolean;
+    canSeeAllTeacherEvents?: boolean;
+    canSeeStudentEvents?: boolean;
+    canSeeOwnCallback?: boolean;
+    hasTA?: boolean;
+    hasClasses?: boolean;
+    isStudent?: boolean;
+    isParent?: boolean;
+    isGuidance?: boolean;
+    canManagePbis?: boolean;
+    canHaveSpecialGroups?: boolean;
     role?: {
       id: string;
       name: string;

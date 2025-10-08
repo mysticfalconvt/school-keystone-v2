@@ -154,7 +154,7 @@ if (!sessionSecret) {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "email",
-  sessionData: "name id isSuperAdmin",
+  sessionData: "name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups",
   secretField: "password",
   initFirstItem: {
     // If there are no items in the database, keystone will ask you to create
@@ -272,7 +272,7 @@ function callbackAccess({ session: session2, context, itemId }) {
   if (!isSignedIn({ session: session2, context, itemId })) {
     return false;
   }
-  if (session2?.data?.role?.canSeeAllCallback) {
+  if (session2?.data?.canSeeAllCallback) {
     return true;
   }
   if (!itemId) {
@@ -316,7 +316,7 @@ function callbackFilter({ session: session2, context }) {
   if (!session2?.itemId) {
     return false;
   }
-  if (session2?.data?.role?.canSeeAllCallback) {
+  if (session2?.data?.canSeeAllCallback) {
     return true;
   }
   const userId = session2.itemId;
@@ -351,9 +351,24 @@ var Callback = (0, import_core2.list)({
   access: {
     operation: {
       query: callbackAccess,
-      create: callbackAccess,
-      delete: callbackAccess,
-      update: callbackAccess
+      create: ({ session: session2, context, itemId }) => {
+        if (session2?.data?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session: session2, context, itemId });
+      },
+      delete: ({ session: session2, context, itemId }) => {
+        if (session2?.data?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session: session2, context, itemId });
+      },
+      update: ({ session: session2, context, itemId }) => {
+        if (session2?.data?.canSeeAllCallback) {
+          return false;
+        }
+        return callbackAccess({ session: session2, context, itemId });
+      }
     },
     filter: {
       query: callbackFilter
