@@ -272,9 +272,6 @@ function callbackAccess({ session: session2, context, itemId }) {
   if (!isSignedIn({ session: session2, context, itemId })) {
     return false;
   }
-  if (session2?.data?.canSeeAllCallback) {
-    return true;
-  }
   if (!itemId) {
     return true;
   }
@@ -309,10 +306,35 @@ function callbackAccess({ session: session2, context, itemId }) {
     const isTeacher = callback.teacher?.id === userId;
     const isTaTeacher = callback.student?.taTeacher?.id === userId;
     const isStaffTeacher = session2.data?.isStaff && callback.student && (callback.student.block1Teacher?.id === userId || callback.student.block2Teacher?.id === userId || callback.student.block3Teacher?.id === userId || callback.student.block4Teacher?.id === userId || callback.student.block5Teacher?.id === userId || callback.student.block6Teacher?.id === userId || callback.student.block7Teacher?.id === userId || callback.student.block8Teacher?.id === userId || callback.student.block9Teacher?.id === userId || callback.student.block10Teacher?.id === userId);
-    return isStudent || isTeacher || isTaTeacher || isStaffTeacher;
+    if (session2.data?.isStaff && callback.student) {
+      return context.sudo().query.User.findOne({
+        where: { id: userId },
+        query: `specialGroupStudents { id }`
+      }).then((sessionUser) => {
+        const isSpecialGroupTeacher = sessionUser?.specialGroupStudents && sessionUser.specialGroupStudents.some(
+          (student) => student.id === callback.student.id
+        );
+        const hasDirectRelationship2 = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isSpecialGroupTeacher;
+        if (hasDirectRelationship2) {
+          return true;
+        }
+        if (session2?.data?.canSeeAllCallback) {
+          return true;
+        }
+        return false;
+      });
+    }
+    const hasDirectRelationship = isStudent || isTeacher || isTaTeacher || isStaffTeacher;
+    if (hasDirectRelationship) {
+      return true;
+    }
+    if (session2?.data?.canSeeAllCallback) {
+      return true;
+    }
+    return false;
   });
 }
-function callbackFilter({ session: session2, context }) {
+async function callbackFilter({ session: session2, context }) {
   if (!session2?.itemId) {
     return false;
   }
@@ -328,7 +350,12 @@ function callbackFilter({ session: session2, context }) {
       { student: { taTeacher: { id: { equals: userId } } } }
     ]
   };
-  if (isStaff) {
+  if (isStaff && context) {
+    const sessionUser = await context.sudo().query.User.findOne({
+      where: { id: userId },
+      query: `specialGroupStudents { id }`
+    });
+    const specialGroupStudentIds = sessionUser?.specialGroupStudents?.map((student) => student.id) || [];
     return {
       OR: [
         ...baseFilter.OR,
@@ -341,7 +368,8 @@ function callbackFilter({ session: session2, context }) {
         { student: { block7Teacher: { id: { equals: userId } } } },
         { student: { block8Teacher: { id: { equals: userId } } } },
         { student: { block9Teacher: { id: { equals: userId } } } },
-        { student: { block10Teacher: { id: { equals: userId } } } }
+        { student: { block10Teacher: { id: { equals: userId } } } },
+        ...specialGroupStudentIds.length > 0 ? [{ student: { id: { in: specialGroupStudentIds } } }] : []
       ]
     };
   }
@@ -352,21 +380,12 @@ var Callback = (0, import_core2.list)({
     operation: {
       query: callbackAccess,
       create: ({ session: session2, context, itemId }) => {
-        if (session2?.data?.canSeeAllCallback) {
-          return false;
-        }
         return callbackAccess({ session: session2, context, itemId });
       },
       delete: ({ session: session2, context, itemId }) => {
-        if (session2?.data?.canSeeAllCallback) {
-          return false;
-        }
         return callbackAccess({ session: session2, context, itemId });
       },
       update: ({ session: session2, context, itemId }) => {
-        if (session2?.data?.canSeeAllCallback) {
-          return false;
-        }
         return callbackAccess({ session: session2, context, itemId });
       }
     },

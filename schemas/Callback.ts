@@ -15,11 +15,6 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
     return false;
   }
 
-  // If user has canSeeAllCallback permission, only allow read access
-  if ((session?.data as any)?.canSeeAllCallback) {
-    return true; // This will be handled by the operation-specific logic below
-  }
-
   // If no itemId is provided, this is a list query - allow access but filter will be applied
   if (!itemId) {
     return true;
@@ -79,12 +74,62 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
           callback.student.block9Teacher?.id === userId ||
           callback.student.block10Teacher?.id === userId);
 
-      return isStudent || isTeacher || isTaTeacher || isStaffTeacher;
+      // Check if user is a staff member who has the student in their special group
+      // We need to query the session user's specialGroupStudents to check if the callback student is in it
+      if (session.data?.isStaff && callback.student) {
+        return context
+          .sudo()
+          .query.User.findOne({
+            where: { id: userId },
+            query: `specialGroupStudents { id }`,
+          })
+          .then((sessionUser: any) => {
+            const isSpecialGroupTeacher =
+              sessionUser?.specialGroupStudents &&
+              sessionUser.specialGroupStudents.some(
+                (student: any) => student.id === callback.student.id,
+              );
+
+            const hasDirectRelationship =
+              isStudent ||
+              isTeacher ||
+              isTaTeacher ||
+              isStaffTeacher ||
+              isSpecialGroupTeacher;
+
+            // If user has direct relationship, allow access
+            if (hasDirectRelationship) {
+              return true;
+            }
+
+            // If no direct relationship, check if user has canSeeAllCallback (read-only access)
+            if ((session?.data as any)?.canSeeAllCallback) {
+              return true;
+            }
+
+            return false;
+          });
+      }
+
+      const hasDirectRelationship =
+        isStudent || isTeacher || isTaTeacher || isStaffTeacher;
+
+      // If user has direct relationship, allow access
+      if (hasDirectRelationship) {
+        return true;
+      }
+
+      // If no direct relationship, check if user has canSeeAllCallback (read-only access)
+      if ((session?.data as any)?.canSeeAllCallback) {
+        return true;
+      }
+
+      return false;
     });
 }
 
 // Filter function to restrict list queries to user's own items
-function callbackFilter({ session, context }: ListAccessArgs) {
+async function callbackFilter({ session, context }: ListAccessArgs) {
   if (!session?.itemId) {
     return false;
   }
@@ -107,7 +152,17 @@ function callbackFilter({ session, context }: ListAccessArgs) {
   };
 
   // If user is staff, also include callbacks for students they teach
-  if (isStaff) {
+  if (isStaff && context) {
+    // Get the session user's special group students
+    const sessionUser = await context.sudo().query.User.findOne({
+      where: { id: userId },
+      query: `specialGroupStudents { id }`,
+    });
+
+    const specialGroupStudentIds =
+      sessionUser?.specialGroupStudents?.map((student: any) => student.id) ||
+      [];
+
     return {
       OR: [
         ...baseFilter.OR,
@@ -121,6 +176,9 @@ function callbackFilter({ session, context }: ListAccessArgs) {
         { student: { block8Teacher: { id: { equals: userId } } } },
         { student: { block9Teacher: { id: { equals: userId } } } },
         { student: { block10Teacher: { id: { equals: userId } } } },
+        ...(specialGroupStudentIds.length > 0
+          ? [{ student: { id: { in: specialGroupStudentIds } } }]
+          : []),
       ],
     };
   }
@@ -133,24 +191,15 @@ export const Callback = list({
     operation: {
       query: callbackAccess,
       create: ({ session, context, itemId }: ListAccessArgs) => {
-        // Users with canSeeAllCallback can only read, not create
-        if ((session?.data as any)?.canSeeAllCallback) {
-          return false;
-        }
+        // Check if user has direct relationship (student, teacher, TA, block teacher, special group)
         return callbackAccess({ session, context, itemId });
       },
       delete: ({ session, context, itemId }: ListAccessArgs) => {
-        // Users with canSeeAllCallback can only read, not delete
-        if ((session?.data as any)?.canSeeAllCallback) {
-          return false;
-        }
+        // Check if user has direct relationship (student, teacher, TA, block teacher, special group)
         return callbackAccess({ session, context, itemId });
       },
       update: ({ session, context, itemId }: ListAccessArgs) => {
-        // Users with canSeeAllCallback can only read, not update
-        if ((session?.data as any)?.canSeeAllCallback) {
-          return false;
-        }
+        // Check if user has direct relationship (student, teacher, TA, block teacher, special group)
         return callbackAccess({ session, context, itemId });
       },
     },
