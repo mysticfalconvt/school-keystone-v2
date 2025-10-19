@@ -74,6 +74,7 @@ model User {
   block10TeacherId                             String?              @map("block10Teacher")
   block10Students                              User[]               @relation("User_block10Teacher")
   specialGroupStudents                         User[]               @relation("User_specialGroupStudents")
+  coTeachesWithTeacher                         User[]               @relation("User_coTeachesWithTeacher")
   taTeam                                       PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
   taTeamId                                     String?              @map("taTeam")
   studentFocusTeacher                          StudentFocus[]       @relation("StudentFocus_teacher")
@@ -145,6 +146,7 @@ model User {
   magicAuthIssuedAt                            DateTime?
   magicAuthRedeemedAt                          DateTime?
   from_User_specialGroupStudents               User[]               @relation("User_specialGroupStudents")
+  from_User_coTeachesWithTeacher               User[]               @relation("User_coTeachesWithTeacher")
   from_BugReport_submittedBy                   BugReport[]          @relation("BugReport_submittedBy")
   from_Bullying_studentOffender                Bullying[]           @relation("Bullying_studentOffender")
   from_Bullying_teacherAuthor                  Bullying[]           @relation("Bullying_teacherAuthor")

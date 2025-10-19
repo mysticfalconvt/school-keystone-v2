@@ -67,6 +67,8 @@ type User {
   block10StudentsCount(where: UserWhereInput! = {}): Int
   specialGroupStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   specialGroupStudentsCount(where: UserWhereInput! = {}): Int
+  coTeachesWithTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  coTeachesWithTeacherCount(where: UserWhereInput! = {}): Int
   taTeam: PbisTeam
   studentFocusTeacher(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
   studentFocusTeacherCount(where: StudentFocusWhereInput! = {}): Int
@@ -220,6 +222,7 @@ input UserWhereInput {
   block10Teacher: UserWhereInput
   block10Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
+  coTeachesWithTeacher: UserManyRelationFilter
   taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
   studentFocusStudent: StudentFocusManyRelationFilter
@@ -548,6 +551,7 @@ input UserUpdateInput {
   block10Teacher: UserRelateToOneForUpdateInput
   block10Students: UserRelateToManyForUpdateInput
   specialGroupStudents: UserRelateToManyForUpdateInput
+  coTeachesWithTeacher: UserRelateToManyForUpdateInput
   taTeam: PbisTeamRelateToOneForUpdateInput
   studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
   studentFocusStudent: StudentFocusRelateToManyForUpdateInput
@@ -754,6 +758,7 @@ input UserCreateInput {
   block10Teacher: UserRelateToOneForCreateInput
   block10Students: UserRelateToManyForCreateInput
   specialGroupStudents: UserRelateToManyForCreateInput
+  coTeachesWithTeacher: UserRelateToManyForCreateInput
   taTeam: PbisTeamRelateToOneForCreateInput
   studentFocusTeacher: StudentFocusRelateToManyForCreateInput
   studentFocusStudent: StudentFocusRelateToManyForCreateInput

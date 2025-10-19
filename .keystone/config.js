@@ -299,13 +299,24 @@ function callbackAccess({ session: session2, context, itemId }) {
         }
         teacher { id }
       `
-  }).then((callback) => {
+  }).then(async (callback) => {
     if (!callback) return false;
     const userId = session2.itemId;
     const isStudent = callback.student?.id === userId;
     const isTeacher = callback.teacher?.id === userId;
     const isTaTeacher = callback.student?.taTeacher?.id === userId;
     const isStaffTeacher = session2.data?.isStaff && callback.student && (callback.student.block1Teacher?.id === userId || callback.student.block2Teacher?.id === userId || callback.student.block3Teacher?.id === userId || callback.student.block4Teacher?.id === userId || callback.student.block5Teacher?.id === userId || callback.student.block6Teacher?.id === userId || callback.student.block7Teacher?.id === userId || callback.student.block8Teacher?.id === userId || callback.student.block9Teacher?.id === userId || callback.student.block10Teacher?.id === userId);
+    let isCoTeacher = false;
+    if (session2.data?.isStaff) {
+      const sessionUser = await context.sudo().query.User.findOne({
+        where: { id: userId },
+        query: `coTeachesWithTeacher { id }`
+      });
+      const coTeacherIds = sessionUser?.coTeachesWithTeacher?.map((teacher) => teacher.id) || [];
+      const isCoTeacherWithAssigningTeacher = callback.teacher?.id && coTeacherIds.includes(callback.teacher.id);
+      const isCoTeacherWithBlockTeacher = callback.student && coTeacherIds.length > 0 && (coTeacherIds.includes(callback.student.block1Teacher?.id) || coTeacherIds.includes(callback.student.block2Teacher?.id) || coTeacherIds.includes(callback.student.block3Teacher?.id) || coTeacherIds.includes(callback.student.block4Teacher?.id) || coTeacherIds.includes(callback.student.block5Teacher?.id) || coTeacherIds.includes(callback.student.block6Teacher?.id) || coTeacherIds.includes(callback.student.block7Teacher?.id) || coTeacherIds.includes(callback.student.block8Teacher?.id) || coTeacherIds.includes(callback.student.block9Teacher?.id) || coTeacherIds.includes(callback.student.block10Teacher?.id));
+      isCoTeacher = isCoTeacherWithAssigningTeacher || isCoTeacherWithBlockTeacher;
+    }
     if (session2.data?.isStaff && callback.student) {
       return context.sudo().query.User.findOne({
         where: { id: userId },
@@ -314,7 +325,7 @@ function callbackAccess({ session: session2, context, itemId }) {
         const isSpecialGroupTeacher = sessionUser?.specialGroupStudents && sessionUser.specialGroupStudents.some(
           (student) => student.id === callback.student.id
         );
-        const hasDirectRelationship2 = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isSpecialGroupTeacher;
+        const hasDirectRelationship2 = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isSpecialGroupTeacher || isCoTeacher;
         if (hasDirectRelationship2) {
           return true;
         }
@@ -324,7 +335,7 @@ function callbackAccess({ session: session2, context, itemId }) {
         return false;
       });
     }
-    const hasDirectRelationship = isStudent || isTeacher || isTaTeacher || isStaffTeacher;
+    const hasDirectRelationship = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isCoTeacher;
     if (hasDirectRelationship) {
       return true;
     }
@@ -353,24 +364,43 @@ async function callbackFilter({ session: session2, context }) {
   if (isStaff && context) {
     const sessionUser = await context.sudo().query.User.findOne({
       where: { id: userId },
-      query: `specialGroupStudents { id }`
+      query: `specialGroupStudents { id } coTeachesWithTeacher { id }`
     });
     const specialGroupStudentIds = sessionUser?.specialGroupStudents?.map((student) => student.id) || [];
+    const coTeacherIds = sessionUser?.coTeachesWithTeacher?.map((teacher) => teacher.id) || [];
+    const filters = [
+      ...baseFilter.OR,
+      { student: { block1Teacher: { id: { equals: userId } } } },
+      { student: { block2Teacher: { id: { equals: userId } } } },
+      { student: { block3Teacher: { id: { equals: userId } } } },
+      { student: { block4Teacher: { id: { equals: userId } } } },
+      { student: { block5Teacher: { id: { equals: userId } } } },
+      { student: { block6Teacher: { id: { equals: userId } } } },
+      { student: { block7Teacher: { id: { equals: userId } } } },
+      { student: { block8Teacher: { id: { equals: userId } } } },
+      { student: { block9Teacher: { id: { equals: userId } } } },
+      { student: { block10Teacher: { id: { equals: userId } } } },
+      ...specialGroupStudentIds.length > 0 ? [{ student: { id: { in: specialGroupStudentIds } } }] : []
+    ];
+    if (coTeacherIds.length > 0) {
+      filters.push(
+        // Show callbacks where student is taught by a co-teacher
+        { student: { block1Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block2Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block3Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block4Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block5Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block6Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block7Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block8Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block9Teacher: { id: { in: coTeacherIds } } } },
+        { student: { block10Teacher: { id: { in: coTeacherIds } } } },
+        // Show callbacks where the assigning teacher is a co-teacher
+        { teacher: { id: { in: coTeacherIds } } }
+      );
+    }
     return {
-      OR: [
-        ...baseFilter.OR,
-        { student: { block1Teacher: { id: { equals: userId } } } },
-        { student: { block2Teacher: { id: { equals: userId } } } },
-        { student: { block3Teacher: { id: { equals: userId } } } },
-        { student: { block4Teacher: { id: { equals: userId } } } },
-        { student: { block5Teacher: { id: { equals: userId } } } },
-        { student: { block6Teacher: { id: { equals: userId } } } },
-        { student: { block7Teacher: { id: { equals: userId } } } },
-        { student: { block8Teacher: { id: { equals: userId } } } },
-        { student: { block9Teacher: { id: { equals: userId } } } },
-        { student: { block10Teacher: { id: { equals: userId } } } },
-        ...specialGroupStudentIds.length > 0 ? [{ student: { id: { in: specialGroupStudentIds } } }] : []
-      ]
+      OR: filters
     };
   }
   return baseFilter;
@@ -1189,6 +1219,7 @@ var User = (0, import_core15.list)({
       many: true
     }),
     specialGroupStudents: (0, import_fields15.relationship)({ ref: "User", many: true }),
+    coTeachesWithTeacher: (0, import_fields15.relationship)({ ref: "User", many: true }),
     //other relationships
     taTeam: (0, import_fields15.relationship)({ ref: "PbisTeam.taTeacher" }),
     studentFocusTeacher: (0, import_fields15.relationship)({
