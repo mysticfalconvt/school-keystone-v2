@@ -317,15 +317,18 @@ function callbackAccess({ session: session2, context, itemId }) {
       const isCoTeacherWithBlockTeacher = callback.student && coTeacherIds.length > 0 && (coTeacherIds.includes(callback.student.block1Teacher?.id) || coTeacherIds.includes(callback.student.block2Teacher?.id) || coTeacherIds.includes(callback.student.block3Teacher?.id) || coTeacherIds.includes(callback.student.block4Teacher?.id) || coTeacherIds.includes(callback.student.block5Teacher?.id) || coTeacherIds.includes(callback.student.block6Teacher?.id) || coTeacherIds.includes(callback.student.block7Teacher?.id) || coTeacherIds.includes(callback.student.block8Teacher?.id) || coTeacherIds.includes(callback.student.block9Teacher?.id) || coTeacherIds.includes(callback.student.block10Teacher?.id));
       isCoTeacher = isCoTeacherWithAssigningTeacher || isCoTeacherWithBlockTeacher;
     }
-    if (session2.data?.isStaff && callback.student) {
+    if ((session2.data?.isStaff || session2.data?.isParent) && callback.student) {
       return context.sudo().query.User.findOne({
         where: { id: userId },
-        query: `specialGroupStudents { id }`
+        query: `specialGroupStudents { id } children { id }`
       }).then((sessionUser) => {
         const isSpecialGroupTeacher = sessionUser?.specialGroupStudents && sessionUser.specialGroupStudents.some(
           (student) => student.id === callback.student.id
         );
-        const hasDirectRelationship2 = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isSpecialGroupTeacher || isCoTeacher;
+        const isParent = sessionUser?.children && sessionUser.children.some(
+          (child) => child.id === callback.student.id
+        );
+        const hasDirectRelationship2 = isStudent || isTeacher || isTaTeacher || isStaffTeacher || isSpecialGroupTeacher || isCoTeacher || isParent;
         if (hasDirectRelationship2) {
           return true;
         }
@@ -358,7 +361,8 @@ async function callbackFilter({ session: session2, context }) {
     OR: [
       { student: { id: { equals: userId } } },
       { teacher: { id: { equals: userId } } },
-      { student: { taTeacher: { id: { equals: userId } } } }
+      { student: { taTeacher: { id: { equals: userId } } } },
+      { student: { parent: { some: { id: { equals: userId } } } } }
     ]
   };
   if (isStaff && context) {

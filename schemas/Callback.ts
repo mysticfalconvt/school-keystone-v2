@@ -105,13 +105,14 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
       }
 
       // Check if user is a staff member who has the student in their special group
-      // We need to query the session user's specialGroupStudents to check if the callback student is in it
-      if (session.data?.isStaff && callback.student) {
+      // OR if user is a parent of the callback student
+      // We need to query the session user's specialGroupStudents/children to check
+      if ((session.data?.isStaff || session.data?.isParent) && callback.student) {
         return context
           .sudo()
           .query.User.findOne({
             where: { id: userId },
-            query: `specialGroupStudents { id }`,
+            query: `specialGroupStudents { id } children { id }`,
           })
           .then((sessionUser: any) => {
             const isSpecialGroupTeacher =
@@ -120,13 +121,20 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
                 (student: any) => student.id === callback.student.id,
               );
 
+            const isParent =
+              sessionUser?.children &&
+              sessionUser.children.some(
+                (child: any) => child.id === callback.student.id,
+              );
+
             const hasDirectRelationship =
               isStudent ||
               isTeacher ||
               isTaTeacher ||
               isStaffTeacher ||
               isSpecialGroupTeacher ||
-              isCoTeacher;
+              isCoTeacher ||
+              isParent;
 
             // If user has direct relationship, allow access
             if (hasDirectRelationship) {
@@ -179,6 +187,7 @@ async function callbackFilter({ session, context }: ListAccessArgs) {
       { student: { id: { equals: userId } } },
       { teacher: { id: { equals: userId } } },
       { student: { taTeacher: { id: { equals: userId } } } },
+      { student: { parent: { some: { id: { equals: userId } } } } },
     ],
   };
 
