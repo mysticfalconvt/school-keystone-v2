@@ -85,6 +85,10 @@ export const permissionFields = {
     defaultValue: false,
     label: "User can have special groups",
   }),
+  isCommunicatorEnabled: checkbox({
+    defaultValue: false,
+    label: "User can access Communicator AI chat",
+  }),
 };
 
 export type Permission = keyof typeof permissionFields;

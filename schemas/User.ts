@@ -102,6 +102,10 @@ export const User = list({
     callbackAssigned: relationship({ ref: "Callback.teacher", many: true }),
     messageSender: relationship({ ref: "Message.sender", many: true }),
     messageReceiver: relationship({ ref: "Message.receiver", many: true }),
+    communicatorChats: relationship({
+      ref: "CommunicatorChat.user",
+      many: true,
+    }),
 
     //PBIS Collection Winners
     currentTaWinner: relationship({

@@ -12,6 +12,7 @@ import { Calendar } from './schemas/Calendar';
 import { Callback } from './schemas/Callback';
 import { CellPhoneViolation } from './schemas/CellPhoneViolation';
 import { ChromebookAssignment } from './schemas/ChromebookAssignment';
+import { CommunicatorChat } from './schemas/CommunicatorChat';
 import { ChromebookCheck } from './schemas/ChromebookCheck';
 import { Discipline } from './schemas/Discipline';
 import { Link } from './schemas/Link';
@@ -39,6 +40,7 @@ const databaseURL =
 if (databaseURL.includes('local')) console.log(databaseURL);
 
 import { addStaff } from './mutations/AddStaff';
+import { queryCommunicator } from './mutations/queryCommunicator';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
 import { updateStudentSchedules } from './mutations/updateStudentSchedules';
@@ -82,6 +84,7 @@ export default withAuth(
       CellPhoneViolation,
       ChromebookCheck,
       ChromebookAssignment,
+      CommunicatorChat,
       Discipline,
       Link,
       Message,
@@ -105,6 +108,7 @@ export default withAuth(
             sendEmail: sendEmail(base),
             updateStudentSchedules: updateStudentSchedules(base),
             addStaff: addStaff(base),
+            queryCommunicator: queryCommunicator(base),
           },
         };
       }),

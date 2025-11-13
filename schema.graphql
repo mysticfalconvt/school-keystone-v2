@@ -35,6 +35,7 @@ type User {
   isSuperAdmin: Boolean
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
+  isCommunicatorEnabled: Boolean
   block1Teacher: User
   block1Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block1StudentsCount(where: UserWhereInput! = {}): Int
@@ -94,6 +95,8 @@ type User {
   messageSenderCount(where: MessageWhereInput! = {}): Int
   messageReceiver(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
   messageReceiverCount(where: MessageWhereInput! = {}): Int
+  communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
+  communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
   currentTaWinner: User
   previousTaWinner: User
   studentIsCurrentWinner: User
@@ -201,6 +204,7 @@ input UserWhereInput {
   isSuperAdmin: BooleanFilter
   canManagePbis: BooleanFilter
   canHaveSpecialGroups: BooleanFilter
+  isCommunicatorEnabled: BooleanFilter
   block1Teacher: UserWhereInput
   block1Students: UserManyRelationFilter
   block2Teacher: UserWhereInput
@@ -236,6 +240,7 @@ input UserWhereInput {
   callbackAssigned: CallbackManyRelationFilter
   messageSender: MessageManyRelationFilter
   messageReceiver: MessageManyRelationFilter
+  communicatorChats: CommunicatorChatManyRelationFilter
   currentTaWinner: UserWhereInput
   previousTaWinner: UserWhereInput
   studentIsCurrentWinner: UserWhereInput
@@ -384,6 +389,12 @@ input MessageManyRelationFilter {
   none: MessageWhereInput
 }
 
+input CommunicatorChatManyRelationFilter {
+  every: CommunicatorChatWhereInput
+  some: CommunicatorChatWhereInput
+  none: CommunicatorChatWhereInput
+}
+
 input RandomDrawingWinManyRelationFilter {
   every: RandomDrawingWinWhereInput
   some: RandomDrawingWinWhereInput
@@ -448,6 +459,7 @@ input UserOrderByInput {
   isSuperAdmin: OrderDirection
   canManagePbis: OrderDirection
   canHaveSpecialGroups: OrderDirection
+  isCommunicatorEnabled: OrderDirection
   individualPbisLevel: OrderDirection
   taTeamPbisLevel: OrderDirection
   taTeamAveragePbisCardsPerStudent: OrderDirection
@@ -530,6 +542,7 @@ input UserUpdateInput {
   isSuperAdmin: Boolean
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
+  isCommunicatorEnabled: Boolean
   block1Teacher: UserRelateToOneForUpdateInput
   block1Students: UserRelateToManyForUpdateInput
   block2Teacher: UserRelateToOneForUpdateInput
@@ -565,6 +578,7 @@ input UserUpdateInput {
   callbackAssigned: CallbackRelateToManyForUpdateInput
   messageSender: MessageRelateToManyForUpdateInput
   messageReceiver: MessageRelateToManyForUpdateInput
+  communicatorChats: CommunicatorChatRelateToManyForUpdateInput
   currentTaWinner: UserRelateToOneForUpdateInput
   previousTaWinner: UserRelateToOneForUpdateInput
   studentIsCurrentWinner: UserRelateToOneForUpdateInput
@@ -682,6 +696,13 @@ input MessageRelateToManyForUpdateInput {
   connect: [MessageWhereUniqueInput!]
 }
 
+input CommunicatorChatRelateToManyForUpdateInput {
+  disconnect: [CommunicatorChatWhereUniqueInput!]
+  set: [CommunicatorChatWhereUniqueInput!]
+  create: [CommunicatorChatCreateInput!]
+  connect: [CommunicatorChatWhereUniqueInput!]
+}
+
 input RandomDrawingWinRelateToManyForUpdateInput {
   disconnect: [RandomDrawingWinWhereUniqueInput!]
   set: [RandomDrawingWinWhereUniqueInput!]
@@ -737,6 +758,7 @@ input UserCreateInput {
   isSuperAdmin: Boolean
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
+  isCommunicatorEnabled: Boolean
   block1Teacher: UserRelateToOneForCreateInput
   block1Students: UserRelateToManyForCreateInput
   block2Teacher: UserRelateToOneForCreateInput
@@ -772,6 +794,7 @@ input UserCreateInput {
   callbackAssigned: CallbackRelateToManyForCreateInput
   messageSender: MessageRelateToManyForCreateInput
   messageReceiver: MessageRelateToManyForCreateInput
+  communicatorChats: CommunicatorChatRelateToManyForCreateInput
   currentTaWinner: UserRelateToOneForCreateInput
   previousTaWinner: UserRelateToOneForCreateInput
   studentIsCurrentWinner: UserRelateToOneForCreateInput
@@ -871,6 +894,11 @@ input CallbackRelateToManyForCreateInput {
 input MessageRelateToManyForCreateInput {
   create: [MessageCreateInput!]
   connect: [MessageWhereUniqueInput!]
+}
+
+input CommunicatorChatRelateToManyForCreateInput {
+  create: [CommunicatorChatCreateInput!]
+  connect: [CommunicatorChatWhereUniqueInput!]
 }
 
 input RandomDrawingWinRelateToManyForCreateInput {
@@ -1410,6 +1438,103 @@ input ChromebookAssignmentUpdateArgs {
 }
 
 scalar Empty
+
+type CommunicatorChat {
+  id: ID!
+  user: User
+  question: String
+  explanation: String
+  graphqlQuery: String
+  errorMessage: String
+  hasError: String
+  model: String
+  iterations: Int
+  evaluationScore: Int
+  userRating: Int
+  userComment: String
+  rawData: JSON
+  timestamp: DateTime
+  createdAt: DateTime
+}
+
+input CommunicatorChatWhereUniqueInput {
+  id: ID
+}
+
+input CommunicatorChatWhereInput {
+  AND: [CommunicatorChatWhereInput!]
+  OR: [CommunicatorChatWhereInput!]
+  NOT: [CommunicatorChatWhereInput!]
+  id: IDFilter
+  user: UserWhereInput
+  question: StringFilter
+  explanation: StringFilter
+  graphqlQuery: StringFilter
+  errorMessage: StringFilter
+  hasError: StringFilter
+  model: StringFilter
+  iterations: IntNullableFilter
+  evaluationScore: IntNullableFilter
+  userRating: IntNullableFilter
+  userComment: StringFilter
+  timestamp: DateTimeNullableFilter
+  createdAt: DateTimeNullableFilter
+}
+
+input CommunicatorChatOrderByInput {
+  id: OrderDirection
+  question: OrderDirection
+  explanation: OrderDirection
+  graphqlQuery: OrderDirection
+  errorMessage: OrderDirection
+  hasError: OrderDirection
+  model: OrderDirection
+  iterations: OrderDirection
+  evaluationScore: OrderDirection
+  userRating: OrderDirection
+  userComment: OrderDirection
+  timestamp: OrderDirection
+  createdAt: OrderDirection
+}
+
+input CommunicatorChatUpdateInput {
+  user: UserRelateToOneForUpdateInput
+  question: String
+  explanation: String
+  graphqlQuery: String
+  errorMessage: String
+  hasError: String
+  model: String
+  iterations: Int
+  evaluationScore: Int
+  userRating: Int
+  userComment: String
+  rawData: JSON
+  timestamp: DateTime
+  createdAt: DateTime
+}
+
+input CommunicatorChatUpdateArgs {
+  where: CommunicatorChatWhereUniqueInput!
+  data: CommunicatorChatUpdateInput!
+}
+
+input CommunicatorChatCreateInput {
+  user: UserRelateToOneForCreateInput
+  question: String
+  explanation: String
+  graphqlQuery: String
+  errorMessage: String
+  hasError: String
+  model: String
+  iterations: Int
+  evaluationScore: Int
+  userRating: Int
+  userComment: String
+  rawData: JSON
+  timestamp: DateTime
+  createdAt: DateTime
+}
 
 type Discipline {
   id: ID!
@@ -2359,6 +2484,12 @@ type Mutation {
   updateChromebookAssignments(data: [ChromebookAssignmentUpdateArgs!]!): [ChromebookAssignment]
   deleteChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
   deleteChromebookAssignments(where: [ChromebookAssignmentWhereUniqueInput!]!): [ChromebookAssignment]
+  createCommunicatorChat(data: CommunicatorChatCreateInput!): CommunicatorChat
+  createCommunicatorChats(data: [CommunicatorChatCreateInput!]!): [CommunicatorChat]
+  updateCommunicatorChat(where: CommunicatorChatWhereUniqueInput!, data: CommunicatorChatUpdateInput!): CommunicatorChat
+  updateCommunicatorChats(data: [CommunicatorChatUpdateArgs!]!): [CommunicatorChat]
+  deleteCommunicatorChat(where: CommunicatorChatWhereUniqueInput!): CommunicatorChat
+  deleteCommunicatorChats(where: [CommunicatorChatWhereUniqueInput!]!): [CommunicatorChat]
   createDiscipline(data: DisciplineCreateInput!): Discipline
   createDisciplines(data: [DisciplineCreateInput!]!): [Discipline]
   updateDiscipline(where: DisciplineWhereUniqueInput!, data: DisciplineUpdateInput!): Discipline
@@ -2442,6 +2573,7 @@ type Mutation {
   sendEmail(emailData: JSON): Boolean
   updateStudentSchedules(studentScheduleData: JSON): String
   addStaff(staffData: JSON): String
+  queryCommunicator(question: String!, model: String!): JSON
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
@@ -2518,6 +2650,9 @@ type Query {
   chromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
   chromebookAssignments(where: ChromebookAssignmentWhereInput! = {}, orderBy: [ChromebookAssignmentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookAssignmentWhereUniqueInput): [ChromebookAssignment!]
   chromebookAssignmentsCount(where: ChromebookAssignmentWhereInput! = {}): Int
+  communicatorChat(where: CommunicatorChatWhereUniqueInput!): CommunicatorChat
+  communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
+  communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
   discipline(where: DisciplineWhereUniqueInput!): Discipline
   disciplines(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   disciplinesCount(where: DisciplineWhereInput! = {}): Int

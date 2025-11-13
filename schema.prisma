@@ -43,6 +43,7 @@ model User {
   isSuperAdmin                                 Boolean              @default(false)
   canManagePbis                                Boolean              @default(false)
   canHaveSpecialGroups                         Boolean              @default(false)
+  isCommunicatorEnabled                        Boolean              @default(false)
   block1Teacher                                User?                @relation("User_block1Teacher", fields: [block1TeacherId], references: [id])
   block1TeacherId                              String?              @map("block1Teacher")
   block1Students                               User[]               @relation("User_block1Teacher")
@@ -89,6 +90,7 @@ model User {
   callbackAssigned                             Callback[]           @relation("Callback_teacher")
   messageSender                                Message[]            @relation("Message_sender")
   messageReceiver                              Message[]            @relation("Message_receiver")
+  communicatorChats                            CommunicatorChat[]   @relation("CommunicatorChat_user")
   currentTaWinner                              User?                @relation("User_currentTaWinner", fields: [currentTaWinnerId], references: [id])
   currentTaWinnerId                            String?              @unique @map("currentTaWinner")
   previousTaWinner                             User?                @relation("User_previousTaWinner", fields: [previousTaWinnerId], references: [id])
@@ -293,6 +295,27 @@ model ChromebookCheck {
 
 model ChromebookAssignment {
   id String @id @default(cuid())
+}
+
+model CommunicatorChat {
+  id              String    @id @default(cuid())
+  user            User?     @relation("CommunicatorChat_user", fields: [userId], references: [id])
+  userId          String?   @map("user")
+  question        String    @default("")
+  explanation     String    @default("")
+  graphqlQuery    String    @default("")
+  errorMessage    String    @default("")
+  hasError        String    @default("false")
+  model           String    @default("")
+  iterations      Int?
+  evaluationScore Int?
+  userRating      Int?      @default(0)
+  userComment     String    @default("")
+  rawData         Json?
+  timestamp       DateTime?
+  createdAt       DateTime? @default(now())
+
+  @@index([userId])
 }
 
 model Discipline {
