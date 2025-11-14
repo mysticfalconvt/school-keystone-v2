@@ -1,5 +1,11 @@
-import { text, relationship, timestamp, json, integer } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
+import {
+  integer,
+  json,
+  relationship,
+  text,
+  timestamp,
+} from '@keystone-6/core/fields';
 import { ListAccessArgs } from '../types';
 
 // Access control: only staff can query/create, only superadmin/canManagePbis can see all
@@ -44,13 +50,12 @@ export const CommunicatorChat = list({
   fields: {
     user: relationship({
       ref: 'User.communicatorChats',
-      ui: {
-        displayMode: 'cards',
-        cardFields: ['name', 'email'],
-        inlineEdit: { fields: ['name', 'email'] },
-        linkToItem: true,
-        inlineCreate: { fields: ['name', 'email'] },
-      },
+      // ui: {
+      //   displayMode: '',
+      //   cardFields: ['name', 'email'],
+      //   linkToItem: true,
+
+      // },
     }),
     question: text({
       validation: { isRequired: true },

@@ -536,8 +536,8 @@ var ChromebookAssignment = (0, import_core4.list)({
 });
 
 // schemas/CommunicatorChat.ts
-var import_fields4 = require("@keystone-6/core/fields");
 var import_core5 = require("@keystone-6/core");
+var import_fields4 = require("@keystone-6/core/fields");
 function canManageCommunicatorChats({ session: session2 }) {
   if (!session2) return false;
   return !!(session2.data.isSuperAdmin || session2.data.canManagePbis);
@@ -574,14 +574,12 @@ var CommunicatorChat = (0, import_core5.list)({
   },
   fields: {
     user: (0, import_fields4.relationship)({
-      ref: "User.communicatorChats",
-      ui: {
-        displayMode: "cards",
-        cardFields: ["name", "email"],
-        inlineEdit: { fields: ["name", "email"] },
-        linkToItem: true,
-        inlineCreate: { fields: ["name", "email"] }
-      }
+      ref: "User.communicatorChats"
+      // ui: {
+      //   displayMode: '',
+      //   cardFields: ['name', 'email'],
+      //   linkToItem: true,
+      // },
     }),
     question: (0, import_fields4.text)({
       validation: { isRequired: true },
