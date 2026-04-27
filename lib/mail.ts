@@ -82,18 +82,28 @@ export async function sendMagicLinkEmail(
     });
     console.log(info);
   } else {
-    const info: SentMessageInfo = await transport.sendMail({
-      to: email,
-      from: process.env.MAIL_USER,
-      subject: 'Your Magic Link',
-      html: makeANiceEmail(`
+    try {
+      const info: SentMessageInfo = await transport.sendMail({
+        to: email,
+        from: process.env.MAIL_USER,
+        subject: 'Your Magic Link',
+        html: makeANiceEmail(`
       <br/>
       Here is your link to login:
       <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
       <br/>
       <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
     `),
-    });
+      });
+      console.log('[magic-link] sent', {
+        to: email,
+        messageId: info?.messageId,
+        response: info?.response,
+      });
+    } catch (err) {
+      console.error('[magic-link] send failed', { to: email, err });
+      throw err;
+    }
   }
 }
 

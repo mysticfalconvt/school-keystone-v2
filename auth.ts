@@ -52,7 +52,15 @@ const { withAuth } = createAuth({
   magicAuthLink: {
     sendToken: async ({ itemId, identity, token, context }) => {
       if (itemId && identity && token) {
-        await sendMagicLinkEmail(token, identity);
+        try {
+          await sendMagicLinkEmail(token, identity);
+        } catch (err) {
+          console.error('[auth] magicAuthLink sendToken failed', {
+            identity,
+            err,
+          });
+          throw err;
+        }
       }
     },
     tokensValidForMins: 60,
