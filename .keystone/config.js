@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core28 = require("@keystone-6/core");
+var import_core29 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -97,18 +97,28 @@ async function sendMagicLinkEmail(token, email) {
     });
     console.log(info);
   } else {
-    const info = await transport.sendMail({
-      to: email,
-      from: process.env.MAIL_USER,
-      subject: "Your Magic Link",
-      html: makeANiceEmail(`
+    try {
+      const info = await transport.sendMail({
+        to: email,
+        from: process.env.MAIL_USER,
+        subject: "Your Magic Link",
+        html: makeANiceEmail(`
       <br/>
       Here is your link to login:
       <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
       <br/>
       <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
     `)
-    });
+      });
+      console.log("[magic-link] sent", {
+        to: email,
+        messageId: info?.messageId,
+        response: info?.response
+      });
+    } catch (err) {
+      console.error("[magic-link] send failed", { to: email, err });
+      throw err;
+    }
   }
 }
 async function sendAnEmail(to, from, subject, body) {
@@ -169,9 +179,28 @@ var { withAuth } = (0, import_auth.createAuth)({
     }
   },
   magicAuthLink: {
-    sendToken: async ({ itemId, identity, token, context }) => {
+    sendToken: async ({ itemId, identity, token }) => {
+      console.log("[auth] magicAuthLink sendToken invoked", {
+        identity,
+        hasItemId: !!itemId,
+        hasToken: !!token
+      });
       if (itemId && identity && token) {
-        await sendMagicLinkEmail(token, identity);
+        try {
+          await sendMagicLinkEmail(token, identity);
+        } catch (err) {
+          console.error("[auth] magicAuthLink sendToken failed", {
+            identity,
+            err
+          });
+          throw err;
+        }
+      } else {
+        console.warn("[auth] magicAuthLink sendToken skipped \u2014 missing field", {
+          identity,
+          hasItemId: !!itemId,
+          hasToken: !!token
+        });
       }
     },
     tokensValidForMins: 60
@@ -1788,13 +1817,80 @@ var addStaff = (base) => import_core23.graphql.field({
   }
 });
 
-// mutations/queryCommunicator.ts
+// mutations/authenticateWithGoogle.ts
 var import_core24 = require("@keystone-6/core");
-var queryCommunicator = (base) => import_core24.graphql.field({
+var import_google_auth_library = require("google-auth-library");
+var CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
+var client = new import_google_auth_library.OAuth2Client();
+var authenticateUserWithGoogle = (base) => import_core24.graphql.field({
   type: import_core24.graphql.JSON,
   args: {
-    question: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) }),
-    model: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) })
+    idToken: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) })
+  },
+  // Cast to any: the resolver returns a small JSON object, but the inferred
+  // union of branches includes optional `undefined` props which the strict
+  // JSONValue type rejects. The runtime shape is valid JSON.
+  resolve: async (source, { idToken }, context) => {
+    if (!CLIENT_ID) {
+      console.error(
+        "[auth] authenticateUserWithGoogle: GOOGLE_OAUTH_CLIENT_ID is not set"
+      );
+      return { success: false, message: "Google sign-in is not configured" };
+    }
+    let payload;
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: CLIENT_ID
+      });
+      payload = ticket.getPayload();
+    } catch (err) {
+      console.warn("[auth] Google ID token verification failed", err);
+      return { success: false, message: "Invalid Google sign-in" };
+    }
+    if (!payload?.email || payload.email_verified !== true) {
+      return {
+        success: false,
+        message: "Your Google account email is not verified"
+      };
+    }
+    const email = payload.email.toLowerCase();
+    const user = await context.sudo().query.User.findOne({
+      where: { email },
+      query: "id name email"
+    });
+    if (!user) {
+      console.log("[auth] Google sign-in: no account for", email, {
+        hd: payload.hd
+      });
+      return {
+        success: false,
+        message: "No account found for this Google email"
+      };
+    }
+    const sessionToken = await context.sessionStrategy?.start({
+      data: { listKey: "User", itemId: String(user.id) },
+      context
+    });
+    if (!sessionToken || typeof sessionToken !== "string") {
+      console.error("[auth] Google sign-in: failed to start session");
+      return { success: false, message: "Could not start session" };
+    }
+    return {
+      success: true,
+      sessionToken,
+      item: { id: user.id, name: user.name, email: user.email }
+    };
+  }
+});
+
+// mutations/queryCommunicator.ts
+var import_core25 = require("@keystone-6/core");
+var queryCommunicator = (base) => import_core25.graphql.field({
+  type: import_core25.graphql.JSON,
+  args: {
+    question: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) }),
+    model: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -1908,12 +2004,12 @@ ${errorDetails}`;
 });
 
 // mutations/recalculateCallback.ts
-var import_core25 = require("@keystone-6/core");
+var import_core26 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core25.graphql.field({
+var recalculateCallback = (base) => import_core26.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.ID) })
+    callbackId: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -1981,11 +2077,11 @@ var recalculateCallback = (base) => import_core25.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core26 = require("@keystone-6/core");
-var sendEmail = (base) => import_core26.graphql.field({
-  type: import_core26.graphql.Boolean,
+var import_core27 = require("@keystone-6/core");
+var sendEmail = (base) => import_core27.graphql.field({
+  type: import_core27.graphql.Boolean,
   args: {
-    emailData: import_core26.graphql.arg({ type: import_core26.graphql.JSON })
+    emailData: import_core27.graphql.arg({ type: import_core27.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Sending an Email", args.emailData);
@@ -2005,12 +2101,12 @@ var sendEmail = (base) => import_core26.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core27 = require("@keystone-6/core");
+var import_core28 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core27.graphql.field({
-  type: import_core27.graphql.String,
+var updateStudentSchedules = (base) => import_core28.graphql.field({
+  type: import_core28.graphql.String,
   args: {
-    studentScheduleData: import_core27.graphql.arg({ type: import_core27.graphql.JSON })
+    studentScheduleData: import_core28.graphql.arg({ type: import_core28.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -2219,7 +2315,7 @@ var updateStudentSchedules = (base) => import_core27.graphql.field({
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 if (databaseURL.includes("local")) console.log(databaseURL);
 var keystone_default = withAuth(
-  (0, import_core28.config)({
+  (0, import_core29.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -2273,14 +2369,15 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === "development",
-      extendGraphqlSchema: import_core28.graphql.extend((base) => {
+      extendGraphqlSchema: import_core29.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
             sendEmail: sendEmail(base),
             updateStudentSchedules: updateStudentSchedules(base),
             addStaff: addStaff(base),
-            queryCommunicator: queryCommunicator(base)
+            queryCommunicator: queryCommunicator(base),
+            authenticateUserWithGoogle: authenticateUserWithGoogle(base)
           }
         };
       })

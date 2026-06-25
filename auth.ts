@@ -50,7 +50,7 @@ const { withAuth } = createAuth({
     },
   },
   magicAuthLink: {
-    sendToken: async ({ itemId, identity, token, context }) => {
+    sendToken: async ({ itemId, identity, token }) => {
       console.log('[auth] magicAuthLink sendToken invoked', {
         identity,
         hasItemId: !!itemId,

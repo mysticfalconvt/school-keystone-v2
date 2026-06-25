@@ -40,6 +40,7 @@ const databaseURL =
 if (databaseURL.includes('local')) console.log(databaseURL);
 
 import { addStaff } from './mutations/AddStaff';
+import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
 import { queryCommunicator } from './mutations/queryCommunicator';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
@@ -109,6 +110,7 @@ export default withAuth(
             updateStudentSchedules: updateStudentSchedules(base),
             addStaff: addStaff(base),
             queryCommunicator: queryCommunicator(base),
+            authenticateUserWithGoogle: authenticateUserWithGoogle(base),
           },
         };
       }),

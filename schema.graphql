@@ -2574,6 +2574,7 @@ type Mutation {
   updateStudentSchedules(studentScheduleData: JSON): String
   addStaff(staffData: JSON): String
   queryCommunicator(question: String!, model: String!): JSON
+  authenticateUserWithGoogle(idToken: String!): JSON
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
