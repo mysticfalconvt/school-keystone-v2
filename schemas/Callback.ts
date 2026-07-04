@@ -8,6 +8,10 @@ import {
 import { isSignedIn } from '../access';
 import { ListAccessArgs } from '../types';
 
+// When true, callback is limited to the assigning teacher / TA / directly-related staff.
+// When absent or false (the default), all staff can see all callback.
+const limitCallback = process.env.LIMIT_CALLBACK_TO_ASSIGNER === 'true';
+
 // Access control for Callback items
 function callbackAccess({ session, context, itemId }: ListAccessArgs) {
   // Check if user is signed in first
@@ -23,6 +27,11 @@ function callbackAccess({ session, context, itemId }: ListAccessArgs) {
   // For individual item operations, check if user is the student or teacher
   if (!session?.itemId) {
     return false;
+  }
+
+  // Default behavior: any staff member has access unless limiting is enabled
+  if (!limitCallback && session.data?.isStaff) {
+    return true;
   }
 
   // Get the callback item to check relationships
@@ -180,6 +189,11 @@ async function callbackFilter({ session, context }: ListAccessArgs) {
 
   const userId = session.itemId;
   const isStaff = session.data?.isStaff;
+
+  // Default behavior: any staff member sees all callback unless limiting is enabled
+  if (!limitCallback && isStaff) {
+    return true;
+  }
 
   // Base filter for student and teacher relationships
   const baseFilter = {

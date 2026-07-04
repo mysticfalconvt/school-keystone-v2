@@ -5,15 +5,15 @@ import {
   checkbox,
 } from "@keystone-6/core/fields";
 import { list } from "@keystone-6/core";
-import { isSignedIn } from "../access";
+import { isSignedIn, canManageLinksAccess } from "../access";
 
 export const Link = list({
   access: {
     operation: {
       query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn,
+      create: canManageLinksAccess,
+      delete: canManageLinksAccess,
+      update: canManageLinksAccess,
     },
   },
   ui: {

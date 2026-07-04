@@ -41,3 +41,8 @@ export function isAdmin({ session, context }: ListAccessArgs) {
 
   return !!isSuperAdmin;
 }
+
+// Only superusers or users with canManagePbis may create/update/delete links.
+export function canManageLinksAccess({ session }: ListAccessArgs) {
+  return !!(session?.data?.isSuperAdmin || session?.data?.canManagePbis);
+}
