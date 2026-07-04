@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core29 = require("@keystone-6/core");
+var import_core30 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -52,7 +52,7 @@ var devTransport = (0, import_nodemailer.createTransport)({
     pass: process.env.MAIL_PASS
   }
 });
-function makeANiceEmail(text22) {
+function makeANiceEmail(text23) {
   return `
     <div className="email" style="
       border: 1px solid black;
@@ -62,7 +62,7 @@ function makeANiceEmail(text22) {
       font-size: 20px;
     ">
       <h2>Hello There!</h2>
-      <p>${text22}</p>
+      <p>${text23}</p>
 
       <p>NCUJHS.Tech</p>
     </div>
@@ -238,6 +238,9 @@ function isAdmin({ session: session2, context }) {
   const isSuperAdmin = session2?.data?.isSuperAdmin || false;
   return !!isSuperAdmin;
 }
+function canManageLinksAccess({ session: session2 }) {
+  return !!(session2?.data?.isSuperAdmin || session2?.data?.canManagePbis);
+}
 
 // schemas/Calendar.ts
 var Calendar = (0, import_core.list)({
@@ -297,6 +300,7 @@ var Calendar = (0, import_core.list)({
 // schemas/Callback.ts
 var import_core2 = require("@keystone-6/core");
 var import_fields2 = require("@keystone-6/core/fields");
+var limitCallback = process.env.LIMIT_CALLBACK_TO_ASSIGNER === "true";
 function callbackAccess({ session: session2, context, itemId }) {
   if (!isSignedIn({ session: session2, context, itemId })) {
     return false;
@@ -306,6 +310,9 @@ function callbackAccess({ session: session2, context, itemId }) {
   }
   if (!session2?.itemId) {
     return false;
+  }
+  if (!limitCallback && session2.data?.isStaff) {
+    return true;
   }
   if (!context) return false;
   return context.sudo().query.Callback.findOne({
@@ -386,6 +393,9 @@ async function callbackFilter({ session: session2, context }) {
   }
   const userId = session2.itemId;
   const isStaff2 = session2.data?.isStaff;
+  if (!limitCallback && isStaff2) {
+    return true;
+  }
   const baseFilter = {
     OR: [
       { student: { id: { equals: userId } } },
@@ -832,9 +842,9 @@ var Link = (0, import_core8.list)({
   access: {
     operation: {
       query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn
+      create: canManageLinksAccess,
+      delete: canManageLinksAccess,
+      update: canManageLinksAccess
     }
   },
   ui: {
@@ -1482,11 +1492,16 @@ var User = (0, import_core16.list)({
     }),
     block10ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
     block10AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    // Archive of this teacher's replaced class assignments
+    assignmentHistory: (0, import_fields16.relationship)({
+      ref: "AssignmentHistory.teacher",
+      many: true
+    }),
     // Sorting Hat
     sortingHat: (0, import_fields16.text)({ defaultValue: "" })
   },
   hooks: {
-    afterOperation: async ({ operation, item, context }) => {
+    afterOperation: async ({ operation, item, originalItem, context }) => {
       if (operation === "create" && item?.isStudent) {
         const createBirtday = await context.query.Birthday.createOne({
           data: {
@@ -1495,14 +1510,66 @@ var User = (0, import_core16.list)({
           // resolveFields: "id",
         });
       }
+      if (operation === "update" && item && originalItem) {
+        for (let n = 1; n <= 10; n++) {
+          const oldVal = originalItem[`block${n}Assignment`];
+          const newVal = item[`block${n}Assignment`];
+          if (oldVal != null && oldVal !== newVal) {
+            await context.sudo().query.AssignmentHistory.createOne({
+              data: {
+                teacher: { connect: { id: item.id } },
+                block: n,
+                className: originalItem[`block${n}ClassName`] ?? "",
+                assignment: oldVal,
+                dateAdded: originalItem[`block${n}AssignmentLastUpdated`] ?? null
+                // dateRemoved defaults to now
+              }
+            });
+          }
+        }
+      }
     }
   }
 });
 
-// schemas/Birthday.ts
-var import_fields18 = require("@keystone-6/core/fields");
+// schemas/AssignmentHistory.ts
 var import_core17 = require("@keystone-6/core");
-var Birthday = (0, import_core17.list)({
+var import_fields18 = require("@keystone-6/core/fields");
+var AssignmentHistory = (0, import_core17.list)({
+  access: {
+    operation: {
+      query: isSignedIn,
+      create: isAdmin,
+      delete: isAdmin,
+      update: isAdmin
+    }
+  },
+  ui: {
+    isHidden: !isAdmin,
+    listView: {
+      initialColumns: ["teacher", "block", "className", "dateRemoved"],
+      initialSort: { field: "dateRemoved", direction: "DESC" },
+      pageSize: 100
+    }
+  },
+  fields: {
+    teacher: (0, import_fields18.relationship)({ ref: "User.assignmentHistory", many: false }),
+    block: (0, import_fields18.integer)(),
+    className: (0, import_fields18.text)(),
+    assignment: (0, import_fields18.text)({ ui: { displayMode: "textarea" } }),
+    // When this (now-archived) assignment had originally been set.
+    dateAdded: (0, import_fields18.timestamp)(),
+    // When it was replaced by a new assignment.
+    dateRemoved: (0, import_fields18.timestamp)({
+      defaultValue: { kind: "now" }
+    })
+  }
+});
+
+// schemas/Birthday.ts
+var import_fields19 = require("@keystone-6/core/fields");
+var import_core18 = require("@keystone-6/core");
+var Birthday = (0, import_core18.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1519,29 +1586,29 @@ var Birthday = (0, import_core17.list)({
     }
   },
   fields: {
-    cakeType: (0, import_fields18.text)(),
-    date: (0, import_fields18.timestamp)({
+    cakeType: (0, import_fields19.text)(),
+    date: (0, import_fields19.timestamp)({
       // validation: {isRequired: true},
       isIndexed: true
     }),
-    hasChosen: (0, import_fields18.checkbox)({
+    hasChosen: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has Chosen a Cake"
     }),
-    hasDelivered: (0, import_fields18.checkbox)({
+    hasDelivered: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has gotten their cake"
     }),
-    student: (0, import_fields18.relationship)({
+    student: (0, import_fields19.relationship)({
       ref: "User.birthday"
     })
   }
 });
 
 // schemas/BugReport.ts
-var import_fields19 = require("@keystone-6/core/fields");
-var import_core18 = require("@keystone-6/core");
-var BugReport = (0, import_core18.list)({
+var import_fields20 = require("@keystone-6/core/fields");
+var import_core19 = require("@keystone-6/core");
+var BugReport = (0, import_core19.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1558,27 +1625,27 @@ var BugReport = (0, import_core18.list)({
     }
   },
   fields: {
-    name: (0, import_fields19.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields19.text)({
+    name: (0, import_fields20.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields20.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    submittedBy: (0, import_fields19.relationship)({
+    submittedBy: (0, import_fields20.relationship)({
       ref: "User"
     }),
-    date: (0, import_fields19.timestamp)({
+    date: (0, import_fields20.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    read: (0, import_fields19.checkbox)({ defaultValue: false })
+    read: (0, import_fields20.checkbox)({ defaultValue: false })
   }
 });
 
 // schemas/Bullying.ts
-var import_fields20 = require("@keystone-6/core/fields");
-var import_core19 = require("@keystone-6/core");
-var Bullying = (0, import_core19.list)({
+var import_fields21 = require("@keystone-6/core/fields");
+var import_core20 = require("@keystone-6/core");
+var Bullying = (0, import_core20.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1595,51 +1662,51 @@ var Bullying = (0, import_core19.list)({
     }
   },
   fields: {
-    studentOffender: (0, import_fields20.relationship)({
+    studentOffender: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    teacherAuthor: (0, import_fields20.relationship)({
+    teacherAuthor: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    dateReported: (0, import_fields20.timestamp)({
+    dateReported: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    dateOfEvent: (0, import_fields20.timestamp)({
+    dateOfEvent: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    investigationDate: (0, import_fields20.timestamp)({
+    investigationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    studentReporter: (0, import_fields20.text)(),
-    employeeWitness: (0, import_fields20.text)(),
-    studentWitness: (0, import_fields20.text)(),
-    studentsInterviewed: (0, import_fields20.text)(),
-    initialActions: (0, import_fields20.text)(),
-    nextSteps: (0, import_fields20.text)(),
-    reporter: (0, import_fields20.text)(),
-    description: (0, import_fields20.text)(),
-    determination: (0, import_fields20.select)({
+    studentReporter: (0, import_fields21.text)(),
+    employeeWitness: (0, import_fields21.text)(),
+    studentWitness: (0, import_fields21.text)(),
+    studentsInterviewed: (0, import_fields21.text)(),
+    initialActions: (0, import_fields21.text)(),
+    nextSteps: (0, import_fields21.text)(),
+    reporter: (0, import_fields21.text)(),
+    description: (0, import_fields21.text)(),
+    determination: (0, import_fields21.select)({
       options: [
         { value: "No", label: "No" },
         { value: "Yes", label: "Yes" }
       ]
     }),
-    determinationDate: (0, import_fields20.timestamp)({
+    determinationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    determinationExplanation: (0, import_fields20.text)(),
-    assignmentInvestigator: (0, import_fields20.text)()
+    determinationExplanation: (0, import_fields21.text)(),
+    assignmentInvestigator: (0, import_fields21.text)()
   }
 });
 
 // schemas/SortingHatQuestion.ts
-var import_fields21 = require("@keystone-6/core/fields");
-var import_core20 = require("@keystone-6/core");
-var SortingHatQuestion = (0, import_core20.list)({
+var import_fields22 = require("@keystone-6/core/fields");
+var import_core21 = require("@keystone-6/core");
+var SortingHatQuestion = (0, import_core21.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1655,25 +1722,25 @@ var SortingHatQuestion = (0, import_core20.list)({
     }
   },
   fields: {
-    question: (0, import_fields21.text)({
+    question: (0, import_fields22.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    gryffindorChoice: (0, import_fields21.text)(),
-    hufflepuffChoice: (0, import_fields21.text)(),
-    ravenclawChoice: (0, import_fields21.text)(),
-    slytherinChoice: (0, import_fields21.text)(),
-    createdBy: (0, import_fields21.relationship)({
+    gryffindorChoice: (0, import_fields22.text)(),
+    hufflepuffChoice: (0, import_fields22.text)(),
+    ravenclawChoice: (0, import_fields22.text)(),
+    slytherinChoice: (0, import_fields22.text)(),
+    createdBy: (0, import_fields22.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/TrimesterAward.ts
-var import_fields22 = require("@keystone-6/core/fields");
-var import_core21 = require("@keystone-6/core");
-var TrimesterAward = (0, import_core21.list)({
+var import_fields23 = require("@keystone-6/core/fields");
+var import_core22 = require("@keystone-6/core");
+var TrimesterAward = (0, import_core22.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1690,7 +1757,7 @@ var TrimesterAward = (0, import_core21.list)({
     }
   },
   fields: {
-    howl: (0, import_fields22.select)({
+    howl: (0, import_fields23.select)({
       options: [
         { value: "Respect", label: "Respect" },
         { value: "Responsibility", label: "Responsibility" },
@@ -1698,7 +1765,7 @@ var TrimesterAward = (0, import_core21.list)({
       ],
       validation: { isRequired: true }
     }),
-    trimester: (0, import_fields22.select)({
+    trimester: (0, import_fields23.select)({
       options: [
         { value: "1", label: "1" },
         { value: "2", label: "2" },
@@ -1706,23 +1773,23 @@ var TrimesterAward = (0, import_core21.list)({
       ],
       isIndexed: true
     }),
-    date: (0, import_fields22.timestamp)({
+    date: (0, import_fields23.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    student: (0, import_fields22.relationship)({
+    student: (0, import_fields23.relationship)({
       ref: "User"
     }),
-    teacher: (0, import_fields22.relationship)({
+    teacher: (0, import_fields23.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/video.ts
-var import_fields23 = require("@keystone-6/core/fields");
-var import_core22 = require("@keystone-6/core");
-var Video = (0, import_core22.list)({
+var import_fields24 = require("@keystone-6/core/fields");
+var import_core23 = require("@keystone-6/core");
+var Video = (0, import_core23.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1738,31 +1805,31 @@ var Video = (0, import_core22.list)({
     }
   },
   fields: {
-    name: (0, import_fields23.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields23.text)({
+    name: (0, import_fields24.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields24.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    onHomePage: (0, import_fields23.checkbox)({ defaultValue: false, label: "On Home Page" }),
-    type: (0, import_fields23.select)({
+    onHomePage: (0, import_fields24.checkbox)({ defaultValue: false, label: "On Home Page" }),
+    type: (0, import_fields24.select)({
       options: [
         { value: "google drive", label: "google drive" },
         { value: "youtube", label: "Youtube" }
       ],
       validation: { isRequired: true }
     }),
-    link: (0, import_fields23.text)()
+    link: (0, import_fields24.text)()
   }
 });
 
 // mutations/AddStaff.ts
-var import_core23 = require("@keystone-6/core");
+var import_core24 = require("@keystone-6/core");
 var gql = String.raw;
-var addStaff = (base) => import_core23.graphql.field({
-  type: import_core23.graphql.String,
+var addStaff = (base) => import_core24.graphql.field({
+  type: import_core24.graphql.String,
   args: {
-    staffData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
+    staffData: import_core24.graphql.arg({ type: import_core24.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Adding Staff");
@@ -1818,14 +1885,14 @@ var addStaff = (base) => import_core23.graphql.field({
 });
 
 // mutations/authenticateWithGoogle.ts
-var import_core24 = require("@keystone-6/core");
+var import_core25 = require("@keystone-6/core");
 var import_google_auth_library = require("google-auth-library");
 var CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
 var client = new import_google_auth_library.OAuth2Client();
-var authenticateUserWithGoogle = (base) => import_core24.graphql.field({
-  type: import_core24.graphql.JSON,
+var authenticateUserWithGoogle = (base) => import_core25.graphql.field({
+  type: import_core25.graphql.JSON,
   args: {
-    idToken: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) })
+    idToken: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
   },
   // Cast to any: the resolver returns a small JSON object, but the inferred
   // union of branches includes optional `undefined` props which the strict
@@ -1885,12 +1952,12 @@ var authenticateUserWithGoogle = (base) => import_core24.graphql.field({
 });
 
 // mutations/queryCommunicator.ts
-var import_core25 = require("@keystone-6/core");
-var queryCommunicator = (base) => import_core25.graphql.field({
-  type: import_core25.graphql.JSON,
+var import_core26 = require("@keystone-6/core");
+var queryCommunicator = (base) => import_core26.graphql.field({
+  type: import_core26.graphql.JSON,
   args: {
-    question: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) }),
-    model: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
+    question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) }),
+    model: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2004,12 +2071,12 @@ ${errorDetails}`;
 });
 
 // mutations/recalculateCallback.ts
-var import_core26 = require("@keystone-6/core");
+var import_core27 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core26.graphql.field({
+var recalculateCallback = (base) => import_core27.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.ID) })
+    callbackId: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -2077,11 +2144,11 @@ var recalculateCallback = (base) => import_core26.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core27 = require("@keystone-6/core");
-var sendEmail = (base) => import_core27.graphql.field({
-  type: import_core27.graphql.Boolean,
+var import_core28 = require("@keystone-6/core");
+var sendEmail = (base) => import_core28.graphql.field({
+  type: import_core28.graphql.Boolean,
   args: {
-    emailData: import_core27.graphql.arg({ type: import_core27.graphql.JSON })
+    emailData: import_core28.graphql.arg({ type: import_core28.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Sending an Email", args.emailData);
@@ -2101,12 +2168,12 @@ var sendEmail = (base) => import_core27.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core28 = require("@keystone-6/core");
+var import_core29 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core28.graphql.field({
-  type: import_core28.graphql.String,
+var updateStudentSchedules = (base) => import_core29.graphql.field({
+  type: import_core29.graphql.String,
   args: {
-    studentScheduleData: import_core28.graphql.arg({ type: import_core28.graphql.JSON })
+    studentScheduleData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -2315,7 +2382,7 @@ var updateStudentSchedules = (base) => import_core28.graphql.field({
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 if (databaseURL.includes("local")) console.log(databaseURL);
 var keystone_default = withAuth(
-  (0, import_core29.config)({
+  (0, import_core30.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -2344,6 +2411,7 @@ var keystone_default = withAuth(
     },
     lists: {
       User,
+      AssignmentHistory,
       Birthday,
       BugReport,
       Bullying,
@@ -2369,7 +2437,7 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === "development",
-      extendGraphqlSchema: import_core29.graphql.extend((base) => {
+      extendGraphqlSchema: import_core30.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),

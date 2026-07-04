@@ -198,11 +198,17 @@ export const User = list({
     block10ClassName: text({ defaultValue: "Class Name Goes Here" }),
     block10AssignmentLastUpdated: timestamp(),
 
+    // Archive of this teacher's replaced class assignments
+    assignmentHistory: relationship({
+      ref: "AssignmentHistory.teacher",
+      many: true,
+    }),
+
     // Sorting Hat
     sortingHat: text({ defaultValue: "" }),
   },
   hooks: {
-    afterOperation: async ({ operation, item, context }) => {
+    afterOperation: async ({ operation, item, originalItem, context }) => {
       if (operation === "create" && item?.isStudent) {
         const createBirtday = await context.query.Birthday.createOne({
           data: {
@@ -210,6 +216,30 @@ export const User = list({
           },
           // resolveFields: "id",
         });
+      }
+
+      // Archive any block assignment that was replaced by this update, so we
+      // keep a history of past class assignments (with when each was added and
+      // when it was replaced).
+      if (operation === "update" && item && originalItem) {
+        for (let n = 1; n <= 10; n++) {
+          const oldVal = (originalItem as any)[`block${n}Assignment`];
+          const newVal = (item as any)[`block${n}Assignment`];
+          if (oldVal != null && oldVal !== newVal) {
+            await context.sudo().query.AssignmentHistory.createOne({
+              data: {
+                teacher: { connect: { id: item.id } },
+                block: n,
+                className: (originalItem as any)[`block${n}ClassName`] ?? "",
+                assignment: oldVal,
+                dateAdded:
+                  (originalItem as any)[`block${n}AssignmentLastUpdated`] ??
+                  null,
+                // dateRemoved defaults to now
+              },
+            });
+          }
+        }
       }
     },
   },

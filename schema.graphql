@@ -146,6 +146,8 @@ type User {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  assignmentHistory(where: AssignmentHistoryWhereInput! = {}, orderBy: [AssignmentHistoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AssignmentHistoryWhereUniqueInput): [AssignmentHistory!]
+  assignmentHistoryCount(where: AssignmentHistoryWhereInput! = {}): Int
   sortingHat: String
   passwordResetToken: PasswordState
   passwordResetIssuedAt: DateTime
@@ -288,6 +290,7 @@ input UserWhereInput {
   block10Assignment: StringFilter
   block10ClassName: StringFilter
   block10AssignmentLastUpdated: DateTimeNullableFilter
+  assignmentHistory: AssignmentHistoryManyRelationFilter
   sortingHat: StringFilter
   passwordResetToken: PasswordFilter
   passwordResetIssuedAt: DateTimeNullableFilter
@@ -427,6 +430,12 @@ input DateTimeNullableFilter {
   gt: DateTime
   gte: DateTime
   not: DateTimeNullableFilter
+}
+
+input AssignmentHistoryManyRelationFilter {
+  every: AssignmentHistoryWhereInput
+  some: AssignmentHistoryWhereInput
+  none: AssignmentHistoryWhereInput
 }
 
 input PasswordFilter {
@@ -626,6 +635,7 @@ input UserUpdateInput {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  assignmentHistory: AssignmentHistoryRelateToManyForUpdateInput
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
@@ -721,6 +731,13 @@ input ChromebookCheckRelateToManyForUpdateInput {
   set: [ChromebookCheckWhereUniqueInput!]
   create: [ChromebookCheckCreateInput!]
   connect: [ChromebookCheckWhereUniqueInput!]
+}
+
+input AssignmentHistoryRelateToManyForUpdateInput {
+  disconnect: [AssignmentHistoryWhereUniqueInput!]
+  set: [AssignmentHistoryWhereUniqueInput!]
+  create: [AssignmentHistoryCreateInput!]
+  connect: [AssignmentHistoryWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -842,6 +859,7 @@ input UserCreateInput {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  assignmentHistory: AssignmentHistoryRelateToManyForCreateInput
   sortingHat: String
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
@@ -914,6 +932,70 @@ input BirthdayRelateToOneForCreateInput {
 input ChromebookCheckRelateToManyForCreateInput {
   create: [ChromebookCheckCreateInput!]
   connect: [ChromebookCheckWhereUniqueInput!]
+}
+
+input AssignmentHistoryRelateToManyForCreateInput {
+  create: [AssignmentHistoryCreateInput!]
+  connect: [AssignmentHistoryWhereUniqueInput!]
+}
+
+type AssignmentHistory {
+  id: ID!
+  teacher: User
+  block: Int
+  className: String
+  assignment: String
+  dateAdded: DateTime
+  dateRemoved: DateTime
+}
+
+input AssignmentHistoryWhereUniqueInput {
+  id: ID
+}
+
+input AssignmentHistoryWhereInput {
+  AND: [AssignmentHistoryWhereInput!]
+  OR: [AssignmentHistoryWhereInput!]
+  NOT: [AssignmentHistoryWhereInput!]
+  id: IDFilter
+  teacher: UserWhereInput
+  block: IntNullableFilter
+  className: StringFilter
+  assignment: StringFilter
+  dateAdded: DateTimeNullableFilter
+  dateRemoved: DateTimeNullableFilter
+}
+
+input AssignmentHistoryOrderByInput {
+  id: OrderDirection
+  block: OrderDirection
+  className: OrderDirection
+  assignment: OrderDirection
+  dateAdded: OrderDirection
+  dateRemoved: OrderDirection
+}
+
+input AssignmentHistoryUpdateInput {
+  teacher: UserRelateToOneForUpdateInput
+  block: Int
+  className: String
+  assignment: String
+  dateAdded: DateTime
+  dateRemoved: DateTime
+}
+
+input AssignmentHistoryUpdateArgs {
+  where: AssignmentHistoryWhereUniqueInput!
+  data: AssignmentHistoryUpdateInput!
+}
+
+input AssignmentHistoryCreateInput {
+  teacher: UserRelateToOneForCreateInput
+  block: Int
+  className: String
+  assignment: String
+  dateAdded: DateTime
+  dateRemoved: DateTime
 }
 
 type Birthday {
@@ -2436,6 +2518,12 @@ type Mutation {
   updateUsers(data: [UserUpdateArgs!]!): [User]
   deleteUser(where: UserWhereUniqueInput!): User
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
+  createAssignmentHistory(data: AssignmentHistoryCreateInput!): AssignmentHistory
+  createAssignmentHistories(data: [AssignmentHistoryCreateInput!]!): [AssignmentHistory]
+  updateAssignmentHistory(where: AssignmentHistoryWhereUniqueInput!, data: AssignmentHistoryUpdateInput!): AssignmentHistory
+  updateAssignmentHistories(data: [AssignmentHistoryUpdateArgs!]!): [AssignmentHistory]
+  deleteAssignmentHistory(where: AssignmentHistoryWhereUniqueInput!): AssignmentHistory
+  deleteAssignmentHistories(where: [AssignmentHistoryWhereUniqueInput!]!): [AssignmentHistory]
   createBirthday(data: BirthdayCreateInput!): Birthday
   createBirthdays(data: [BirthdayCreateInput!]!): [Birthday]
   updateBirthday(where: BirthdayWhereUniqueInput!, data: BirthdayUpdateInput!): Birthday
@@ -2627,6 +2715,9 @@ type Query {
   user(where: UserWhereUniqueInput!): User
   users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   usersCount(where: UserWhereInput! = {}): Int
+  assignmentHistory(where: AssignmentHistoryWhereUniqueInput!): AssignmentHistory
+  assignmentHistories(where: AssignmentHistoryWhereInput! = {}, orderBy: [AssignmentHistoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AssignmentHistoryWhereUniqueInput): [AssignmentHistory!]
+  assignmentHistoriesCount(where: AssignmentHistoryWhereInput! = {}): Int
   birthday(where: BirthdayWhereUniqueInput!): Birthday
   birthdays(where: BirthdayWhereInput! = {}, orderBy: [BirthdayOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BirthdayWhereUniqueInput): [Birthday!]
   birthdaysCount(where: BirthdayWhereInput! = {}): Int

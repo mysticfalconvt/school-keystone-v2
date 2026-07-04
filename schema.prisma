@@ -140,6 +140,7 @@ model User {
   block10Assignment                            String               @default("Current Assignment for Block 10 goes here")
   block10ClassName                             String               @default("Class Name Goes Here")
   block10AssignmentLastUpdated                 DateTime?
+  assignmentHistory                            AssignmentHistory[]  @relation("AssignmentHistory_teacher")
   sortingHat                                   String               @default("")
   passwordResetToken                           String?
   passwordResetIssuedAt                        DateTime?
@@ -178,6 +179,19 @@ model User {
   @@index([block9TeacherId])
   @@index([block10TeacherId])
   @@index([taTeamId])
+}
+
+model AssignmentHistory {
+  id          String    @id @default(cuid())
+  teacher     User?     @relation("AssignmentHistory_teacher", fields: [teacherId], references: [id])
+  teacherId   String?   @map("teacher")
+  block       Int?
+  className   String    @default("")
+  assignment  String    @default("")
+  dateAdded   DateTime?
+  dateRemoved DateTime? @default(now())
+
+  @@index([teacherId])
 }
 
 model Birthday {
