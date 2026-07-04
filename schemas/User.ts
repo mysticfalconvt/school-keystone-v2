@@ -96,6 +96,17 @@ export const User = list({
         displayMode: "count",
       },
     }),
+    staffPbisCardsGiven: relationship({
+      ref: "StaffPbisCard.giver",
+      many: true,
+    }),
+    staffPbisCardsReceived: relationship({
+      ref: "StaffPbisCard.recipient",
+      many: true,
+      ui: {
+        displayMode: "count",
+      },
+    }),
     teacherDiscipline: relationship({ ref: "Discipline.teacher", many: true }),
     studentDiscipline: relationship({ ref: "Discipline.student", many: true }),
     callbackItems: relationship({ ref: "Callback.student", many: true }),

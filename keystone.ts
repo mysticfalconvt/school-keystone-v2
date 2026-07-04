@@ -18,6 +18,7 @@ import { Discipline } from './schemas/Discipline';
 import { Link } from './schemas/Link';
 import { Message } from './schemas/Message';
 import { PbisCard } from './schemas/PbisCard';
+import { StaffPbisCard } from './schemas/StaffPbisCard';
 import { PbisCollection } from './schemas/PbisCollection';
 import { PbisCollectionDate } from './schemas/PbisCollectionDate';
 import { PbisTeam } from './schemas/PbisTeam';
@@ -92,6 +93,7 @@ export default withAuth(
       Link,
       Message,
       PbisCard,
+      StaffPbisCard,
       PbisCollection,
       PbisTeam,
       PbisCollectionDate,

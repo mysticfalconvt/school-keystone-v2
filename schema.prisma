@@ -84,6 +84,8 @@ model User {
   teacherCellPhoneViolation                    CellPhoneViolation[] @relation("CellPhoneViolation_teacher")
   teacherPbisCards                             PbisCard[]           @relation("PbisCard_teacher")
   studentPbisCards                             PbisCard[]           @relation("PbisCard_student")
+  staffPbisCardsGiven                          StaffPbisCard[]      @relation("StaffPbisCard_giver")
+  staffPbisCardsReceived                       StaffPbisCard[]      @relation("StaffPbisCard_recipient")
   teacherDiscipline                            Discipline[]         @relation("Discipline_teacher")
   studentDiscipline                            Discipline[]         @relation("Discipline_student")
   callbackItems                                Callback[]           @relation("Callback_student")
@@ -424,6 +426,23 @@ model PbisCard {
   @@index([cardMessage])
   @@index([studentId])
   @@index([teacherId])
+}
+
+model StaffPbisCard {
+  id          String   @id @default(cuid())
+  category    String   @default("")
+  giver       User?    @relation("StaffPbisCard_giver", fields: [giverId], references: [id])
+  giverId     String?  @map("giver")
+  recipient   User?    @relation("StaffPbisCard_recipient", fields: [recipientId], references: [id])
+  recipientId String?  @map("recipient")
+  cardMessage String   @default("")
+  dateGiven   DateTime @default(now())
+  counted     Boolean  @default(false)
+
+  @@index([category])
+  @@index([giverId])
+  @@index([recipientId])
+  @@index([cardMessage])
 }
 
 model PbisCollection {

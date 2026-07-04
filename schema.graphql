@@ -83,6 +83,10 @@ type User {
   teacherPbisCardsCount(where: PbisCardWhereInput! = {}): Int
   studentPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   studentPbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  staffPbisCardsGiven(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  staffPbisCardsGivenCount(where: StaffPbisCardWhereInput! = {}): Int
+  staffPbisCardsReceived(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  staffPbisCardsReceivedCount(where: StaffPbisCardWhereInput! = {}): Int
   teacherDiscipline(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   teacherDisciplineCount(where: DisciplineWhereInput! = {}): Int
   studentDiscipline(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
@@ -236,6 +240,8 @@ input UserWhereInput {
   teacherCellPhoneViolation: CellPhoneViolationManyRelationFilter
   teacherPbisCards: PbisCardManyRelationFilter
   studentPbisCards: PbisCardManyRelationFilter
+  staffPbisCardsGiven: StaffPbisCardManyRelationFilter
+  staffPbisCardsReceived: StaffPbisCardManyRelationFilter
   teacherDiscipline: DisciplineManyRelationFilter
   studentDiscipline: DisciplineManyRelationFilter
   callbackItems: CallbackManyRelationFilter
@@ -372,6 +378,12 @@ input PbisCardManyRelationFilter {
   every: PbisCardWhereInput
   some: PbisCardWhereInput
   none: PbisCardWhereInput
+}
+
+input StaffPbisCardManyRelationFilter {
+  every: StaffPbisCardWhereInput
+  some: StaffPbisCardWhereInput
+  none: StaffPbisCardWhereInput
 }
 
 input DisciplineManyRelationFilter {
@@ -581,6 +593,8 @@ input UserUpdateInput {
   teacherCellPhoneViolation: CellPhoneViolationRelateToManyForUpdateInput
   teacherPbisCards: PbisCardRelateToManyForUpdateInput
   studentPbisCards: PbisCardRelateToManyForUpdateInput
+  staffPbisCardsGiven: StaffPbisCardRelateToManyForUpdateInput
+  staffPbisCardsReceived: StaffPbisCardRelateToManyForUpdateInput
   teacherDiscipline: DisciplineRelateToManyForUpdateInput
   studentDiscipline: DisciplineRelateToManyForUpdateInput
   callbackItems: CallbackRelateToManyForUpdateInput
@@ -683,6 +697,13 @@ input PbisCardRelateToManyForUpdateInput {
   set: [PbisCardWhereUniqueInput!]
   create: [PbisCardCreateInput!]
   connect: [PbisCardWhereUniqueInput!]
+}
+
+input StaffPbisCardRelateToManyForUpdateInput {
+  disconnect: [StaffPbisCardWhereUniqueInput!]
+  set: [StaffPbisCardWhereUniqueInput!]
+  create: [StaffPbisCardCreateInput!]
+  connect: [StaffPbisCardWhereUniqueInput!]
 }
 
 input DisciplineRelateToManyForUpdateInput {
@@ -805,6 +826,8 @@ input UserCreateInput {
   teacherCellPhoneViolation: CellPhoneViolationRelateToManyForCreateInput
   teacherPbisCards: PbisCardRelateToManyForCreateInput
   studentPbisCards: PbisCardRelateToManyForCreateInput
+  staffPbisCardsGiven: StaffPbisCardRelateToManyForCreateInput
+  staffPbisCardsReceived: StaffPbisCardRelateToManyForCreateInput
   teacherDiscipline: DisciplineRelateToManyForCreateInput
   studentDiscipline: DisciplineRelateToManyForCreateInput
   callbackItems: CallbackRelateToManyForCreateInput
@@ -897,6 +920,11 @@ input CellPhoneViolationRelateToManyForCreateInput {
 input PbisCardRelateToManyForCreateInput {
   create: [PbisCardCreateInput!]
   connect: [PbisCardWhereUniqueInput!]
+}
+
+input StaffPbisCardRelateToManyForCreateInput {
+  create: [StaffPbisCardCreateInput!]
+  connect: [StaffPbisCardWhereUniqueInput!]
 }
 
 input DisciplineRelateToManyForCreateInput {
@@ -2016,6 +2044,64 @@ input PbisCardCreateInput {
   counted: Boolean
 }
 
+type StaffPbisCard {
+  id: ID!
+  category: String
+  giver: User
+  recipient: User
+  cardMessage: String
+  dateGiven: DateTime
+  counted: Boolean
+}
+
+input StaffPbisCardWhereUniqueInput {
+  id: ID
+}
+
+input StaffPbisCardWhereInput {
+  AND: [StaffPbisCardWhereInput!]
+  OR: [StaffPbisCardWhereInput!]
+  NOT: [StaffPbisCardWhereInput!]
+  id: IDFilter
+  category: StringFilter
+  giver: UserWhereInput
+  recipient: UserWhereInput
+  cardMessage: StringFilter
+  dateGiven: DateTimeFilter
+  counted: BooleanFilter
+}
+
+input StaffPbisCardOrderByInput {
+  id: OrderDirection
+  category: OrderDirection
+  cardMessage: OrderDirection
+  dateGiven: OrderDirection
+  counted: OrderDirection
+}
+
+input StaffPbisCardUpdateInput {
+  category: String
+  giver: UserRelateToOneForUpdateInput
+  recipient: UserRelateToOneForUpdateInput
+  cardMessage: String
+  dateGiven: DateTime
+  counted: Boolean
+}
+
+input StaffPbisCardUpdateArgs {
+  where: StaffPbisCardWhereUniqueInput!
+  data: StaffPbisCardUpdateInput!
+}
+
+input StaffPbisCardCreateInput {
+  category: String
+  giver: UserRelateToOneForCreateInput
+  recipient: UserRelateToOneForCreateInput
+  cardMessage: String
+  dateGiven: DateTime
+  counted: Boolean
+}
+
 type PbisCollection {
   id: ID!
   name: String
@@ -2602,6 +2688,12 @@ type Mutation {
   updatePbisCards(data: [PbisCardUpdateArgs!]!): [PbisCard]
   deletePbisCard(where: PbisCardWhereUniqueInput!): PbisCard
   deletePbisCards(where: [PbisCardWhereUniqueInput!]!): [PbisCard]
+  createStaffPbisCard(data: StaffPbisCardCreateInput!): StaffPbisCard
+  createStaffPbisCards(data: [StaffPbisCardCreateInput!]!): [StaffPbisCard]
+  updateStaffPbisCard(where: StaffPbisCardWhereUniqueInput!, data: StaffPbisCardUpdateInput!): StaffPbisCard
+  updateStaffPbisCards(data: [StaffPbisCardUpdateArgs!]!): [StaffPbisCard]
+  deleteStaffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
+  deleteStaffPbisCards(where: [StaffPbisCardWhereUniqueInput!]!): [StaffPbisCard]
   createPbisCollection(data: PbisCollectionCreateInput!): PbisCollection
   createPbisCollections(data: [PbisCollectionCreateInput!]!): [PbisCollection]
   updatePbisCollection(where: PbisCollectionWhereUniqueInput!, data: PbisCollectionUpdateInput!): PbisCollection
@@ -2757,6 +2849,9 @@ type Query {
   pbisCard(where: PbisCardWhereUniqueInput!): PbisCard
   pbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   pbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  staffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
+  staffPbisCards(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  staffPbisCardsCount(where: StaffPbisCardWhereInput! = {}): Int
   pbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
   pbisCollections(where: PbisCollectionWhereInput! = {}, orderBy: [PbisCollectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionWhereUniqueInput): [PbisCollection!]
   pbisCollectionsCount(where: PbisCollectionWhereInput! = {}): Int
