@@ -10,6 +10,7 @@ import { session, withAuth } from './auth';
 // Schemas from individual files
 import { Calendar } from './schemas/Calendar';
 import { Callback } from './schemas/Callback';
+import { CallbackRewardRun } from './schemas/CallbackRewardRun';
 import { CellPhoneViolation } from './schemas/CellPhoneViolation';
 import { ChromebookAssignment } from './schemas/ChromebookAssignment';
 import { CommunicatorChat } from './schemas/CommunicatorChat';
@@ -85,6 +86,7 @@ export default withAuth(
       BugReport,
       Bullying,
       Callback,
+      CallbackRewardRun,
       Calendar,
       CellPhoneViolation,
       ChromebookCheck,

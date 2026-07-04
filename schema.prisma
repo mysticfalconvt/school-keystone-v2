@@ -155,6 +155,9 @@ model User {
   from_BugReport_submittedBy                   BugReport[]          @relation("BugReport_submittedBy")
   from_Bullying_studentOffender                Bullying[]           @relation("Bullying_studentOffender")
   from_Bullying_teacherAuthor                  Bullying[]           @relation("Bullying_teacherAuthor")
+  from_CallbackRewardRun_eligibleStudents      CallbackRewardRun[]  @relation("CallbackRewardRun_eligibleStudents")
+  from_CallbackRewardRun_ineligibleStudents    CallbackRewardRun[]  @relation("CallbackRewardRun_ineligibleStudents")
+  from_CallbackRewardRun_lastModifiedBy        CallbackRewardRun[]  @relation("CallbackRewardRun_lastModifiedBy")
   from_Calendar_author                         Calendar[]           @relation("Calendar_author")
   from_Link_modifiedBy                         Link[]               @relation("Link_modifiedBy")
   from_PbisCollection_lastModifiedBy           PbisCollection[]     @relation("PbisCollection_lastModifiedBy")
@@ -266,6 +269,18 @@ model Callback {
   @@index([studentId])
   @@index([teacherId])
   @@index([dateCompleted])
+}
+
+model CallbackRewardRun {
+  id                 String   @id @default(cuid())
+  runDate            DateTime @default(now())
+  eligibleStudents   User[]   @relation("CallbackRewardRun_eligibleStudents")
+  ineligibleStudents User[]   @relation("CallbackRewardRun_ineligibleStudents")
+  cardsAwarded       Int?     @default(0)
+  lastModifiedBy     User?    @relation("CallbackRewardRun_lastModifiedBy", fields: [lastModifiedById], references: [id])
+  lastModifiedById   String?  @map("lastModifiedBy")
+
+  @@index([lastModifiedById])
 }
 
 model Calendar {

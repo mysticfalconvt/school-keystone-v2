@@ -1362,6 +1362,60 @@ input CallbackCreateInput {
   daysLate: Int
 }
 
+type CallbackRewardRun {
+  id: ID!
+  runDate: DateTime
+  eligibleStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  eligibleStudentsCount(where: UserWhereInput! = {}): Int
+  ineligibleStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  ineligibleStudentsCount(where: UserWhereInput! = {}): Int
+  cardsAwarded: Int
+  lastModifiedBy: User
+}
+
+input CallbackRewardRunWhereUniqueInput {
+  id: ID
+}
+
+input CallbackRewardRunWhereInput {
+  AND: [CallbackRewardRunWhereInput!]
+  OR: [CallbackRewardRunWhereInput!]
+  NOT: [CallbackRewardRunWhereInput!]
+  id: IDFilter
+  runDate: DateTimeFilter
+  eligibleStudents: UserManyRelationFilter
+  ineligibleStudents: UserManyRelationFilter
+  cardsAwarded: IntNullableFilter
+  lastModifiedBy: UserWhereInput
+}
+
+input CallbackRewardRunOrderByInput {
+  id: OrderDirection
+  runDate: OrderDirection
+  cardsAwarded: OrderDirection
+}
+
+input CallbackRewardRunUpdateInput {
+  runDate: DateTime
+  eligibleStudents: UserRelateToManyForUpdateInput
+  ineligibleStudents: UserRelateToManyForUpdateInput
+  cardsAwarded: Int
+  lastModifiedBy: UserRelateToOneForUpdateInput
+}
+
+input CallbackRewardRunUpdateArgs {
+  where: CallbackRewardRunWhereUniqueInput!
+  data: CallbackRewardRunUpdateInput!
+}
+
+input CallbackRewardRunCreateInput {
+  runDate: DateTime
+  eligibleStudents: UserRelateToManyForCreateInput
+  ineligibleStudents: UserRelateToManyForCreateInput
+  cardsAwarded: Int
+  lastModifiedBy: UserRelateToOneForCreateInput
+}
+
 type Calendar {
   id: ID!
   name: String
@@ -2634,6 +2688,12 @@ type Mutation {
   updateCallbacks(data: [CallbackUpdateArgs!]!): [Callback]
   deleteCallback(where: CallbackWhereUniqueInput!): Callback
   deleteCallbacks(where: [CallbackWhereUniqueInput!]!): [Callback]
+  createCallbackRewardRun(data: CallbackRewardRunCreateInput!): CallbackRewardRun
+  createCallbackRewardRuns(data: [CallbackRewardRunCreateInput!]!): [CallbackRewardRun]
+  updateCallbackRewardRun(where: CallbackRewardRunWhereUniqueInput!, data: CallbackRewardRunUpdateInput!): CallbackRewardRun
+  updateCallbackRewardRuns(data: [CallbackRewardRunUpdateArgs!]!): [CallbackRewardRun]
+  deleteCallbackRewardRun(where: CallbackRewardRunWhereUniqueInput!): CallbackRewardRun
+  deleteCallbackRewardRuns(where: [CallbackRewardRunWhereUniqueInput!]!): [CallbackRewardRun]
   createCalendar(data: CalendarCreateInput!): Calendar
   createCalendars(data: [CalendarCreateInput!]!): [Calendar]
   updateCalendar(where: CalendarWhereUniqueInput!, data: CalendarUpdateInput!): Calendar
@@ -2823,6 +2883,9 @@ type Query {
   callback(where: CallbackWhereUniqueInput!): Callback
   callbacks(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbacksCount(where: CallbackWhereInput! = {}): Int
+  callbackRewardRun(where: CallbackRewardRunWhereUniqueInput!): CallbackRewardRun
+  callbackRewardRuns(where: CallbackRewardRunWhereInput! = {}, orderBy: [CallbackRewardRunOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackRewardRunWhereUniqueInput): [CallbackRewardRun!]
+  callbackRewardRunsCount(where: CallbackRewardRunWhereInput! = {}): Int
   calendar(where: CalendarWhereUniqueInput!): Calendar
   calendars(where: CalendarWhereInput! = {}, orderBy: [CalendarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CalendarWhereUniqueInput): [Calendar!]
   calendarsCount(where: CalendarWhereInput! = {}): Int
