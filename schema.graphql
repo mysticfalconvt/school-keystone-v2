@@ -2755,6 +2755,7 @@ type Mutation {
   addStaff(staffData: JSON): String
   queryCommunicator(question: String!, model: String!): JSON
   authenticateUserWithGoogle(idToken: String!): JSON
+  impersonateUser(userId: String!): JSON
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure

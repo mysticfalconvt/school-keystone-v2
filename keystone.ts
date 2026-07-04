@@ -43,6 +43,7 @@ if (databaseURL.includes('local')) console.log(databaseURL);
 
 import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
+import { impersonateUser } from './mutations/impersonateUser';
 import { queryCommunicator } from './mutations/queryCommunicator';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
@@ -115,6 +116,7 @@ export default withAuth(
             addStaff: addStaff(base),
             queryCommunicator: queryCommunicator(base),
             authenticateUserWithGoogle: authenticateUserWithGoogle(base),
+            impersonateUser: impersonateUser(base),
           },
         };
       }),

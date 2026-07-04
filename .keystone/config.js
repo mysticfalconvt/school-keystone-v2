@@ -24,7 +24,7 @@ __export(keystone_exports, {
 });
 module.exports = __toCommonJS(keystone_exports);
 var import_config2 = require("dotenv/config");
-var import_core31 = require("@keystone-6/core");
+var import_core32 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -2037,13 +2037,58 @@ var authenticateUserWithGoogle = (base) => import_core26.graphql.field({
   }
 });
 
-// mutations/queryCommunicator.ts
+// mutations/impersonateUser.ts
 var import_core27 = require("@keystone-6/core");
-var queryCommunicator = (base) => import_core27.graphql.field({
+var impersonateUser = (base) => import_core27.graphql.field({
   type: import_core27.graphql.JSON,
   args: {
-    question: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) }),
-    model: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) })
+    userId: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) })
+  },
+  resolve: async (source, { userId }, context) => {
+    if (process.env.NODE_ENV === "production") {
+      return { success: false, message: "Impersonation is disabled" };
+    }
+    if (process.env.ALLOW_IMPERSONATION !== "true") {
+      return { success: false, message: "Impersonation is disabled" };
+    }
+    if (!context.session?.data?.isSuperAdmin) {
+      return {
+        success: false,
+        message: "Only superadmins can impersonate users"
+      };
+    }
+    const user = await context.sudo().query.User.findOne({
+      where: { id: String(userId) },
+      query: "id name email"
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const sessionToken = await context.sessionStrategy?.start({
+      data: { listKey: "User", itemId: String(user.id) },
+      context
+    });
+    if (!sessionToken || typeof sessionToken !== "string") {
+      return { success: false, message: "Could not start session" };
+    }
+    console.log(
+      `[impersonate] ${context.session?.itemId} -> ${user.id} (${user.email})`
+    );
+    return {
+      success: true,
+      sessionToken,
+      item: { id: user.id, name: user.name, email: user.email }
+    };
+  }
+});
+
+// mutations/queryCommunicator.ts
+var import_core28 = require("@keystone-6/core");
+var queryCommunicator = (base) => import_core28.graphql.field({
+  type: import_core28.graphql.JSON,
+  args: {
+    question: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.String) }),
+    model: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2157,12 +2202,12 @@ ${errorDetails}`;
 });
 
 // mutations/recalculateCallback.ts
-var import_core28 = require("@keystone-6/core");
+var import_core29 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core28.graphql.field({
+var recalculateCallback = (base) => import_core29.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.ID) })
+    callbackId: import_core29.graphql.arg({ type: import_core29.graphql.nonNull(import_core29.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -2230,11 +2275,11 @@ var recalculateCallback = (base) => import_core28.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core29 = require("@keystone-6/core");
-var sendEmail = (base) => import_core29.graphql.field({
-  type: import_core29.graphql.Boolean,
+var import_core30 = require("@keystone-6/core");
+var sendEmail = (base) => import_core30.graphql.field({
+  type: import_core30.graphql.Boolean,
   args: {
-    emailData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
+    emailData: import_core30.graphql.arg({ type: import_core30.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Sending an Email", args.emailData);
@@ -2254,12 +2299,12 @@ var sendEmail = (base) => import_core29.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core30 = require("@keystone-6/core");
+var import_core31 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core30.graphql.field({
-  type: import_core30.graphql.String,
+var updateStudentSchedules = (base) => import_core31.graphql.field({
+  type: import_core31.graphql.String,
   args: {
-    studentScheduleData: import_core30.graphql.arg({ type: import_core30.graphql.JSON })
+    studentScheduleData: import_core31.graphql.arg({ type: import_core31.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -2468,7 +2513,7 @@ var updateStudentSchedules = (base) => import_core30.graphql.field({
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 if (databaseURL.includes("local")) console.log(databaseURL);
 var keystone_default = withAuth(
-  (0, import_core31.config)({
+  (0, import_core32.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -2524,7 +2569,7 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === "development",
-      extendGraphqlSchema: import_core31.graphql.extend((base) => {
+      extendGraphqlSchema: import_core32.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
@@ -2532,7 +2577,8 @@ var keystone_default = withAuth(
             updateStudentSchedules: updateStudentSchedules(base),
             addStaff: addStaff(base),
             queryCommunicator: queryCommunicator(base),
-            authenticateUserWithGoogle: authenticateUserWithGoogle(base)
+            authenticateUserWithGoogle: authenticateUserWithGoogle(base),
+            impersonateUser: impersonateUser(base)
           }
         };
       })
