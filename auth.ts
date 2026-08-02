@@ -12,6 +12,7 @@ import { createAuth } from '@keystone-6/auth';
 // See https://keystonejs.com/docs/apis/session#session-api for the session docs
 import { statelessSessions } from '@keystone-6/core/session';
 import { sendMagicLinkEmail, sendPasswordResetEmail } from './lib/mail';
+import { captureError } from './lib/bugsink';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -63,6 +64,10 @@ const { withAuth } = createAuth({
           console.error('[auth] magicAuthLink sendToken failed', {
             identity,
             err,
+          });
+          captureError(err, {
+            tags: { source: 'auth', step: 'magicAuthLink.sendToken' },
+            extra: { itemId: String(itemId) },
           });
           throw err;
         }

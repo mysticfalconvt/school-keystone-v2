@@ -1,5 +1,6 @@
 import { graphql } from '@keystone-6/core';
 import { OAuth2Client } from 'google-auth-library';
+import { captureError } from '../lib/bugsink';
 
 // The OAuth client ID created in Google Cloud (type: Web application).
 // Must be the SAME id the frontend uses to render the Google Sign-In button,
@@ -84,6 +85,15 @@ export const authenticateUserWithGoogle = (base: any) =>
 
       if (!sessionToken || typeof sessionToken !== 'string') {
         console.error('[auth] Google sign-in: failed to start session');
+        // A rejected token is normal; failing to mint a session for a verified,
+        // known user is not.
+        captureError(
+          new Error('Google sign-in: sessionStrategy.start returned no token'),
+          {
+            tags: { mutation: 'authenticateUserWithGoogle' },
+            userId: String(user.id),
+          },
+        );
         return { success: false, message: 'Could not start session' };
       }
 

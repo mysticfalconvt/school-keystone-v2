@@ -1,5 +1,9 @@
 import 'dotenv/config';
 
+// Bugsink error reporting. Imported early so the SDK's uncaught-exception and
+// unhandled-rejection handlers are installed before anything else runs.
+import { bugsinkApolloPlugin } from './lib/bugsink';
+
 // config from Keystone
 import { config, graphql } from '@keystone-6/core';
 
@@ -109,6 +113,11 @@ export default withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === 'development',
+      apolloConfig: {
+        // Keystone appends these to its own plugins, so the playground config
+        // above is unaffected.
+        plugins: [bugsinkApolloPlugin],
+      },
       extendGraphqlSchema: graphql.extend((base) => {
         return {
           mutation: {

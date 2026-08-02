@@ -1,4 +1,5 @@
 import { graphql } from '@keystone-6/core';
+import { captureError } from '../lib/bugsink';
 
 export const queryCommunicator = (base: any) =>
   graphql.field({
@@ -77,6 +78,13 @@ export const queryCommunicator = (base: any) =>
 
           const errorMessage = `Communicator API error (${response.status} ${response.statusText}):\n${errorDetails}`;
           console.error(errorMessage);
+          // Returned to the caller rather than thrown, so Bugsink is the only
+          // place this ever shows up.
+          captureError(new Error(errorMessage), {
+            tags: { mutation: 'queryCommunicator', model: args.model },
+            extra: { status: response.status, details: errorDetails },
+            userId: String(user.id),
+          });
 
           // Save error to database
           await context.query.CommunicatorChat.createOne({
@@ -126,6 +134,10 @@ export const queryCommunicator = (base: any) =>
             : 'Failed to query communicator service';
 
         console.error('Communicator Query Error:', error);
+        captureError(error, {
+          tags: { mutation: 'queryCommunicator', model: args.model },
+          userId: String(user.id),
+        });
 
         // Save error to database
         try {
@@ -141,6 +153,9 @@ export const queryCommunicator = (base: any) =>
           });
         } catch (dbError) {
           console.error('Failed to save error to database:', dbError);
+          captureError(dbError, {
+            tags: { mutation: 'queryCommunicator', step: 'saveErrorToDb' },
+          });
         }
 
         // Return error response instead of throwing

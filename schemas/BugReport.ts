@@ -1,6 +1,7 @@
 import {  text, relationship, timestamp, checkbox, } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
 import {  isSignedIn } from '../access';
+import { reportUserBug } from '../lib/bugsink';
 
 export const BugReport = list({
     access: {
@@ -10,6 +11,24 @@ export const BugReport = list({
             delete: isSignedIn,
             update: isSignedIn,
         }
+    },
+    hooks: {
+        // Mirror anything a user reports here into Bugsink so it lands in the
+        // same place as the errors the server catches on its own. Never throws,
+        // so a Bugsink outage cannot block someone filing a report.
+        afterOperation: {
+            create: async ({ item }) => {
+                reportUserBug({
+                    title: String(item.name),
+                    description: item.description
+                        ? String(item.description)
+                        : undefined,
+                    submittedById: item.submittedById
+                        ? String(item.submittedById)
+                        : undefined,
+                });
+            },
+        },
     },
     ui: {
         listView: {
