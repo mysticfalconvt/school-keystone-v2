@@ -2562,14 +2562,16 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
         });
         studentUpdateResults.email = student.email;
         for (const slot of slots) {
-          const teacherId = teacherIdByEmail.get(student[slot]);
+          const teacherEmail = student[slot];
+          if (!teacherEmail) continue;
+          const teacherId = teacherIdByEmail.get(teacherEmail);
           if (!teacherId) continue;
           const target = slot === "ta" ? "taTeacher" : `${slot}Teacher`;
           studentUpdateResults[target] = { connect: { id: teacherId } };
         }
+        const suppliedName = student.name?.trim();
+        studentUpdateResults.name = suppliedName || student.email.split("@")[0].split(".").join(" ");
         if (!studentInfo[0]?.id) {
-          const nameArray = student.email.split("@")[0].split(".");
-          studentUpdateResults.name = nameArray.join(" ");
           studentUpdateResults.isStudent = true;
           studentUpdateResults.password = "notpassword";
           const createdStudent = await context.query.User.createOne({
@@ -2588,7 +2590,6 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
           });
         }
         studentUpdateResults.existed = !!studentInfo[0];
-        studentUpdateResults.name = studentInfo[0]?.name;
         allStudentUpdateResults.push(studentUpdateResults);
       })
     );

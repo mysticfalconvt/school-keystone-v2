@@ -6,8 +6,11 @@ const gql = String.raw;
 type StudentData = {
   email: string;
   ta: string;
+  // Display name, e.g. "Vyelle Agcaoili". Optional - when absent a name is
+  // derived from the email address, which is lowercase and lossy.
+  name?: string;
   // block1..block{NUMBER_OF_BLOCKS}, each holding a teacher's email address
-  [block: string]: string;
+  [block: string]: string | undefined;
 };
 
 type TeacherConnection = { connect: { id: string } } | null;
@@ -90,18 +93,24 @@ export const updateStudentSchedules = (base: any) =>
           studentUpdateResults.email = student.email;
 
           for (const slot of slots) {
-            const teacherId = teacherIdByEmail.get(student[slot]);
+            const teacherEmail = student[slot];
+            if (!teacherEmail) continue;
+            const teacherId = teacherIdByEmail.get(teacherEmail);
             if (!teacherId) continue;
             const target = slot === "ta" ? "taTeacher" : `${slot}Teacher`;
             studentUpdateResults[target] = { connect: { id: teacherId } };
           }
 
+          // Prefer the name supplied in the payload. Falling back to the email
+          // gives a lowercase, lossy name ("hectorm figueroa"), so it is only a
+          // last resort. Applied on update as well as create so a re-import
+          // corrects names that were previously derived from the address.
+          const suppliedName = student.name?.trim();
+          studentUpdateResults.name =
+            suppliedName || student.email.split("@")[0].split(".").join(" ");
+
           //if user is new create new user
           if (!studentInfo[0]?.id) {
-            //get name as a string from email separated by .
-            const nameArray = student.email.split("@")[0].split(".");
-            //join the names together
-            studentUpdateResults.name = nameArray.join(" ");
             studentUpdateResults.isStudent = true;
             studentUpdateResults.password = "notpassword";
             const createdStudent = await context.query.User.createOne({
@@ -121,9 +130,10 @@ export const updateStudentSchedules = (base: any) =>
               },
             });
           }
-          // save if student is new or updated and add data to array
+          // save if student is new or updated and add data to array. The name
+          // reported back is the one written, so the caller's "students not
+          // updated" comparison also works for newly created students.
           studentUpdateResults.existed = !!studentInfo[0];
-          studentUpdateResults.name = studentInfo[0]?.name;
           allStudentUpdateResults.push(studentUpdateResults);
         })
       );
