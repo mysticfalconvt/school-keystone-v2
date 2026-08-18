@@ -8,6 +8,7 @@ import {
 } from "@keystone-6/core/fields";
 import { isAdmin, isSignedIn } from "../access";
 import { permissionFields } from "./fields";
+import { NUMBER_OF_BLOCKS } from "./blocks";
 
 export const User = list({
   access: {
@@ -64,6 +65,22 @@ export const User = list({
     }),
     block10Students: relationship({
       ref: "User.block10Teacher",
+      many: true,
+    }),
+    block11Teacher: relationship({
+      ref: "User.block11Students",
+      many: false,
+    }),
+    block11Students: relationship({
+      ref: "User.block11Teacher",
+      many: true,
+    }),
+    block12Teacher: relationship({
+      ref: "User.block12Students",
+      many: false,
+    }),
+    block12Students: relationship({
+      ref: "User.block12Teacher",
       many: true,
     }),
 
@@ -208,6 +225,16 @@ export const User = list({
     }),
     block10ClassName: text({ defaultValue: "Class Name Goes Here" }),
     block10AssignmentLastUpdated: timestamp(),
+    block11Assignment: text({
+      defaultValue: "Current Assignment for Block 11 goes here",
+    }),
+    block11ClassName: text({ defaultValue: "Class Name Goes Here" }),
+    block11AssignmentLastUpdated: timestamp(),
+    block12Assignment: text({
+      defaultValue: "Current Assignment for Block 12 goes here",
+    }),
+    block12ClassName: text({ defaultValue: "Class Name Goes Here" }),
+    block12AssignmentLastUpdated: timestamp(),
 
     // Archive of this teacher's replaced class assignments
     assignmentHistory: relationship({
@@ -233,7 +260,7 @@ export const User = list({
       // keep a history of past class assignments (with when each was added and
       // when it was replaced).
       if (operation === "update" && item && originalItem) {
-        for (let n = 1; n <= 10; n++) {
+        for (let n = 1; n <= NUMBER_OF_BLOCKS; n++) {
           const oldVal = (originalItem as any)[`block${n}Assignment`];
           const newVal = (item as any)[`block${n}Assignment`];
           if (oldVal != null && oldVal !== newVal) {

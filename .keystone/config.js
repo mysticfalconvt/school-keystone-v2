@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -15,6 +17,14 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // keystone.ts
@@ -23,7 +33,107 @@ __export(keystone_exports, {
   default: () => keystone_default
 });
 module.exports = __toCommonJS(keystone_exports);
-var import_config2 = require("dotenv/config");
+var import_config3 = require("dotenv/config");
+
+// lib/bugsink.ts
+var import_config = require("dotenv/config");
+var Sentry = __toESM(require("@sentry/node"));
+var dsn = process.env.BUGSINK_DSN;
+var bugsinkEnabled = Boolean(dsn);
+if (dsn) {
+  Sentry.init({
+    dsn,
+    release: `school-keystone-v2@${process.env.npm_package_version || "dev"}`,
+    environment: process.env.NODE_ENV || "development",
+    // Bugsink is an error tracker only — it does not ingest traces or profiles.
+    tracesSampleRate: 0,
+    // This app holds student data. Never let the SDK attach request bodies,
+    // headers, cookies or IPs on its own; we attach specific fields by hand.
+    sendDefaultPii: false
+  });
+  console.log(`[bugsink] error reporting enabled -> ${new URL(dsn).origin}`);
+} else {
+  console.log("[bugsink] BUGSINK_DSN not set \u2014 error reporting disabled");
+}
+function captureError(error, context = {}) {
+  if (!bugsinkEnabled) return;
+  try {
+    Sentry.withScope((scope) => {
+      if (context.tags) scope.setTags(context.tags);
+      if (context.extra) scope.setExtras(context.extra);
+      if (context.userId) scope.setUser({ id: context.userId });
+      if (error instanceof Error) {
+        Sentry.captureException(error);
+      } else {
+        Sentry.captureMessage(String(error), "error");
+      }
+    });
+  } catch (bugsinkError) {
+    console.error("[bugsink] failed to report error", bugsinkError);
+  }
+}
+function reportUserBug(report) {
+  if (!bugsinkEnabled) return;
+  try {
+    Sentry.withScope((scope) => {
+      scope.setLevel("warning");
+      scope.setTag("source", "bug-report");
+      scope.setFingerprint(["bug-report", report.title]);
+      if (report.description) scope.setExtra("description", report.description);
+      if (report.submittedById) scope.setUser({ id: report.submittedById });
+      Sentry.captureMessage(`Bug report: ${report.title}`);
+    });
+  } catch (bugsinkError) {
+    console.error("[bugsink] failed to report user bug", bugsinkError);
+  }
+}
+var IGNORED_ERROR_CODES = /* @__PURE__ */ new Set([
+  "GRAPHQL_PARSE_FAILED",
+  "GRAPHQL_VALIDATION_FAILED",
+  "BAD_USER_INPUT",
+  "BAD_REQUEST",
+  "PERSISTED_QUERY_NOT_FOUND"
+]);
+var IGNORED_MESSAGE_PATTERNS = [
+  /access denied/i,
+  /must be logged in/i,
+  /not authoriz/i,
+  /permission/i
+];
+function isExpectedError(error) {
+  const code = error.extensions?.code;
+  if (typeof code === "string" && IGNORED_ERROR_CODES.has(code)) return true;
+  return IGNORED_MESSAGE_PATTERNS.some((pattern) => pattern.test(error.message));
+}
+var bugsinkApolloPlugin = {
+  async requestDidStart() {
+    return {
+      async didEncounterErrors({ errors, request, contextValue }) {
+        if (!bugsinkEnabled) return;
+        const userId = contextValue?.session?.itemId;
+        for (const error of errors) {
+          if (isExpectedError(error)) continue;
+          captureError(error.originalError ?? error, {
+            tags: {
+              source: "graphql",
+              ...request.operationName ? { operation: request.operationName } : {}
+            },
+            extra: {
+              // The query text is safe to log; variables can hold student data,
+              // so only their names go along.
+              query: request.query,
+              variableNames: Object.keys(request.variables ?? {}),
+              path: error.path?.join(".")
+            },
+            userId: userId ? String(userId) : void 0
+          });
+        }
+      }
+    };
+  }
+};
+
+// keystone.ts
 var import_core33 = require("@keystone-6/core");
 
 // auth.ts
@@ -32,7 +142,7 @@ var import_session = require("@keystone-6/core/session");
 
 // lib/mail.ts
 var import_nodemailer = require("nodemailer");
-var import_config = require("dotenv/config");
+var import_config2 = require("dotenv/config");
 var transport = (0, import_nodemailer.createTransport)({
   service: "gmail",
   secure: false,
@@ -192,6 +302,10 @@ var { withAuth } = (0, import_auth.createAuth)({
           console.error("[auth] magicAuthLink sendToken failed", {
             identity,
             err
+          });
+          captureError(err, {
+            tags: { source: "auth", step: "magicAuthLink.sendToken" },
+            extra: { itemId: String(itemId) }
           });
           throw err;
         }
@@ -1417,6 +1531,9 @@ var permissionsList = Object.keys(
   permissionFields
 );
 
+// schemas/blocks.ts
+var NUMBER_OF_BLOCKS = 12;
+
 // schemas/User.ts
 var User = (0, import_core18.list)({
   access: {
@@ -1472,6 +1589,22 @@ var User = (0, import_core18.list)({
     }),
     block10Students: (0, import_fields18.relationship)({
       ref: "User.block10Teacher",
+      many: true
+    }),
+    block11Teacher: (0, import_fields18.relationship)({
+      ref: "User.block11Students",
+      many: false
+    }),
+    block11Students: (0, import_fields18.relationship)({
+      ref: "User.block11Teacher",
+      many: true
+    }),
+    block12Teacher: (0, import_fields18.relationship)({
+      ref: "User.block12Students",
+      many: false
+    }),
+    block12Students: (0, import_fields18.relationship)({
+      ref: "User.block12Teacher",
       many: true
     }),
     specialGroupStudents: (0, import_fields18.relationship)({ ref: "User", many: true }),
@@ -1611,6 +1744,16 @@ var User = (0, import_core18.list)({
     }),
     block10ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
     block10AssignmentLastUpdated: (0, import_fields18.timestamp)(),
+    block11Assignment: (0, import_fields18.text)({
+      defaultValue: "Current Assignment for Block 11 goes here"
+    }),
+    block11ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
+    block11AssignmentLastUpdated: (0, import_fields18.timestamp)(),
+    block12Assignment: (0, import_fields18.text)({
+      defaultValue: "Current Assignment for Block 12 goes here"
+    }),
+    block12ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
+    block12AssignmentLastUpdated: (0, import_fields18.timestamp)(),
     // Archive of this teacher's replaced class assignments
     assignmentHistory: (0, import_fields18.relationship)({
       ref: "AssignmentHistory.teacher",
@@ -1630,7 +1773,7 @@ var User = (0, import_core18.list)({
         });
       }
       if (operation === "update" && item && originalItem) {
-        for (let n = 1; n <= 10; n++) {
+        for (let n = 1; n <= NUMBER_OF_BLOCKS; n++) {
           const oldVal = originalItem[`block${n}Assignment`];
           const newVal = item[`block${n}Assignment`];
           if (oldVal != null && oldVal !== newVal) {
@@ -1734,6 +1877,20 @@ var BugReport = (0, import_core21.list)({
       create: isSignedIn,
       delete: isSignedIn,
       update: isSignedIn
+    }
+  },
+  hooks: {
+    // Mirror anything a user reports here into Bugsink so it lands in the
+    // same place as the errors the server catches on its own. Never throws,
+    // so a Bugsink outage cannot block someone filing a report.
+    afterOperation: {
+      create: async ({ item }) => {
+        reportUserBug({
+          title: String(item.name),
+          description: item.description ? String(item.description) : void 0,
+          submittedById: item.submittedById ? String(item.submittedById) : void 0
+        });
+      }
     }
   },
   ui: {
@@ -2060,6 +2217,13 @@ var authenticateUserWithGoogle = (base) => import_core27.graphql.field({
     });
     if (!sessionToken || typeof sessionToken !== "string") {
       console.error("[auth] Google sign-in: failed to start session");
+      captureError(
+        new Error("Google sign-in: sessionStrategy.start returned no token"),
+        {
+          tags: { mutation: "authenticateUserWithGoogle" },
+          userId: String(user.id)
+        }
+      );
       return { success: false, message: "Could not start session" };
     }
     return {
@@ -2176,6 +2340,11 @@ var queryCommunicator = (base) => import_core29.graphql.field({
         const errorMessage = `Communicator API error (${response.status} ${response.statusText}):
 ${errorDetails}`;
         console.error(errorMessage);
+        captureError(new Error(errorMessage), {
+          tags: { mutation: "queryCommunicator", model: args.model },
+          extra: { status: response.status, details: errorDetails },
+          userId: String(user.id)
+        });
         await context.query.CommunicatorChat.createOne({
           data: {
             user: { connect: { id: user.id } },
@@ -2212,6 +2381,10 @@ ${errorDetails}`;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to query communicator service";
       console.error("Communicator Query Error:", error);
+      captureError(error, {
+        tags: { mutation: "queryCommunicator", model: args.model },
+        userId: String(user.id)
+      });
       try {
         await context.query.CommunicatorChat.createOne({
           data: {
@@ -2225,6 +2398,9 @@ ${errorDetails}`;
         });
       } catch (dbError) {
         console.error("Failed to save error to database:", dbError);
+        captureError(dbError, {
+          tags: { mutation: "queryCommunicator", step: "saveErrorToDb" }
+        });
       }
       return {
         error: true,
@@ -2346,6 +2522,33 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
     const studentDataList = JSON.parse(
       args.studentScheduleData
     );
+    const slots = [
+      ...Array.from({ length: NUMBER_OF_BLOCKS }, (_, i) => `block${i + 1}`),
+      "ta"
+    ];
+    const teacherEmails = [
+      ...new Set(
+        studentDataList.flatMap((student) => slots.map((slot) => student[slot])).filter((email) => !!email)
+      )
+    ];
+    const teachers = await context.query.User.findMany({
+      where: { email: { in: teacherEmails } },
+      query: gql3`
+          id
+          email
+        `
+    });
+    const teacherIdByEmail = new Map(
+      teachers.map((teacher) => [teacher.email, teacher.id])
+    );
+    const unmatchedEmails = teacherEmails.filter(
+      (email) => !teacherIdByEmail.has(email)
+    );
+    if (unmatchedEmails.length > 0) {
+      console.warn(
+        `updateStudentSchedules: no user found for ${unmatchedEmails.length} teacher email(s): ${unmatchedEmails.join(", ")}`
+      );
+    }
     await Promise.all(
       studentDataList.map(async (student) => {
         const studentUpdateResults = {};
@@ -2358,159 +2561,11 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
           `
         });
         studentUpdateResults.email = student.email;
-        if (student.block1) {
-          const block1Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block1 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block1Teacher.length > 0) {
-            studentUpdateResults.block1Teacher = {
-              connect: { id: block1Teacher[0].id }
-            };
-          }
-        }
-        if (student.block2) {
-          const block2Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block2 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block2Teacher.length > 0) {
-            studentUpdateResults.block2Teacher = {
-              connect: { id: block2Teacher[0].id }
-            };
-          }
-        }
-        if (student.block3) {
-          const block3Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block3 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block3Teacher.length > 0) {
-            studentUpdateResults.block3Teacher = {
-              connect: { id: block3Teacher[0].id }
-            };
-          }
-        }
-        if (student.block4) {
-          const block4Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block4 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block4Teacher.length > 0) {
-            studentUpdateResults.block4Teacher = {
-              connect: { id: block4Teacher[0].id }
-            };
-          }
-        }
-        if (student.block5) {
-          const block5Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block5 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block5Teacher.length > 0) {
-            studentUpdateResults.block5Teacher = {
-              connect: { id: block5Teacher[0].id }
-            };
-          }
-        }
-        if (student.block6) {
-          const block6Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block6 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block6Teacher.length > 0) {
-            studentUpdateResults.block6Teacher = {
-              connect: { id: block6Teacher[0].id }
-            };
-          }
-        }
-        if (student.block7) {
-          const block7Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block7 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block7Teacher.length > 0) {
-            studentUpdateResults.block7Teacher = {
-              connect: { id: block7Teacher[0].id }
-            };
-          }
-        }
-        if (student.block8) {
-          const block8Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block8 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block8Teacher.length > 0) {
-            studentUpdateResults.block8Teacher = {
-              connect: { id: block8Teacher[0].id }
-            };
-          }
-        }
-        if (student.block9) {
-          const block9Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block9 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block9Teacher.length > 0) {
-            studentUpdateResults.block9Teacher = {
-              connect: { id: block9Teacher[0].id }
-            };
-          }
-        }
-        if (student.block10) {
-          const block10Teacher = await context.query.User.findMany({
-            where: { email: { equals: student.block10 } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (block10Teacher.length > 0) {
-            studentUpdateResults.block10Teacher = {
-              connect: { id: block10Teacher[0].id }
-            };
-          }
-        }
-        if (student.ta) {
-          const taTeacher = await context.query.User.findMany({
-            where: { email: { equals: student.ta } },
-            query: gql3`
-      id
-    email
-    `
-          });
-          if (taTeacher.length > 0) {
-            studentUpdateResults.taTeacher = {
-              connect: { id: taTeacher[0].id }
-            };
-          }
+        for (const slot of slots) {
+          const teacherId = teacherIdByEmail.get(student[slot]);
+          if (!teacherId) continue;
+          const target = slot === "ta" ? "taTeacher" : `${slot}Teacher`;
+          studentUpdateResults[target] = { connect: { id: teacherId } };
         }
         if (!studentInfo[0]?.id) {
           const nameArray = student.email.split("@")[0].split(".");
@@ -2603,6 +2658,11 @@ var keystone_default = withAuth(
     session,
     graphql: {
       playground: process.env.NODE_ENV === "development",
+      apolloConfig: {
+        // Keystone appends these to its own plugins, so the playground config
+        // above is unaffected.
+        plugins: [bugsinkApolloPlugin]
+      },
       extendGraphqlSchema: import_core33.graphql.extend((base) => {
         return {
           mutation: {

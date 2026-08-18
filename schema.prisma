@@ -74,6 +74,12 @@ model User {
   block10Teacher                               User?                @relation("User_block10Teacher", fields: [block10TeacherId], references: [id])
   block10TeacherId                             String?              @map("block10Teacher")
   block10Students                              User[]               @relation("User_block10Teacher")
+  block11Teacher                               User?                @relation("User_block11Teacher", fields: [block11TeacherId], references: [id])
+  block11TeacherId                             String?              @map("block11Teacher")
+  block11Students                              User[]               @relation("User_block11Teacher")
+  block12Teacher                               User?                @relation("User_block12Teacher", fields: [block12TeacherId], references: [id])
+  block12TeacherId                             String?              @map("block12Teacher")
+  block12Students                              User[]               @relation("User_block12Teacher")
   specialGroupStudents                         User[]               @relation("User_specialGroupStudents")
   coTeachesWithTeacher                         User[]               @relation("User_coTeachesWithTeacher")
   taTeam                                       PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
@@ -142,6 +148,12 @@ model User {
   block10Assignment                            String               @default("Current Assignment for Block 10 goes here")
   block10ClassName                             String               @default("Class Name Goes Here")
   block10AssignmentLastUpdated                 DateTime?
+  block11Assignment                            String               @default("Current Assignment for Block 11 goes here")
+  block11ClassName                             String               @default("Class Name Goes Here")
+  block11AssignmentLastUpdated                 DateTime?
+  block12Assignment                            String               @default("Current Assignment for Block 12 goes here")
+  block12ClassName                             String               @default("Class Name Goes Here")
+  block12AssignmentLastUpdated                 DateTime?
   assignmentHistory                            AssignmentHistory[]  @relation("AssignmentHistory_teacher")
   sortingHat                                   String               @default("")
   passwordResetToken                           String?
@@ -183,6 +195,8 @@ model User {
   @@index([block8TeacherId])
   @@index([block9TeacherId])
   @@index([block10TeacherId])
+  @@index([block11TeacherId])
+  @@index([block12TeacherId])
   @@index([taTeamId])
 }
 

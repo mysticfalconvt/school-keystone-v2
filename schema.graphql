@@ -66,6 +66,12 @@ type User {
   block10Teacher: User
   block10Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block10StudentsCount(where: UserWhereInput! = {}): Int
+  block11Teacher: User
+  block11Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  block11StudentsCount(where: UserWhereInput! = {}): Int
+  block12Teacher: User
+  block12Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  block12StudentsCount(where: UserWhereInput! = {}): Int
   specialGroupStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   specialGroupStudentsCount(where: UserWhereInput! = {}): Int
   coTeachesWithTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
@@ -150,6 +156,12 @@ type User {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  block11Assignment: String
+  block11ClassName: String
+  block11AssignmentLastUpdated: DateTime
+  block12Assignment: String
+  block12ClassName: String
+  block12AssignmentLastUpdated: DateTime
   assignmentHistory(where: AssignmentHistoryWhereInput! = {}, orderBy: [AssignmentHistoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AssignmentHistoryWhereUniqueInput): [AssignmentHistory!]
   assignmentHistoryCount(where: AssignmentHistoryWhereInput! = {}): Int
   sortingHat: String
@@ -231,6 +243,10 @@ input UserWhereInput {
   block9Students: UserManyRelationFilter
   block10Teacher: UserWhereInput
   block10Students: UserManyRelationFilter
+  block11Teacher: UserWhereInput
+  block11Students: UserManyRelationFilter
+  block12Teacher: UserWhereInput
+  block12Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
   coTeachesWithTeacher: UserManyRelationFilter
   taTeam: PbisTeamWhereInput
@@ -296,6 +312,12 @@ input UserWhereInput {
   block10Assignment: StringFilter
   block10ClassName: StringFilter
   block10AssignmentLastUpdated: DateTimeNullableFilter
+  block11Assignment: StringFilter
+  block11ClassName: StringFilter
+  block11AssignmentLastUpdated: DateTimeNullableFilter
+  block12Assignment: StringFilter
+  block12ClassName: StringFilter
+  block12AssignmentLastUpdated: DateTimeNullableFilter
   assignmentHistory: AssignmentHistoryManyRelationFilter
   sortingHat: StringFilter
   passwordResetToken: PasswordFilter
@@ -521,6 +543,12 @@ input UserOrderByInput {
   block10Assignment: OrderDirection
   block10ClassName: OrderDirection
   block10AssignmentLastUpdated: OrderDirection
+  block11Assignment: OrderDirection
+  block11ClassName: OrderDirection
+  block11AssignmentLastUpdated: OrderDirection
+  block12Assignment: OrderDirection
+  block12ClassName: OrderDirection
+  block12AssignmentLastUpdated: OrderDirection
   sortingHat: OrderDirection
   passwordResetIssuedAt: OrderDirection
   passwordResetRedeemedAt: OrderDirection
@@ -584,6 +612,10 @@ input UserUpdateInput {
   block9Students: UserRelateToManyForUpdateInput
   block10Teacher: UserRelateToOneForUpdateInput
   block10Students: UserRelateToManyForUpdateInput
+  block11Teacher: UserRelateToOneForUpdateInput
+  block11Students: UserRelateToManyForUpdateInput
+  block12Teacher: UserRelateToOneForUpdateInput
+  block12Students: UserRelateToManyForUpdateInput
   specialGroupStudents: UserRelateToManyForUpdateInput
   coTeachesWithTeacher: UserRelateToManyForUpdateInput
   taTeam: PbisTeamRelateToOneForUpdateInput
@@ -649,6 +681,12 @@ input UserUpdateInput {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  block11Assignment: String
+  block11ClassName: String
+  block11AssignmentLastUpdated: DateTime
+  block12Assignment: String
+  block12ClassName: String
+  block12AssignmentLastUpdated: DateTime
   assignmentHistory: AssignmentHistoryRelateToManyForUpdateInput
   sortingHat: String
   passwordResetToken: String
@@ -817,6 +855,10 @@ input UserCreateInput {
   block9Students: UserRelateToManyForCreateInput
   block10Teacher: UserRelateToOneForCreateInput
   block10Students: UserRelateToManyForCreateInput
+  block11Teacher: UserRelateToOneForCreateInput
+  block11Students: UserRelateToManyForCreateInput
+  block12Teacher: UserRelateToOneForCreateInput
+  block12Students: UserRelateToManyForCreateInput
   specialGroupStudents: UserRelateToManyForCreateInput
   coTeachesWithTeacher: UserRelateToManyForCreateInput
   taTeam: PbisTeamRelateToOneForCreateInput
@@ -882,6 +924,12 @@ input UserCreateInput {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  block11Assignment: String
+  block11ClassName: String
+  block11AssignmentLastUpdated: DateTime
+  block12Assignment: String
+  block12ClassName: String
+  block12AssignmentLastUpdated: DateTime
   assignmentHistory: AssignmentHistoryRelateToManyForCreateInput
   sortingHat: String
   passwordResetToken: String
