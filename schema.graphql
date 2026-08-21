@@ -119,6 +119,8 @@ type User {
   taTeamAveragePbisCardsPerStudent: Int
   chromebookCheck(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
   chromebookCheckCount(where: ChromebookCheckWhereInput! = {}): Int
+  classroomChromebookChecks(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
+  classroomChromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -275,6 +277,7 @@ input UserWhereInput {
   taTeamPbisLevel: IntNullableFilter
   taTeamAveragePbisCardsPerStudent: IntNullableFilter
   chromebookCheck: ChromebookCheckManyRelationFilter
+  classroomChromebookChecks: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
   PbisCardCount: IntNullableFilter
@@ -644,6 +647,7 @@ input UserUpdateInput {
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
   chromebookCheck: ChromebookCheckRelateToManyForUpdateInput
+  classroomChromebookChecks: ChromebookCheckRelateToManyForUpdateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -887,6 +891,7 @@ input UserCreateInput {
   taTeamPbisLevel: Int
   taTeamAveragePbisCardsPerStudent: Int
   chromebookCheck: ChromebookCheckRelateToManyForCreateInput
+  classroomChromebookChecks: ChromebookCheckRelateToManyForCreateInput
   callbackCount: Int
   totalCallbackCount: Int
   PbisCardCount: Int
@@ -1585,6 +1590,7 @@ type ChromebookCheck {
   id: ID!
   time: DateTime
   student: User
+  classroom: User
   message: String
 }
 
@@ -1599,6 +1605,7 @@ input ChromebookCheckWhereInput {
   id: IDFilter
   time: DateTimeFilter
   student: UserWhereInput
+  classroom: UserWhereInput
   message: StringFilter
 }
 
@@ -1611,6 +1618,7 @@ input ChromebookCheckOrderByInput {
 input ChromebookCheckUpdateInput {
   time: DateTime
   student: UserRelateToOneForUpdateInput
+  classroom: UserRelateToOneForUpdateInput
   message: String
 }
 
@@ -1622,6 +1630,7 @@ input ChromebookCheckUpdateArgs {
 input ChromebookCheckCreateInput {
   time: DateTime
   student: UserRelateToOneForCreateInput
+  classroom: UserRelateToOneForCreateInput
   message: String
 }
 

@@ -836,7 +836,7 @@ var ChromebookCheck = (0, import_core7.list)({
   },
   ui: {
     listView: {
-      initialColumns: ["time", "assignment"],
+      initialColumns: ["time", "student", "classroom"],
       pageSize: 100
     }
   },
@@ -847,6 +847,11 @@ var ChromebookCheck = (0, import_core7.list)({
     }),
     student: (0, import_fields6.relationship)({
       ref: "User.chromebookCheck"
+    }),
+    // The teacher whose classroom the chromebook lives in. Checks are done by
+    // the classroom teacher, not by the student's TA.
+    classroom: (0, import_fields6.relationship)({
+      ref: "User.classroomChromebookChecks"
     }),
     message: (0, import_fields6.text)()
   }
@@ -1683,6 +1688,11 @@ var User = (0, import_core18.list)({
     taTeamAveragePbisCardsPerStudent: (0, import_fields18.integer)({ defaultValue: 0 }),
     chromebookCheck: (0, import_fields18.relationship)({
       ref: "ChromebookCheck.student",
+      many: true
+    }),
+    // Checks performed on chromebooks kept in this teacher's classroom
+    classroomChromebookChecks: (0, import_fields18.relationship)({
+      ref: "ChromebookCheck.classroom",
       many: true
     }),
     // Important Info

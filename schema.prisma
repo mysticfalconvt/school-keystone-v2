@@ -111,6 +111,7 @@ model User {
   taTeamPbisLevel                              Int?                 @default(0)
   taTeamAveragePbisCardsPerStudent             Int?                 @default(0)
   chromebookCheck                              ChromebookCheck[]    @relation("ChromebookCheck_student")
+  classroomChromebookChecks                    ChromebookCheck[]    @relation("ChromebookCheck_classroom")
   callbackCount                                Int?                 @default(0)
   totalCallbackCount                           Int?                 @default(0)
   PbisCardCount                                Int?                 @default(0)
@@ -329,13 +330,16 @@ model CellPhoneViolation {
 }
 
 model ChromebookCheck {
-  id        String   @id @default(cuid())
-  time      DateTime @default(now())
-  student   User?    @relation("ChromebookCheck_student", fields: [studentId], references: [id])
-  studentId String?  @map("student")
-  message   String   @default("")
+  id          String   @id @default(cuid())
+  time        DateTime @default(now())
+  student     User?    @relation("ChromebookCheck_student", fields: [studentId], references: [id])
+  studentId   String?  @map("student")
+  classroom   User?    @relation("ChromebookCheck_classroom", fields: [classroomId], references: [id])
+  classroomId String?  @map("classroom")
+  message     String   @default("")
 
   @@index([studentId])
+  @@index([classroomId])
 }
 
 model ChromebookAssignment {

@@ -18,7 +18,7 @@ export const ChromebookCheck = list({
   },
   ui: {
     listView: {
-      initialColumns: ["time", "assignment"],
+      initialColumns: ["time", "student", "classroom"],
       pageSize: 100,
     },
   },
@@ -29,6 +29,11 @@ export const ChromebookCheck = list({
     }),
     student: relationship({
       ref: "User.chromebookCheck",
+    }),
+    // The teacher whose classroom the chromebook lives in. Checks are done by
+    // the classroom teacher, not by the student's TA.
+    classroom: relationship({
+      ref: "User.classroomChromebookChecks",
     }),
     message: text(),
   },

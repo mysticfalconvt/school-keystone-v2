@@ -164,6 +164,11 @@ export const User = list({
       ref: "ChromebookCheck.student",
       many: true,
     }),
+    // Checks performed on chromebooks kept in this teacher's classroom
+    classroomChromebookChecks: relationship({
+      ref: "ChromebookCheck.classroom",
+      many: true,
+    }),
 
     // Important Info
     callbackCount: integer({ defaultValue: 0 }),
