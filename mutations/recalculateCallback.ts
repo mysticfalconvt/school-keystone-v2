@@ -22,6 +22,8 @@ export const recalculateCallback = (base: any) =>
       }
       `,
       });
+      if (!callback) return null;
+
       const studentId = callback.student.id;
       const teacherId = callback.teacher.id;
       // const taTeacherId = callback.student.taTeacher.id
