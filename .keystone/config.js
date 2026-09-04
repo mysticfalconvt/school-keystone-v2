@@ -2442,6 +2442,7 @@ var recalculateCallback = (base) => import_core30.graphql.field({
       }
       `
     });
+    if (!callback) return null;
     const studentId = callback.student.id;
     const teacherId = callback.teacher.id;
     const student = await context.query.User.findOne({
