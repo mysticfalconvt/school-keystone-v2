@@ -31,6 +31,15 @@ if (dsn) {
     // This app holds student data. Never let the SDK attach request bodies,
     // headers, cookies or IPs on its own; we attach specific fields by hand.
     sendDefaultPii: false,
+    // Console arguments and HTTP request details can contain credentials or
+    // student data even when sendDefaultPii is disabled.
+    beforeBreadcrumb(breadcrumb) {
+      return breadcrumb.category === 'console' ? null : breadcrumb;
+    },
+    beforeSend(event) {
+      delete event.request;
+      return event;
+    },
   });
   console.log(`[bugsink] error reporting enabled -> ${new URL(dsn).origin}`);
 } else {
@@ -145,9 +154,6 @@ export const bugsinkApolloPlugin: ApolloServerPlugin = {
                 : {}),
             },
             extra: {
-              // The query text is safe to log; variables can hold student data,
-              // so only their names go along.
-              query: request.query,
               variableNames: Object.keys(request.variables ?? {}),
               path: error.path?.join('.'),
             },

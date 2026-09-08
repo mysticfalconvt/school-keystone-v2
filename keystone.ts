@@ -44,7 +44,6 @@ const databaseURL =
   process.env.LOCAL_DATABASE_URL ||
   process.env.DATABASE_URL ||
   'postgres://postgres:postgres@localhost:5432/postgres';
-if (databaseURL.includes('local')) console.log(databaseURL);
 
 import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';

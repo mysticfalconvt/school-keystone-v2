@@ -52,19 +52,11 @@ const { withAuth } = createAuth({
   },
   magicAuthLink: {
     sendToken: async ({ itemId, identity, token }) => {
-      console.log('[auth] magicAuthLink sendToken invoked', {
-        identity,
-        hasItemId: !!itemId,
-        hasToken: !!token,
-      });
       if (itemId && identity && token) {
         try {
           await sendMagicLinkEmail(token, identity);
         } catch (err) {
-          console.error('[auth] magicAuthLink sendToken failed', {
-            identity,
-            err,
-          });
+          console.error('[auth] magicAuthLink sendToken failed');
           captureError(err, {
             tags: { source: 'auth', step: 'magicAuthLink.sendToken' },
             extra: { itemId: String(itemId) },
@@ -73,8 +65,8 @@ const { withAuth } = createAuth({
         }
       } else {
         console.warn('[auth] magicAuthLink sendToken skipped — missing field', {
-          identity,
           hasItemId: !!itemId,
+          hasIdentity: !!identity,
           hasToken: !!token,
         });
       }

@@ -45,8 +45,8 @@ export const authenticateUserWithGoogle = (base: any) =>
           audience: CLIENT_ID,
         });
         payload = ticket.getPayload();
-      } catch (err) {
-        console.warn('[auth] Google ID token verification failed', err);
+      } catch {
+        console.warn('[auth] Google ID token verification failed');
         return { success: false, message: 'Invalid Google sign-in' };
       }
 

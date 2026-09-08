@@ -49,7 +49,16 @@ if (dsn) {
     tracesSampleRate: 0,
     // This app holds student data. Never let the SDK attach request bodies,
     // headers, cookies or IPs on its own; we attach specific fields by hand.
-    sendDefaultPii: false
+    sendDefaultPii: false,
+    // Console arguments and HTTP request details can contain credentials or
+    // student data even when sendDefaultPii is disabled.
+    beforeBreadcrumb(breadcrumb) {
+      return breadcrumb.category === "console" ? null : breadcrumb;
+    },
+    beforeSend(event) {
+      delete event.request;
+      return event;
+    }
   });
   console.log(`[bugsink] error reporting enabled -> ${new URL(dsn).origin}`);
 } else {
@@ -119,9 +128,6 @@ var bugsinkApolloPlugin = {
               ...request.operationName ? { operation: request.operationName } : {}
             },
             extra: {
-              // The query text is safe to log; variables can hold student data,
-              // so only their names go along.
-              query: request.query,
               variableNames: Object.keys(request.variables ?? {}),
               path: error.path?.join(".")
             },
@@ -143,25 +149,54 @@ var import_session = require("@keystone-6/core/session");
 // lib/mail.ts
 var import_nodemailer = require("nodemailer");
 var import_config2 = require("dotenv/config");
+var mailPort = Number(process.env.MAIL_PORT || 587);
+if (!process.env.MAIL_HOST || !process.env.MAIL_USER || !process.env.MAIL_PASS) {
+  throw new Error("MAIL_HOST, MAIL_USER, and MAIL_PASS must be configured");
+}
+if (!Number.isInteger(mailPort) || mailPort <= 0) {
+  throw new Error("MAIL_PORT must be a valid port number");
+}
 var transport = (0, import_nodemailer.createTransport)({
-  service: "gmail",
-  secure: false,
+  pool: true,
+  host: process.env.MAIL_HOST,
+  port: mailPort,
+  secure: mailPort === 465,
+  requireTLS: mailPort !== 465,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
   },
+  maxConnections: 2,
+  maxMessages: 50,
+  rateDelta: 1e3,
+  rateLimit: 5,
   tls: {
-    ciphers: "SSLv3"
+    minVersion: "TLSv1.2"
   }
 });
-var devTransport = (0, import_nodemailer.createTransport)({
-  host: process.env.MAIL_HOST,
-  port: Number(process.env.MAIL_PORT),
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS
+var RETRY_DELAYS_MS = [2e3, 8e3];
+async function sendMail(options) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await transport.sendMail(options);
+    } catch (error) {
+      const responseCode = error instanceof Error && "responseCode" in error ? Number(error.responseCode) : void 0;
+      const delayMs = RETRY_DELAYS_MS[attempt];
+      if (!delayMs || responseCode !== 421 && responseCode !== 454) {
+        throw error;
+      }
+      console.warn("[mail] transient SMTP failure; retrying", {
+        responseCode,
+        attempt: attempt + 1,
+        delayMs
+      });
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
-});
+}
+function logSentMessage(info) {
+  console.log("[mail] message sent", { messageId: info?.messageId });
+}
 function makeANiceEmail(text24) {
   return `
     <div className="email" style="
@@ -179,7 +214,7 @@ function makeANiceEmail(text24) {
   `;
 }
 async function sendPasswordResetEmail(resetToken, to) {
-  const info = await transport.sendMail({
+  const info = await sendMail({
     to,
     from: process.env.MAIL_USER,
     subject: "Your password reset token!",
@@ -187,76 +222,40 @@ async function sendPasswordResetEmail(resetToken, to) {
       <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Click Here to reset</a>
     `)
   });
+  logSentMessage(info);
   if (process.env.MAIL_USER?.includes("ethereal.email")) {
     console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
 }
 async function sendMagicLinkEmail(token, email) {
-  if (process.env.NODE_ENV === "development") {
-    const info = await devTransport.sendMail({
-      to: email,
-      from: process.env.MAIL_USER,
-      subject: "Your Magic Link",
-      html: makeANiceEmail(`
-        <br/>
-        Here is your link to login:
-        <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
-        <br/>
-        <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
-      `)
-    });
-    console.log(info);
-  } else {
-    try {
-      const info = await transport.sendMail({
-        to: email,
-        from: process.env.MAIL_USER,
-        subject: "Your Magic Link",
-        html: makeANiceEmail(`
+  const info = await sendMail({
+    to: email,
+    from: process.env.MAIL_USER,
+    subject: "Your Magic Link",
+    html: makeANiceEmail(`
       <br/>
       Here is your link to login:
       <a href="${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}">Click Here to login</a>
       <br/>
       <p>or copy this link: ${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}</p>
     `)
-      });
-      console.log("[magic-link] sent", {
-        to: email,
-        messageId: info?.messageId,
-        response: info?.response
-      });
-    } catch (err) {
-      console.error("[magic-link] send failed", { to: email, err });
-      throw err;
-    }
+  });
+  logSentMessage(info);
+  if (process.env.MAIL_USER?.includes("ethereal.email")) {
+    console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
 }
 async function sendAnEmail(to, from, subject, body) {
-  console.log(process.env.MAIL_HOST);
-  console.log(process.env.MAIL_USER);
-  console.log(process.env.MAIL_PASS);
-  console.log(process.env.MAIL_PORT);
-  if (process.env.NODE_ENV === "development") {
-    const info = await devTransport.sendMail({
-      to,
-      from: process.env.MAIL_USER,
-      replyTo: from,
-      subject,
-      html: makeANiceEmail(body)
-    });
-    console.log(info);
-  } else {
-    const info = await transport.sendMail({
-      to,
-      from: process.env.MAIL_USER,
-      replyTo: from,
-      subject,
-      html: makeANiceEmail(body)
-    });
-    console.log(info);
-    if (process.env.MAIL_USER?.includes("ethereal.email")) {
-      console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
-    }
+  const info = await sendMail({
+    to,
+    from: process.env.MAIL_USER,
+    replyTo: from,
+    subject,
+    html: makeANiceEmail(body)
+  });
+  logSentMessage(info);
+  if (process.env.MAIL_USER?.includes("ethereal.email")) {
+    console.log(`\u{1F48C} Message Sent!  Preview it at ${(0, import_nodemailer.getTestMessageUrl)(info)}`);
   }
 }
 
@@ -290,19 +289,11 @@ var { withAuth } = (0, import_auth.createAuth)({
   },
   magicAuthLink: {
     sendToken: async ({ itemId, identity, token }) => {
-      console.log("[auth] magicAuthLink sendToken invoked", {
-        identity,
-        hasItemId: !!itemId,
-        hasToken: !!token
-      });
       if (itemId && identity && token) {
         try {
           await sendMagicLinkEmail(token, identity);
         } catch (err) {
-          console.error("[auth] magicAuthLink sendToken failed", {
-            identity,
-            err
-          });
+          console.error("[auth] magicAuthLink sendToken failed");
           captureError(err, {
             tags: { source: "auth", step: "magicAuthLink.sendToken" },
             extra: { itemId: String(itemId) }
@@ -311,8 +302,8 @@ var { withAuth } = (0, import_auth.createAuth)({
         }
       } else {
         console.warn("[auth] magicAuthLink sendToken skipped \u2014 missing field", {
-          identity,
           hasItemId: !!itemId,
+          hasIdentity: !!identity,
           hasToken: !!token
         });
       }
@@ -2197,8 +2188,8 @@ var authenticateUserWithGoogle = (base) => import_core27.graphql.field({
         audience: CLIENT_ID
       });
       payload = ticket.getPayload();
-    } catch (err) {
-      console.warn("[auth] Google ID token verification failed", err);
+    } catch {
+      console.warn("[auth] Google ID token verification failed");
       return { success: false, message: "Invalid Google sign-in" };
     }
     if (!payload?.email || payload.email_verified !== true) {
@@ -2302,7 +2293,6 @@ var queryCommunicator = (base) => import_core29.graphql.field({
     if (!session2) {
       throw new Error("You must be logged in to use the communicator");
     }
-    console.log(session2.data);
     if (!session2.data.isStaff) {
       throw new Error("Only staff members can access the communicator");
     }
@@ -2502,7 +2492,6 @@ var sendEmail = (base) => import_core31.graphql.field({
     emailData: import_core31.graphql.arg({ type: import_core31.graphql.JSON })
   },
   resolve: async (source, args, context) => {
-    console.log("Sending an Email", args.emailData);
     const session2 = await context.session;
     const isAllowed = isSignedIn({ session: session2, context });
     if (!isAllowed) return false;
@@ -2611,7 +2600,6 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
 
 // keystone.ts
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
-if (databaseURL.includes("local")) console.log(databaseURL);
 var keystone_default = withAuth(
   (0, import_core33.config)({
     db: {

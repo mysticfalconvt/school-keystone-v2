@@ -12,7 +12,6 @@ export const sendEmail = (base: any) =>
       emailData: graphql.arg({ type: graphql.JSON }),
     },
     resolve: async (source, args, context) => {
-      console.log("Sending an Email", args.emailData);
       const session = await context.session;
       const isAllowed = isSignedIn({ session, context });
       if (!isAllowed) return false;

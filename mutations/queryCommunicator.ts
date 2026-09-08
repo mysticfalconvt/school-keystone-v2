@@ -16,7 +16,6 @@ export const queryCommunicator = (base: any) =>
       if (!session) {
         throw new Error('You must be logged in to use the communicator');
       }
-      console.log(session.data);
       // Check if user is staff
       if (!session.data.isStaff) {
         throw new Error('Only staff members can access the communicator');
