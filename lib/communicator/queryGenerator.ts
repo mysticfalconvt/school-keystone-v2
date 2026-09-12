@@ -497,6 +497,23 @@ PBIS Card Rules:
 - Do not invent stored count fields such as PbisCardCount, YearPbisCount or
   taPbisCardCount. They were removed; only the relationship counts above exist.
 
+Collection Period Rules:
+- "The last collection", "this collection", "since the last collection" and
+  "this week's cards" all refer to a PBIS collection RUN, not a calendar week or
+  month. The runs are the rows of pbisCollectionDates.
+- NEVER invent a date like the first of the month for these. Fetch the latest run
+  first: query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 1)
+  { collectionDate } }, then filter cards with dateGiven gte that value.
+- If you answer with a date range, state the actual range you used so the reader
+  can see what "last collection" was taken to mean.
+
+Who Counts As A Teacher:
+- Administrators bulk-import PBIS cards hundreds at a time, so their totals are
+  not comparable to a teacher handing out cards individually. For any "who gave
+  the most cards" or similar ranking of staff, EXCLUDE them:
+  users(where: { isStaff: { equals: true }, isSuperAdmin: { equals: false } })
+- Include them only if the question explicitly asks about administrators.
+
 Counting and Ranking Rules:
 - Prefer a *Count field with a where filter over fetching rows and counting them
   yourself. counts are computed by the database and are exact; counting rows in a
@@ -993,14 +1010,26 @@ ${
         // Check if it's a parse or validation error that we might be able to fix.
         // Parse failures mean the document never made it past the tokenizer, so
         // nothing downstream was even analysed - they are worth a retry too.
+        // A parse or validation error means the document never ran, so nothing
+        // resolved and there is no path. An execution error happens inside a
+        // resolver and always carries the path it failed at. That distinction
+        // holds regardless of who formats the error, which matters because
+        // Apollo used to add extensions.code over HTTP and in-process
+        // execution does not - relying on the code silently stopped every
+        // "Cannot query field" from being retried once the pipeline moved
+        // in-process.
+        const isQueryShapeError = (e: any) => !e.path || e.path.length === 0;
+
         const retryableError = result.errors.find(
           (e) =>
+            isQueryShapeError(e) ||
             e.extensions?.code === 'GRAPHQL_PARSE_FAILED' ||
-            e.message.includes('Syntax Error') ||
             e.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
+            e.message.includes('Syntax Error') ||
             e.message.includes('conflict') ||
             e.message.includes('differing arguments') ||
             e.message.includes('is not defined by type') ||
+            e.message.includes('Cannot query field') ||
             e.message.includes('UserWhereUniqueInput'),
         );
 
@@ -1040,6 +1069,13 @@ ${
             retryableError.message.includes('is not defined by type')
           ) {
             errorGuidance = `The field you used doesn't exist in that input type. Check the schema and use the correct field name and input type. Remember: user (singular) only accepts unique fields like id, while users (plural) accepts filtering fields.`;
+          } else if (retryableError.message.includes('Cannot query field')) {
+            const m = retryableError.message.match(
+              /Cannot query field "(\w+)" on type "(\w+)"/,
+            );
+            const field = m ? m[1] : 'that field';
+            const onType = m ? m[2] : 'that type';
+            errorGuidance = `CRITICAL: "${field}" does not exist on type "${onType}". Do not guess field names. Look at the "${onType}" type in the schema you were given and use only the fields listed there. The schema you see is the complete set of what you may query - if something is not in it, it is not available and you should answer using what is, or say the data is not available.`;
           }
 
           // Update the question to include the error context

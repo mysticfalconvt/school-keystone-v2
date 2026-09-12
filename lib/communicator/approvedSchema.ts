@@ -166,7 +166,8 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
     student: 'The student who received the card.',
   },
   PbisCollectionDate: {
-    collectionDate: 'When this weekly PBIS collection run happened.',
+    collectionDate:
+      'When this weekly PBIS collection run happened. "The last collection" means the most recent of these timestamps - never a calendar week or month. To answer anything scoped to a collection period, first fetch the latest collectionDate, then filter cards by dateGiven relative to it.',
     collectedCards: 'Cards counted in this run. Stored as text, not a number.',
   },
   Callback: {

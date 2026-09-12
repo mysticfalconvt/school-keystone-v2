@@ -215,7 +215,9 @@ type StaffPbisCard {
 
 type PbisCollectionDate {
   id: ID!
-  """When this weekly PBIS collection run happened."""
+  """
+  When this weekly PBIS collection run happened. "The last collection" means the most recent of these timestamps - never a calendar week or month. To answer anything scoped to a collection period, first fetch the latest collectionDate, then filter cards by dateGiven relative to it.
+  """
   collectionDate: DateTime
   randomDrawingWinners(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinnersCount(where: RandomDrawingWinWhereInput! = {}): Int
