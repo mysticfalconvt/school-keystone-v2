@@ -2885,10 +2885,10 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
   /**
    * Generate an explanation of query results
    */
-  async explainResults(question, query, results, model) {
+  async explainResults(question, query, results, model, maxChars = this.MAX_RESULT_CHARS) {
     const alreadyTruncated = results._truncated === true;
     const originalSize = JSON.stringify(results).length;
-    const truncatedResults = alreadyTruncated ? results : this.truncateResults(results);
+    const truncatedResults = alreadyTruncated ? results : this.truncateResults(results, maxChars);
     const wasTruncated = truncatedResults._truncated === true;
     const truncatedSize = JSON.stringify(truncatedResults).length;
     console.log(
@@ -2914,7 +2914,13 @@ Terminology Rules:
 11. Use "callback assignment" or "late assignment" instead of just "callback" when explaining to make it clear
 12. Example: "John has 3 callback assignments" or "Sarah has 2 late assignments" (NOT "John has 3 callbacks")
 13. PBIS cards can be referred to as "PBIS cards" or "positive behavior cards"
-${wasTruncated ? "14. Note that the results shown are truncated/summarized due to size" : ""}`;
+${wasTruncated ? `14. CRITICAL - THE RESULTS ARE INCOMPLETE. They were cut to fit, and the
+    rows you were given are an arbitrary slice, not the top or first ones by any
+    meaningful order. Therefore you MUST NOT state or imply a maximum, minimum,
+    "most", "least", "top", "best", "worst", or any ranking or total. Say plainly
+    that the data was too large to show in full, report only what is visible and
+    label it as a partial sample, and suggest narrowing the question (a specific
+    person, class, or date range) to get a reliable answer.` : ""}`;
     const userPrompt = `User's Question: "${question}"
 
 GraphQL Query Executed:
@@ -3116,7 +3122,8 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
         // Use original question
         allQueries.join("\n---\n"),
         dataToExplain,
-        model
+        model,
+        truncationLimit
       );
       if (iteration < this.MAX_ITERATIONS) {
         const evaluation = await this.evaluateResponse(

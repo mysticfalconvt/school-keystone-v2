@@ -1,203 +1,62 @@
-# GraphQL Schema (Query-only)
-# Fetched: 2025-11-15T15:20:43.964Z
-# Mutations and Create/Update inputs excluded
-
-schema {
-  query: Query
-}
-
-"""System bug reports submitted by users"""
-type BugReport {
-  id: ID!
-  name: String
-  description: String
-  submittedBy: User
-  date: DateTime
-  read: Boolean
-}
-
-"""School calendar events, announcements, and important dates"""
-type Calendar {
-  id: ID!
-  name: String
-  description: String
-  status: String
-  date: DateTime
-  author: User
-  dateCreated: DateTime
-  link: String
-  linkTitle: String
-}
-
-"""Academic assignments/tasks assigned by teachers to students that need completion"""
-type Callback {
-  id: ID!
-  title: String
-  description: String
-  student: User
-  teacher: User
-  dateAssigned: DateTime
-  dateCompleted: DateTime
-  link: String
-  messageFromTeacher: String
-  messageFromTeacherDate: String
-  messageFromStudent: String
-  messageFromStudentDate: String
-  daysLate: Int
-}
-
-"""Records of student chromebook check-ins and check-outs"""
-type ChromebookCheck {
-  id: ID!
-  time: DateTime
-  student: User
-  message: String
-}
-
-"""Internal chat history logs from the Communicator query system"""
-type CommunicatorChat {
-  id: ID!
-  user: User
-  question: String
-  explanation: String
-  graphqlQuery: String
-  errorMessage: String
-  hasError: String
-  model: String
-  iterations: Int
-  evaluationScore: Int
-  userRating: Int
-  userComment: String
-  rawData: JSON
-  timestamp: DateTime
-  createdAt: DateTime
-}
-
-type KeystoneMeta {
-  adminMeta: KeystoneAdminMeta!
-}
-
-"""Shared educational links and resources"""
-type Link {
-  id: ID!
-  name: String
-  description: String
-  forTeachers: Boolean
-  forStudents: Boolean
-  forParents: Boolean
-  onHomePage: Boolean
-  forPbis: Boolean
-  forEPortfolio: Boolean
-  modifiedBy: User
-  modified: DateTime
-  link: String
-}
-
-"""Messages sent between users (teachers, students, staff)"""
-type Message {
-  id: ID!
-  subject: String
-  message: String
-  sender: User
-  receiver: User
-  sent: DateTime
-  read: Boolean
-  link: String
-}
-
-"""Positive Behavior (PBIS) reward cards given to students by teachers"""
-type PbisCard {
-  id: ID!
-  category: String
-  cardMessage: String
-  student: User
-  teacher: User
-  dateGiven: DateTime
-  counted: Boolean
-}
-
-"""PBIS collection periods tracking winners at various reward levels"""
-type PbisCollectionDate {
-  id: ID!
-  collectionDate: DateTime
-  randomDrawingWinners(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
-  randomDrawingWinnersCount(where: RandomDrawingWinWhereInput! = {}): Int
-  personalLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
-  personalLevelWinnersCount(where: UserWhereInput! = {}): Int
-  taNewLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
-  taNewLevelWinnersCount(where: UserWhereInput! = {}): Int
-  staffRandomWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
-  staffRandomWinnersCount(where: UserWhereInput! = {}): Int
-  collectedCards: String
-  lastModifiedBy: User
-}
+# GENERATED FILE - DO NOT EDIT
+#
+# Built from schema.graphql by scripts/buildCommunicatorSchema.ts, filtered
+# through the allowlist in lib/communicator/approvedSchema.ts. This is the only
+# schema the Communicator model is shown.
+#
+# To change what the model can see, edit approvedSchema.ts and regenerate.
 
 type Query {
   user(where: UserWhereUniqueInput!): User
   users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   usersCount(where: UserWhereInput! = {}): Int
-  bugReport(where: BugReportWhereUniqueInput!): BugReport
-  bugReports(where: BugReportWhereInput! = {}, orderBy: [BugReportOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BugReportWhereUniqueInput): [BugReport!]
-  bugReportsCount(where: BugReportWhereInput! = {}): Int
   callback(where: CallbackWhereUniqueInput!): Callback
   callbacks(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbacksCount(where: CallbackWhereInput! = {}): Int
-  calendar(where: CalendarWhereUniqueInput!): Calendar
-  calendars(where: CalendarWhereInput! = {}, orderBy: [CalendarOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CalendarWhereUniqueInput): [Calendar!]
-  calendarsCount(where: CalendarWhereInput! = {}): Int
-  chromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
-  chromebookChecks(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
-  chromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
-  communicatorChat(where: CommunicatorChatWhereUniqueInput!): CommunicatorChat
-  communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
-  communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
-  link(where: LinkWhereUniqueInput!): Link
-  links(where: LinkWhereInput! = {}, orderBy: [LinkOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LinkWhereUniqueInput): [Link!]
-  linksCount(where: LinkWhereInput! = {}): Int
-  message(where: MessageWhereUniqueInput!): Message
-  messages(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
-  messagesCount(where: MessageWhereInput! = {}): Int
   pbisCard(where: PbisCardWhereUniqueInput!): PbisCard
   pbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   pbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  staffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
+  staffPbisCards(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  staffPbisCardsCount(where: StaffPbisCardWhereInput! = {}): Int
   pbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!): PbisCollectionDate
   pbisCollectionDates(where: PbisCollectionDateWhereInput! = {}, orderBy: [PbisCollectionDateOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionDateWhereUniqueInput): [PbisCollectionDate!]
   pbisCollectionDatesCount(where: PbisCollectionDateWhereInput! = {}): Int
+  randomDrawingWin(where: RandomDrawingWinWhereUniqueInput!): RandomDrawingWin
+  randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
+  randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
+  authenticatedItem: AuthenticatedItem
 }
 
-"""Users in the system including teachers, students, parents, and staff"""
 type User {
   id: ID!
   name: String
   preferredName: String
   email: String
+  """The students in this teacher's TA (advisory) group."""
   taStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   taStudentsCount(where: UserWhereInput! = {}): Int
+  """The student's TA (advisory) teacher."""
   taTeacher: User
   parent(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   parentCount(where: UserWhereInput! = {}): Int
   children(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   childrenCount(where: UserWhereInput! = {}): Int
-  canManageCalendar: Boolean
-  canSeeOtherUsers: Boolean
-  canManageUsers: Boolean
-  canManageRoles: Boolean
-  canManageLinks: Boolean
-  canSeeAllTeacherEvents: Boolean
-  canSeeStudentEvents: Boolean
-  canSeeOwnCallback: Boolean
-  canSeeAllCallback: Boolean
   hasTA: Boolean
   hasClasses: Boolean
   isStudent: Boolean
   isParent: Boolean
+  """True for anyone who works at the school."""
   isStaff: Boolean
+  """
+  True for classroom teachers specifically. Note that people here say "teacher" to mean any employee, so isStaff is usually the right filter; use isTeacher only when the question means classroom teachers as distinct from other staff.
+  """
   isTeacher: Boolean
   isGuidance: Boolean
+  """
+  Administrator account. Admins bulk-import PBIS cards, so their card totals are not comparable to a teacher handing out cards individually. Exclude them from "who gave the most cards" style questions.
+  """
   isSuperAdmin: Boolean
-  canManagePbis: Boolean
-  canHaveSpecialGroups: Boolean
-  isCommunicatorEnabled: Boolean
   block1Teacher: User
   block1Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block1StudentsCount(where: UserWhereInput! = {}): Int
@@ -228,29 +87,49 @@ type User {
   block10Teacher: User
   block10Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block10StudentsCount(where: UserWhereInput! = {}): Int
+  block11Teacher: User
+  block11Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  block11StudentsCount(where: UserWhereInput! = {}): Int
+  block12Teacher: User
+  block12Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  block12StudentsCount(where: UserWhereInput! = {}): Int
   specialGroupStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   specialGroupStudentsCount(where: UserWhereInput! = {}): Int
   coTeachesWithTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   coTeachesWithTeacherCount(where: UserWhereInput! = {}): Int
   teacherPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
+  """Live count of PBIS cards this staff member has GIVEN to students."""
   teacherPbisCardsCount(where: PbisCardWhereInput! = {}): Int
   studentPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
+  """
+  Live count of PBIS cards this student has RECEIVED. Accepts the same where filter as pbisCards, so date ranges go inside it. With no argument it counts every card on record.
+  """
   studentPbisCardsCount(where: PbisCardWhereInput! = {}): Int
+  staffPbisCardsGiven(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  """Live count of staff-to-staff PBIS cards this person has given."""
+  staffPbisCardsGivenCount(where: StaffPbisCardWhereInput! = {}): Int
+  staffPbisCardsReceived(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
+  """Live count of staff-to-staff PBIS cards this person has received."""
+  staffPbisCardsReceivedCount(where: StaffPbisCardWhereInput! = {}): Int
   callbackItems(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbackItemsCount(where: CallbackWhereInput! = {}): Int
   callbackAssigned(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
   callbackAssignedCount(where: CallbackWhereInput! = {}): Int
-  messageSender(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
-  messageSenderCount(where: MessageWhereInput! = {}): Int
-  messageReceiver(where: MessageWhereInput! = {}, orderBy: [MessageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MessageWhereUniqueInput): [Message!]
-  messageReceiverCount(where: MessageWhereInput! = {}): Int
-  communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
-  communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
+  randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
+  randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
+  """
+  Stored level for the student, updated by the weekly PBIS collection. Current state, not a running total.
+  """
   individualPbisLevel: Int
+  """
+  Stored level for this teacher's TA group, updated by the weekly PBIS collection.
+  """
   taTeamPbisLevel: Int
+  """
+  Stored average cards per student for this teacher's TA group, updated by the weekly PBIS collection.
+  """
   taTeamAveragePbisCardsPerStudent: Int
-  chromebookCheck(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
-  chromebookCheckCount(where: ChromebookCheckWhereInput! = {}): Int
+  """Number of callback assignments currently open for a student."""
   callbackCount: Int
   totalCallbackCount: Int
   teacherSubject: String
@@ -285,137 +164,87 @@ type User {
   block10Assignment: String
   block10ClassName: String
   block10AssignmentLastUpdated: DateTime
+  block11Assignment: String
+  block11ClassName: String
+  block11AssignmentLastUpdated: DateTime
+  block12Assignment: String
+  block12ClassName: String
+  block12AssignmentLastUpdated: DateTime
 }
 
-input BirthdayOrderByInput {
-  id: OrderDirection
-  cakeType: OrderDirection
-  date: OrderDirection
-  hasChosen: OrderDirection
-  hasDelivered: OrderDirection
+type PbisCard {
+  id: ID!
+  """
+  One of: physical, class, responsibility, callback, quick, respect, perseverance.
+  """
+  category: String
+  cardMessage: String
+  """The student who received the card."""
+  student: User
+  """The staff member who gave the card."""
+  teacher: User
+  """When the card was given. Use this for any date filtering."""
+  dateGiven: DateTime
+  counted: Boolean
 }
 
-input BirthdayWhereInput {
-  AND: [BirthdayWhereInput!]
-  OR: [BirthdayWhereInput!]
-  NOT: [BirthdayWhereInput!]
-  id: IDFilter
-  cakeType: StringFilter
-  date: DateTimeNullableFilter
-  hasChosen: BooleanFilter
-  hasDelivered: BooleanFilter
-  student: UserWhereInput
+type StaffPbisCard {
+  id: ID!
+  category: String
+  giver: User
+  recipient: User
+  cardMessage: String
+  dateGiven: DateTime
+  counted: Boolean
 }
 
-input BirthdayWhereUniqueInput {
-  id: ID
-  student: UserWhereUniqueInput
+type PbisCollectionDate {
+  id: ID!
+  """When this weekly PBIS collection run happened."""
+  collectionDate: DateTime
+  randomDrawingWinners(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
+  randomDrawingWinnersCount(where: RandomDrawingWinWhereInput! = {}): Int
+  personalLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  personalLevelWinnersCount(where: UserWhereInput! = {}): Int
+  taNewLevelWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  taNewLevelWinnersCount(where: UserWhereInput! = {}): Int
+  staffRandomWinners(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  staffRandomWinnersCount(where: UserWhereInput! = {}): Int
+  """Cards counted in this run. Stored as text, not a number."""
+  collectedCards: String
+  lastModifiedBy: User
 }
+
+type RandomDrawingWin {
+  id: ID!
+  student: User
+  collectionDate: PbisCollectionDate
+  lastModifiedBy: User
+}
+
+type Callback {
+  id: ID!
+  title: String
+  description: String
+  student: User
+  teacher: User
+  """When the callback (late or missing work) was assigned."""
+  dateAssigned: DateTime
+  """Null while the callback is still outstanding."""
+  dateCompleted: DateTime
+  link: String
+  messageFromTeacher: String
+  messageFromTeacherDate: String
+  messageFromStudent: String
+  messageFromStudentDate: String
+  daysLate: Int
+}
+
+union AuthenticatedItem = User
 
 input BooleanFilter {
   equals: Boolean
   not: BooleanFilter
-}
-
-input BugReportOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  description: OrderDirection
-  date: OrderDirection
-  read: OrderDirection
-}
-
-input BugReportWhereInput {
-  AND: [BugReportWhereInput!]
-  OR: [BugReportWhereInput!]
-  NOT: [BugReportWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  description: StringFilter
-  submittedBy: UserWhereInput
-  date: DateTimeFilter
-  read: BooleanFilter
-}
-
-input BugReportWhereUniqueInput {
-  id: ID
-}
-
-input BullyingOrderByInput {
-  id: OrderDirection
-  dateReported: OrderDirection
-  dateOfEvent: OrderDirection
-  investigationDate: OrderDirection
-  studentReporter: OrderDirection
-  employeeWitness: OrderDirection
-  studentWitness: OrderDirection
-  studentsInterviewed: OrderDirection
-  initialActions: OrderDirection
-  nextSteps: OrderDirection
-  reporter: OrderDirection
-  description: OrderDirection
-  determination: OrderDirection
-  determinationDate: OrderDirection
-  determinationExplanation: OrderDirection
-  assignmentInvestigator: OrderDirection
-}
-
-input BullyingWhereInput {
-  AND: [BullyingWhereInput!]
-  OR: [BullyingWhereInput!]
-  NOT: [BullyingWhereInput!]
-  id: IDFilter
-  studentOffender: UserWhereInput
-  teacherAuthor: UserWhereInput
-  dateReported: DateTimeFilter
-  dateOfEvent: DateTimeFilter
-  investigationDate: DateTimeFilter
-  studentReporter: StringFilter
-  employeeWitness: StringFilter
-  studentWitness: StringFilter
-  studentsInterviewed: StringFilter
-  initialActions: StringFilter
-  nextSteps: StringFilter
-  reporter: StringFilter
-  description: StringFilter
-  determination: StringNullableFilter
-  determinationDate: DateTimeFilter
-  determinationExplanation: StringFilter
-  assignmentInvestigator: StringFilter
-}
-
-input BullyingWhereUniqueInput {
-  id: ID
-}
-
-input CalendarOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  description: OrderDirection
-  status: OrderDirection
-  date: OrderDirection
-  dateCreated: OrderDirection
-  link: OrderDirection
-  linkTitle: OrderDirection
-}
-
-input CalendarWhereInput {
-  AND: [CalendarWhereInput!]
-  OR: [CalendarWhereInput!]
-  NOT: [CalendarWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  description: StringFilter
-  status: StringFilter
-  date: DateTimeFilter
-  author: UserWhereInput
-  dateCreated: DateTimeFilter
-  link: StringFilter
-  linkTitle: StringFilter
-}
-
-input CalendarWhereUniqueInput {
-  id: ID
 }
 
 input CallbackManyRelationFilter {
@@ -461,110 +290,7 @@ input CallbackWhereUniqueInput {
   id: ID
 }
 
-input CellPhoneViolationManyRelationFilter {
-  every: CellPhoneViolationWhereInput
-  some: CellPhoneViolationWhereInput
-  none: CellPhoneViolationWhereInput
-}
-
-input CellPhoneViolationOrderByInput {
-  id: OrderDirection
-  description: OrderDirection
-  dateGiven: OrderDirection
-}
-
-input CellPhoneViolationWhereInput {
-  AND: [CellPhoneViolationWhereInput!]
-  OR: [CellPhoneViolationWhereInput!]
-  NOT: [CellPhoneViolationWhereInput!]
-  id: IDFilter
-  description: StringFilter
-  student: UserWhereInput
-  teacher: UserWhereInput
-  dateGiven: DateTimeFilter
-}
-
-input CellPhoneViolationWhereUniqueInput {
-  id: ID
-}
-
-input ChromebookCheckManyRelationFilter {
-  every: ChromebookCheckWhereInput
-  some: ChromebookCheckWhereInput
-  none: ChromebookCheckWhereInput
-}
-
-input ChromebookCheckOrderByInput {
-  id: OrderDirection
-  time: OrderDirection
-  message: OrderDirection
-}
-
-input ChromebookCheckWhereInput {
-  AND: [ChromebookCheckWhereInput!]
-  OR: [ChromebookCheckWhereInput!]
-  NOT: [ChromebookCheckWhereInput!]
-  id: IDFilter
-  time: DateTimeFilter
-  student: UserWhereInput
-  message: StringFilter
-}
-
-input ChromebookCheckWhereUniqueInput {
-  id: ID
-}
-
-input CommunicatorChatManyRelationFilter {
-  every: CommunicatorChatWhereInput
-  some: CommunicatorChatWhereInput
-  none: CommunicatorChatWhereInput
-}
-
-input CommunicatorChatOrderByInput {
-  id: OrderDirection
-  question: OrderDirection
-  explanation: OrderDirection
-  graphqlQuery: OrderDirection
-  errorMessage: OrderDirection
-  hasError: OrderDirection
-  model: OrderDirection
-  iterations: OrderDirection
-  evaluationScore: OrderDirection
-  userRating: OrderDirection
-  userComment: OrderDirection
-  timestamp: OrderDirection
-  createdAt: OrderDirection
-}
-
-input CommunicatorChatWhereInput {
-  AND: [CommunicatorChatWhereInput!]
-  OR: [CommunicatorChatWhereInput!]
-  NOT: [CommunicatorChatWhereInput!]
-  id: IDFilter
-  user: UserWhereInput
-  question: StringFilter
-  explanation: StringFilter
-  graphqlQuery: StringFilter
-  errorMessage: StringFilter
-  hasError: StringFilter
-  model: StringFilter
-  iterations: IntNullableFilter
-  evaluationScore: IntNullableFilter
-  userRating: IntNullableFilter
-  userComment: StringFilter
-  timestamp: DateTimeNullableFilter
-  createdAt: DateTimeNullableFilter
-}
-
-input CommunicatorChatWhereUniqueInput {
-  id: ID
-}
-
-input CreateInitialUserInput {
-  name: String
-  email: String
-  password: String
-}
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 input DateTimeFilter {
   equals: DateTime
@@ -586,91 +312,6 @@ input DateTimeNullableFilter {
   gt: DateTime
   gte: DateTime
   not: DateTimeNullableFilter
-}
-
-input DisciplineManyRelationFilter {
-  every: DisciplineWhereInput
-  some: DisciplineWhereInput
-  none: DisciplineWhereInput
-}
-
-input DisciplineOrderByInput {
-  id: OrderDirection
-  teacherComments: OrderDirection
-  adminComments: OrderDirection
-  classType: OrderDirection
-  location: OrderDirection
-  timeOfDay: OrderDirection
-  date: OrderDirection
-  addressed: OrderDirection
-  inappropriateLanguage: OrderDirection
-  physicalConduct: OrderDirection
-  nonCompliance: OrderDirection
-  disruption: OrderDirection
-  propertyMisuse: OrderDirection
-  otherConduct: OrderDirection
-  VerbalWarning: OrderDirection
-  buddyRoom: OrderDirection
-  conferenceWithStudent: OrderDirection
-  ParentContact: OrderDirection
-  PlanningRoomReferral: OrderDirection
-  FollowupPlan: OrderDirection
-  LossOfPrivilege: OrderDirection
-  DetentionWithTeacher: OrderDirection
-  IndividualizedInstruction: OrderDirection
-  GuidanceReferral: OrderDirection
-  ReferToAdministrator: OrderDirection
-  OtherAction: OrderDirection
-  none: OrderDirection
-  peers: OrderDirection
-  teacherInvolved: OrderDirection
-  substitute: OrderDirection
-  unknown: OrderDirection
-  othersInvolved: OrderDirection
-}
-
-input DisciplineWhereInput {
-  AND: [DisciplineWhereInput!]
-  OR: [DisciplineWhereInput!]
-  NOT: [DisciplineWhereInput!]
-  id: IDFilter
-  teacherComments: StringFilter
-  adminComments: StringFilter
-  classType: StringNullableFilter
-  location: StringNullableFilter
-  timeOfDay: StringNullableFilter
-  student: UserWhereInput
-  teacher: UserWhereInput
-  date: DateTimeFilter
-  addressed: DateTimeFilter
-  inappropriateLanguage: BooleanFilter
-  physicalConduct: BooleanFilter
-  nonCompliance: BooleanFilter
-  disruption: BooleanFilter
-  propertyMisuse: BooleanFilter
-  otherConduct: BooleanFilter
-  VerbalWarning: BooleanFilter
-  buddyRoom: BooleanFilter
-  conferenceWithStudent: BooleanFilter
-  ParentContact: BooleanFilter
-  PlanningRoomReferral: BooleanFilter
-  FollowupPlan: BooleanFilter
-  LossOfPrivilege: BooleanFilter
-  DetentionWithTeacher: BooleanFilter
-  IndividualizedInstruction: BooleanFilter
-  GuidanceReferral: BooleanFilter
-  ReferToAdministrator: BooleanFilter
-  OtherAction: BooleanFilter
-  none: BooleanFilter
-  peers: BooleanFilter
-  teacherInvolved: BooleanFilter
-  substitute: BooleanFilter
-  unknown: BooleanFilter
-  othersInvolved: BooleanFilter
-}
-
-input DisciplineWhereUniqueInput {
-  id: ID
 }
 
 input IDFilter {
@@ -695,75 +336,6 @@ input IntNullableFilter {
   not: IntNullableFilter
 }
 
-input LinkOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  description: OrderDirection
-  forTeachers: OrderDirection
-  forStudents: OrderDirection
-  forParents: OrderDirection
-  onHomePage: OrderDirection
-  forPbis: OrderDirection
-  forEPortfolio: OrderDirection
-  modified: OrderDirection
-  link: OrderDirection
-}
-
-input LinkWhereInput {
-  AND: [LinkWhereInput!]
-  OR: [LinkWhereInput!]
-  NOT: [LinkWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  description: StringFilter
-  forTeachers: BooleanFilter
-  forStudents: BooleanFilter
-  forParents: BooleanFilter
-  onHomePage: BooleanFilter
-  forPbis: BooleanFilter
-  forEPortfolio: BooleanFilter
-  modifiedBy: UserWhereInput
-  modified: DateTimeFilter
-  link: StringFilter
-}
-
-input LinkWhereUniqueInput {
-  id: ID
-}
-
-input MessageManyRelationFilter {
-  every: MessageWhereInput
-  some: MessageWhereInput
-  none: MessageWhereInput
-}
-
-input MessageOrderByInput {
-  id: OrderDirection
-  subject: OrderDirection
-  message: OrderDirection
-  sent: OrderDirection
-  read: OrderDirection
-  link: OrderDirection
-}
-
-input MessageWhereInput {
-  AND: [MessageWhereInput!]
-  OR: [MessageWhereInput!]
-  NOT: [MessageWhereInput!]
-  id: IDFilter
-  subject: StringFilter
-  message: StringFilter
-  sender: UserWhereInput
-  receiver: UserWhereInput
-  sent: DateTimeFilter
-  read: BooleanFilter
-  link: StringFilter
-}
-
-input MessageWhereUniqueInput {
-  id: ID
-}
-
 input NestedStringFilter {
   equals: String
   in: [String!]
@@ -778,8 +350,9 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input PasswordFilter {
-  isSet: Boolean!
+enum OrderDirection {
+  asc
+  desc
 }
 
 input PbisCardManyRelationFilter {
@@ -837,6 +410,11 @@ input PbisCollectionDateWhereUniqueInput {
   id: ID
 }
 
+enum QueryMode {
+  default
+  insensitive
+}
+
 input RandomDrawingWinManyRelationFilter {
   every: RandomDrawingWinWhereInput
   some: RandomDrawingWinWhereInput
@@ -861,29 +439,34 @@ input RandomDrawingWinWhereUniqueInput {
   id: ID
 }
 
-input SortingHatQuestionOrderByInput {
+input StaffPbisCardManyRelationFilter {
+  every: StaffPbisCardWhereInput
+  some: StaffPbisCardWhereInput
+  none: StaffPbisCardWhereInput
+}
+
+input StaffPbisCardOrderByInput {
   id: OrderDirection
-  question: OrderDirection
-  gryffindorChoice: OrderDirection
-  hufflepuffChoice: OrderDirection
-  ravenclawChoice: OrderDirection
-  slytherinChoice: OrderDirection
+  category: OrderDirection
+  cardMessage: OrderDirection
+  dateGiven: OrderDirection
+  counted: OrderDirection
 }
 
-input SortingHatQuestionWhereInput {
-  AND: [SortingHatQuestionWhereInput!]
-  OR: [SortingHatQuestionWhereInput!]
-  NOT: [SortingHatQuestionWhereInput!]
+input StaffPbisCardWhereInput {
+  AND: [StaffPbisCardWhereInput!]
+  OR: [StaffPbisCardWhereInput!]
+  NOT: [StaffPbisCardWhereInput!]
   id: IDFilter
-  question: StringFilter
-  gryffindorChoice: StringFilter
-  hufflepuffChoice: StringFilter
-  ravenclawChoice: StringFilter
-  slytherinChoice: StringFilter
-  createdBy: UserWhereInput
+  category: StringFilter
+  giver: UserWhereInput
+  recipient: UserWhereInput
+  cardMessage: StringFilter
+  dateGiven: DateTimeFilter
+  counted: BooleanFilter
 }
 
-input SortingHatQuestionWhereUniqueInput {
+input StaffPbisCardWhereUniqueInput {
   id: ID
 }
 
@@ -902,73 +485,6 @@ input StringFilter {
   not: NestedStringFilter
 }
 
-input StringNullableFilter {
-  equals: String
-  in: [String!]
-  notIn: [String!]
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  contains: String
-  startsWith: String
-  endsWith: String
-  mode: QueryMode
-  not: StringNullableFilter
-}
-
-input StudentFocusManyRelationFilter {
-  every: StudentFocusWhereInput
-  some: StudentFocusWhereInput
-  none: StudentFocusWhereInput
-}
-
-input StudentFocusOrderByInput {
-  id: OrderDirection
-  comments: OrderDirection
-  category: OrderDirection
-  dateCreated: OrderDirection
-}
-
-input StudentFocusWhereInput {
-  AND: [StudentFocusWhereInput!]
-  OR: [StudentFocusWhereInput!]
-  NOT: [StudentFocusWhereInput!]
-  id: IDFilter
-  comments: StringFilter
-  category: StringFilter
-  student: UserWhereInput
-  teacher: UserWhereInput
-  dateCreated: DateTimeFilter
-}
-
-input StudentFocusWhereUniqueInput {
-  id: ID
-}
-
-input TrimesterAwardOrderByInput {
-  id: OrderDirection
-  howl: OrderDirection
-  trimester: OrderDirection
-  date: OrderDirection
-}
-
-input TrimesterAwardWhereInput {
-  AND: [TrimesterAwardWhereInput!]
-  OR: [TrimesterAwardWhereInput!]
-  NOT: [TrimesterAwardWhereInput!]
-  id: IDFilter
-  howl: StringFilter
-  trimester: StringNullableFilter
-  date: DateTimeFilter
-  student: UserWhereInput
-  teacher: UserWhereInput
-}
-
-input TrimesterAwardWhereUniqueInput {
-  id: ID
-}
-
 input UserManyRelationFilter {
   every: UserWhereInput
   some: UserWhereInput
@@ -980,17 +496,6 @@ input UserOrderByInput {
   name: OrderDirection
   preferredName: OrderDirection
   email: OrderDirection
-  canManageCalendar: OrderDirection
-  canSeeOtherUsers: OrderDirection
-  canManageUsers: OrderDirection
-  canManageRoles: OrderDirection
-  canManageLinks: OrderDirection
-  canManageDiscipline: OrderDirection
-  canSeeAllDiscipline: OrderDirection
-  canSeeAllTeacherEvents: OrderDirection
-  canSeeStudentEvents: OrderDirection
-  canSeeOwnCallback: OrderDirection
-  canSeeAllCallback: OrderDirection
   hasTA: OrderDirection
   hasClasses: OrderDirection
   isStudent: OrderDirection
@@ -999,9 +504,6 @@ input UserOrderByInput {
   isTeacher: OrderDirection
   isGuidance: OrderDirection
   isSuperAdmin: OrderDirection
-  canManagePbis: OrderDirection
-  canHaveSpecialGroups: OrderDirection
-  isCommunicatorEnabled: OrderDirection
   individualPbisLevel: OrderDirection
   taTeamPbisLevel: OrderDirection
   taTeamAveragePbisCardsPerStudent: OrderDirection
@@ -1039,11 +541,12 @@ input UserOrderByInput {
   block10Assignment: OrderDirection
   block10ClassName: OrderDirection
   block10AssignmentLastUpdated: OrderDirection
-  sortingHat: OrderDirection
-  passwordResetIssuedAt: OrderDirection
-  passwordResetRedeemedAt: OrderDirection
-  magicAuthIssuedAt: OrderDirection
-  magicAuthRedeemedAt: OrderDirection
+  block11Assignment: OrderDirection
+  block11ClassName: OrderDirection
+  block11AssignmentLastUpdated: OrderDirection
+  block12Assignment: OrderDirection
+  block12ClassName: OrderDirection
+  block12AssignmentLastUpdated: OrderDirection
 }
 
 input UserWhereInput {
@@ -1058,17 +561,6 @@ input UserWhereInput {
   taTeacher: UserWhereInput
   parent: UserManyRelationFilter
   children: UserManyRelationFilter
-  canManageCalendar: BooleanFilter
-  canSeeOtherUsers: BooleanFilter
-  canManageUsers: BooleanFilter
-  canManageRoles: BooleanFilter
-  canManageLinks: BooleanFilter
-  canManageDiscipline: BooleanFilter
-  canSeeAllDiscipline: BooleanFilter
-  canSeeAllTeacherEvents: BooleanFilter
-  canSeeStudentEvents: BooleanFilter
-  canSeeOwnCallback: BooleanFilter
-  canSeeAllCallback: BooleanFilter
   hasTA: BooleanFilter
   hasClasses: BooleanFilter
   isStudent: BooleanFilter
@@ -1077,9 +569,6 @@ input UserWhereInput {
   isTeacher: BooleanFilter
   isGuidance: BooleanFilter
   isSuperAdmin: BooleanFilter
-  canManagePbis: BooleanFilter
-  canHaveSpecialGroups: BooleanFilter
-  isCommunicatorEnabled: BooleanFilter
   block1Teacher: UserWhereInput
   block1Students: UserManyRelationFilter
   block2Teacher: UserWhereInput
@@ -1100,27 +589,22 @@ input UserWhereInput {
   block9Students: UserManyRelationFilter
   block10Teacher: UserWhereInput
   block10Students: UserManyRelationFilter
+  block11Teacher: UserWhereInput
+  block11Students: UserManyRelationFilter
+  block12Teacher: UserWhereInput
+  block12Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
   coTeachesWithTeacher: UserManyRelationFilter
-  studentFocusTeacher: StudentFocusManyRelationFilter
-  studentFocusStudent: StudentFocusManyRelationFilter
-  studentCellPhoneViolation: CellPhoneViolationManyRelationFilter
-  teacherCellPhoneViolation: CellPhoneViolationManyRelationFilter
   teacherPbisCards: PbisCardManyRelationFilter
   studentPbisCards: PbisCardManyRelationFilter
-  teacherDiscipline: DisciplineManyRelationFilter
-  studentDiscipline: DisciplineManyRelationFilter
+  staffPbisCardsGiven: StaffPbisCardManyRelationFilter
+  staffPbisCardsReceived: StaffPbisCardManyRelationFilter
   callbackItems: CallbackManyRelationFilter
   callbackAssigned: CallbackManyRelationFilter
-  messageSender: MessageManyRelationFilter
-  messageReceiver: MessageManyRelationFilter
-  communicatorChats: CommunicatorChatManyRelationFilter
   randomDrawingWins: RandomDrawingWinManyRelationFilter
-  birthday: BirthdayWhereInput
   individualPbisLevel: IntNullableFilter
   taTeamPbisLevel: IntNullableFilter
   taTeamAveragePbisCardsPerStudent: IntNullableFilter
-  chromebookCheck: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
   teacherSubject: StringFilter
@@ -1155,78 +639,15 @@ input UserWhereInput {
   block10Assignment: StringFilter
   block10ClassName: StringFilter
   block10AssignmentLastUpdated: DateTimeNullableFilter
-  sortingHat: StringFilter
-  passwordResetToken: PasswordFilter
-  passwordResetIssuedAt: DateTimeNullableFilter
-  passwordResetRedeemedAt: DateTimeNullableFilter
-  magicAuthToken: PasswordFilter
-  magicAuthIssuedAt: DateTimeNullableFilter
-  magicAuthRedeemedAt: DateTimeNullableFilter
+  block11Assignment: StringFilter
+  block11ClassName: StringFilter
+  block11AssignmentLastUpdated: DateTimeNullableFilter
+  block12Assignment: StringFilter
+  block12ClassName: StringFilter
+  block12AssignmentLastUpdated: DateTimeNullableFilter
 }
 
 input UserWhereUniqueInput {
   id: ID
   email: String
-  birthday: BirthdayWhereUniqueInput
 }
-
-input VideoOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  description: OrderDirection
-  onHomePage: OrderDirection
-  type: OrderDirection
-  link: OrderDirection
-}
-
-input VideoWhereInput {
-  AND: [VideoWhereInput!]
-  OR: [VideoWhereInput!]
-  NOT: [VideoWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  description: StringFilter
-  onHomePage: BooleanFilter
-  type: StringFilter
-  link: StringFilter
-}
-
-input VideoWhereUniqueInput {
-  id: ID
-}
-
-enum MagicLinkRedemptionErrorCode {
-  FAILURE
-  TOKEN_EXPIRED
-  TOKEN_REDEEMED
-}
-
-enum OrderDirection {
-  asc
-  desc
-}
-
-enum QueryMode {
-  default
-  insensitive
-}
-
-"""The `Boolean` scalar type represents `true` or `false`."""
-scalar Boolean
-
-scalar DateTime
-
-scalar Empty
-
-"""The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID."""
-scalar ID
-
-"""The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1."""
-scalar Int
-
-"""The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."""
-scalar JSON
-
-"""The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text."""
-scalar String
-
