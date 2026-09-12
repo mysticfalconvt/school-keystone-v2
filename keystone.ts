@@ -30,7 +30,6 @@ import { PbisTeam } from './schemas/PbisTeam';
 import { RandomDrawingWin } from './schemas/RandomDrawingWin';
 import { StudentFocus } from './schemas/StudentFocus';
 import { User } from './schemas/User';
-// import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
 import { AssignmentHistory } from './schemas/AssignmentHistory';
 import { Birthday } from './schemas/Birthday';
 import { BugReport } from './schemas/BugReport';
