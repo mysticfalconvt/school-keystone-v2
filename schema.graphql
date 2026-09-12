@@ -76,7 +76,6 @@ type User {
   specialGroupStudentsCount(where: UserWhereInput! = {}): Int
   coTeachesWithTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   coTeachesWithTeacherCount(where: UserWhereInput! = {}): Int
-  taTeam: PbisTeam
   studentFocusTeacher(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
   studentFocusTeacherCount(where: StudentFocusWhereInput! = {}): Int
   studentFocusStudent(where: StudentFocusWhereInput! = {}, orderBy: [StudentFocusOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StudentFocusWhereUniqueInput): [StudentFocus!]
@@ -251,7 +250,6 @@ input UserWhereInput {
   block12Students: UserManyRelationFilter
   specialGroupStudents: UserManyRelationFilter
   coTeachesWithTeacher: UserManyRelationFilter
-  taTeam: PbisTeamWhereInput
   studentFocusTeacher: StudentFocusManyRelationFilter
   studentFocusStudent: StudentFocusManyRelationFilter
   studentCellPhoneViolation: CellPhoneViolationManyRelationFilter
@@ -621,7 +619,6 @@ input UserUpdateInput {
   block12Students: UserRelateToManyForUpdateInput
   specialGroupStudents: UserRelateToManyForUpdateInput
   coTeachesWithTeacher: UserRelateToManyForUpdateInput
-  taTeam: PbisTeamRelateToOneForUpdateInput
   studentFocusTeacher: StudentFocusRelateToManyForUpdateInput
   studentFocusStudent: StudentFocusRelateToManyForUpdateInput
   studentCellPhoneViolation: CellPhoneViolationRelateToManyForUpdateInput
@@ -711,12 +708,6 @@ input UserRelateToManyForUpdateInput {
 input UserRelateToOneForUpdateInput {
   create: UserCreateInput
   connect: UserWhereUniqueInput
-  disconnect: Boolean
-}
-
-input PbisTeamRelateToOneForUpdateInput {
-  create: PbisTeamCreateInput
-  connect: PbisTeamWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -865,7 +856,6 @@ input UserCreateInput {
   block12Students: UserRelateToManyForCreateInput
   specialGroupStudents: UserRelateToManyForCreateInput
   coTeachesWithTeacher: UserRelateToManyForCreateInput
-  taTeam: PbisTeamRelateToOneForCreateInput
   studentFocusTeacher: StudentFocusRelateToManyForCreateInput
   studentFocusStudent: StudentFocusRelateToManyForCreateInput
   studentCellPhoneViolation: CellPhoneViolationRelateToManyForCreateInput
@@ -953,11 +943,6 @@ input UserRelateToManyForCreateInput {
 input UserRelateToOneForCreateInput {
   create: UserCreateInput
   connect: UserWhereUniqueInput
-}
-
-input PbisTeamRelateToOneForCreateInput {
-  create: PbisTeamCreateInput
-  connect: PbisTeamWhereUniqueInput
 }
 
 input StudentFocusRelateToManyForCreateInput {
@@ -2187,80 +2172,6 @@ input StaffPbisCardCreateInput {
   counted: Boolean
 }
 
-type PbisTeam {
-  id: ID!
-  teamName: String
-  taTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
-  taTeacherCount(where: UserWhereInput! = {}): Int
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-  lastModifiedBy: User
-}
-
-input PbisTeamWhereUniqueInput {
-  id: ID
-}
-
-input PbisTeamWhereInput {
-  AND: [PbisTeamWhereInput!]
-  OR: [PbisTeamWhereInput!]
-  NOT: [PbisTeamWhereInput!]
-  id: IDFilter
-  teamName: StringFilter
-  taTeacher: UserManyRelationFilter
-  uncountedCards: IntNullableFilter
-  countedCards: IntNullableFilter
-  currentLevel: IntNullableFilter
-  numberOfStudents: IntNullableFilter
-  averageCardsPerStudent: IntNullableFilter
-  dateModified: DateTimeFilter
-  lastModifiedBy: UserWhereInput
-}
-
-input PbisTeamOrderByInput {
-  id: OrderDirection
-  teamName: OrderDirection
-  uncountedCards: OrderDirection
-  countedCards: OrderDirection
-  currentLevel: OrderDirection
-  numberOfStudents: OrderDirection
-  averageCardsPerStudent: OrderDirection
-  dateModified: OrderDirection
-}
-
-input PbisTeamUpdateInput {
-  teamName: String
-  taTeacher: UserRelateToManyForUpdateInput
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-  lastModifiedBy: UserRelateToOneForUpdateInput
-}
-
-input PbisTeamUpdateArgs {
-  where: PbisTeamWhereUniqueInput!
-  data: PbisTeamUpdateInput!
-}
-
-input PbisTeamCreateInput {
-  teamName: String
-  taTeacher: UserRelateToManyForCreateInput
-  uncountedCards: Int
-  countedCards: Int
-  currentLevel: Int
-  numberOfStudents: Int
-  averageCardsPerStudent: Int
-  dateModified: DateTime
-  lastModifiedBy: UserRelateToOneForCreateInput
-}
-
 type PbisCollectionDate {
   id: ID!
   collectionDate: DateTime
@@ -2700,12 +2611,6 @@ type Mutation {
   updateStaffPbisCards(data: [StaffPbisCardUpdateArgs!]!): [StaffPbisCard]
   deleteStaffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
   deleteStaffPbisCards(where: [StaffPbisCardWhereUniqueInput!]!): [StaffPbisCard]
-  createPbisTeam(data: PbisTeamCreateInput!): PbisTeam
-  createPbisTeams(data: [PbisTeamCreateInput!]!): [PbisTeam]
-  updatePbisTeam(where: PbisTeamWhereUniqueInput!, data: PbisTeamUpdateInput!): PbisTeam
-  updatePbisTeams(data: [PbisTeamUpdateArgs!]!): [PbisTeam]
-  deletePbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
-  deletePbisTeams(where: [PbisTeamWhereUniqueInput!]!): [PbisTeam]
   createPbisCollectionDate(data: PbisCollectionDateCreateInput!): PbisCollectionDate
   createPbisCollectionDates(data: [PbisCollectionDateCreateInput!]!): [PbisCollectionDate]
   updatePbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!, data: PbisCollectionDateUpdateInput!): PbisCollectionDate
@@ -2853,9 +2758,6 @@ type Query {
   staffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
   staffPbisCards(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
   staffPbisCardsCount(where: StaffPbisCardWhereInput! = {}): Int
-  pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
-  pbisTeams(where: PbisTeamWhereInput! = {}, orderBy: [PbisTeamOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisTeamWhereUniqueInput): [PbisTeam!]
-  pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int
   pbisCollectionDate(where: PbisCollectionDateWhereUniqueInput!): PbisCollectionDate
   pbisCollectionDates(where: PbisCollectionDateWhereInput! = {}, orderBy: [PbisCollectionDateOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionDateWhereUniqueInput): [PbisCollectionDate!]
   pbisCollectionDatesCount(where: PbisCollectionDateWhereInput! = {}): Int

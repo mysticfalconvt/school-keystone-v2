@@ -140,7 +140,7 @@ var bugsinkApolloPlugin = {
 };
 
 // keystone.ts
-var import_core31 = require("@keystone-6/core");
+var import_core30 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -197,7 +197,7 @@ async function sendMail(options) {
 function logSentMessage(info) {
   console.log("[mail] message sent", { messageId: info?.messageId });
 }
-function makeANiceEmail(text23) {
+function makeANiceEmail(text22) {
   return `
     <div className="email" style="
       border: 1px solid black;
@@ -207,7 +207,7 @@ function makeANiceEmail(text23) {
       font-size: 20px;
     ">
       <h2>Hello There!</h2>
-      <p>${text23}</p>
+      <p>${text22}</p>
 
       <p>NCUJHS.Tech</p>
     </div>
@@ -1213,47 +1213,10 @@ var PbisCollectionDate = (0, import_core12.list)({
   }
 });
 
-// schemas/PbisTeam.ts
+// schemas/RandomDrawingWin.ts
 var import_fields13 = require("@keystone-6/core/fields");
 var import_core13 = require("@keystone-6/core");
-var PbisTeam = (0, import_core13.list)({
-  access: {
-    operation: {
-      query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn
-    }
-  },
-  ui: {
-    listView: {
-      initialColumns: ["teamName", "taTeacher"],
-      pageSize: 100
-    }
-  },
-  fields: {
-    teamName: (0, import_fields13.text)(),
-    taTeacher: (0, import_fields13.relationship)({
-      ref: "User.taTeam",
-      many: true
-    }),
-    uncountedCards: (0, import_fields13.integer)({ defaultValue: 0 }),
-    countedCards: (0, import_fields13.integer)({ defaultValue: 0 }),
-    currentLevel: (0, import_fields13.integer)({ defaultValue: 0 }),
-    numberOfStudents: (0, import_fields13.integer)(),
-    averageCardsPerStudent: (0, import_fields13.integer)({ defaultValue: 0 }),
-    dateModified: (0, import_fields13.timestamp)({
-      validation: { isRequired: true },
-      defaultValue: { kind: "now" }
-    }),
-    lastModifiedBy: (0, import_fields13.relationship)({ ref: "User" })
-  }
-});
-
-// schemas/RandomDrawingWin.ts
-var import_fields14 = require("@keystone-6/core/fields");
-var import_core14 = require("@keystone-6/core");
-var RandomDrawingWin = (0, import_core14.list)({
+var RandomDrawingWin = (0, import_core13.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1269,21 +1232,21 @@ var RandomDrawingWin = (0, import_core14.list)({
     }
   },
   fields: {
-    student: (0, import_fields14.relationship)({
+    student: (0, import_fields13.relationship)({
       ref: "User.randomDrawingWins"
     }),
-    collectionDate: (0, import_fields14.relationship)({
+    collectionDate: (0, import_fields13.relationship)({
       ref: "PbisCollectionDate.randomDrawingWinners",
       many: false
     }),
-    lastModifiedBy: (0, import_fields14.relationship)({ ref: "User" })
+    lastModifiedBy: (0, import_fields13.relationship)({ ref: "User" })
   }
 });
 
 // schemas/StudentFocus.ts
-var import_fields15 = require("@keystone-6/core/fields");
-var import_core15 = require("@keystone-6/core");
-var StudentFocus = (0, import_core15.list)({
+var import_fields14 = require("@keystone-6/core/fields");
+var import_core14 = require("@keystone-6/core");
+var StudentFocus = (0, import_core14.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1299,19 +1262,19 @@ var StudentFocus = (0, import_core15.list)({
     }
   },
   fields: {
-    comments: (0, import_fields15.text)({
+    comments: (0, import_fields14.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    category: (0, import_fields15.text)(),
-    student: (0, import_fields15.relationship)({
+    category: (0, import_fields14.text)(),
+    student: (0, import_fields14.relationship)({
       ref: "User.studentFocusStudent"
     }),
-    teacher: (0, import_fields15.relationship)({
+    teacher: (0, import_fields14.relationship)({
       ref: "User.studentFocusTeacher"
     }),
-    dateCreated: (0, import_fields15.timestamp)({
+    dateCreated: (0, import_fields14.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     })
@@ -1319,97 +1282,97 @@ var StudentFocus = (0, import_core15.list)({
 });
 
 // schemas/User.ts
-var import_core16 = require("@keystone-6/core");
-var import_fields17 = require("@keystone-6/core/fields");
+var import_core15 = require("@keystone-6/core");
+var import_fields16 = require("@keystone-6/core/fields");
 
 // schemas/fields.ts
-var import_fields16 = require("@keystone-6/core/fields");
+var import_fields15 = require("@keystone-6/core/fields");
 var permissionFields = {
-  canManageCalendar: (0, import_fields16.checkbox)({
+  canManageCalendar: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can Update and delete any  Calendar Event"
   }),
-  canSeeOtherUsers: (0, import_fields16.checkbox)({
+  canSeeOtherUsers: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can query other users"
   }),
-  canManageUsers: (0, import_fields16.checkbox)({
+  canManageUsers: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can Edit other users"
   }),
-  canManageRoles: (0, import_fields16.checkbox)({
+  canManageRoles: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can CRUD roles"
   }),
-  canManageLinks: (0, import_fields16.checkbox)({
+  canManageLinks: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see and manage Links"
   }),
-  canManageDiscipline: (0, import_fields16.checkbox)({
+  canManageDiscipline: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see and manage Discipline Referrals"
   }),
-  canSeeAllDiscipline: (0, import_fields16.checkbox)({
+  canSeeAllDiscipline: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see Referrals"
   }),
-  canSeeAllTeacherEvents: (0, import_fields16.checkbox)({
+  canSeeAllTeacherEvents: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see TeacherEvents"
   }),
-  canSeeStudentEvents: (0, import_fields16.checkbox)({
+  canSeeStudentEvents: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see Student Events"
   }),
-  canSeeOwnCallback: (0, import_fields16.checkbox)({
+  canSeeOwnCallback: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see own callback"
   }),
-  canSeeAllCallback: (0, import_fields16.checkbox)({
+  canSeeAllCallback: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see all callback"
   }),
-  hasTA: (0, import_fields16.checkbox)({
+  hasTA: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User has a TA"
   }),
-  hasClasses: (0, import_fields16.checkbox)({
+  hasClasses: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User teaches classes"
   }),
-  isStudent: (0, import_fields16.checkbox)({
+  isStudent: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a student"
   }),
-  isParent: (0, import_fields16.checkbox)({
+  isParent: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a parent"
   }),
-  isStaff: (0, import_fields16.checkbox)({
+  isStaff: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a staff member"
   }),
-  isTeacher: (0, import_fields16.checkbox)({
+  isTeacher: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a teacher"
   }),
-  isGuidance: (0, import_fields16.checkbox)({
+  isGuidance: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is Guidance"
   }),
-  isSuperAdmin: (0, import_fields16.checkbox)({
+  isSuperAdmin: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a super admin"
   }),
-  canManagePbis: (0, import_fields16.checkbox)({
+  canManagePbis: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can manage PBIS"
   }),
-  canHaveSpecialGroups: (0, import_fields16.checkbox)({
+  canHaveSpecialGroups: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can have special groups"
   }),
-  isCommunicatorEnabled: (0, import_fields16.checkbox)({
+  isCommunicatorEnabled: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can access Communicator AI chat"
   })
@@ -1422,7 +1385,7 @@ var permissionsList = Object.keys(
 var NUMBER_OF_BLOCKS = 12;
 
 // schemas/User.ts
-var User = (0, import_core16.list)({
+var User = (0, import_core15.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1442,217 +1405,216 @@ var User = (0, import_core16.list)({
     }
   },
   fields: {
-    name: (0, import_fields17.text)({ isIndexed: true, validation: { isRequired: true } }),
-    preferredName: (0, import_fields17.text)(),
-    email: (0, import_fields17.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
-    password: (0, import_fields17.password)({ validation: { isRequired: true } }),
-    taStudents: (0, import_fields17.relationship)({ ref: "User.taTeacher", many: true }),
-    taTeacher: (0, import_fields17.relationship)({ ref: "User.taStudents", many: false }),
-    parent: (0, import_fields17.relationship)({ ref: "User.children", many: true }),
-    children: (0, import_fields17.relationship)({ ref: "User.parent", many: true }),
+    name: (0, import_fields16.text)({ isIndexed: true, validation: { isRequired: true } }),
+    preferredName: (0, import_fields16.text)(),
+    email: (0, import_fields16.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
+    password: (0, import_fields16.password)({ validation: { isRequired: true } }),
+    taStudents: (0, import_fields16.relationship)({ ref: "User.taTeacher", many: true }),
+    taTeacher: (0, import_fields16.relationship)({ ref: "User.taStudents", many: false }),
+    parent: (0, import_fields16.relationship)({ ref: "User.children", many: true }),
+    children: (0, import_fields16.relationship)({ ref: "User.parent", many: true }),
     ...permissionFields,
     //classes
-    block1Teacher: (0, import_fields17.relationship)({ ref: "User.block1Students", many: false }),
-    block1Students: (0, import_fields17.relationship)({ ref: "User.block1Teacher", many: true }),
-    block2Teacher: (0, import_fields17.relationship)({ ref: "User.block2Students", many: false }),
-    block2Students: (0, import_fields17.relationship)({ ref: "User.block2Teacher", many: true }),
-    block3Teacher: (0, import_fields17.relationship)({ ref: "User.block3Students", many: false }),
-    block3Students: (0, import_fields17.relationship)({ ref: "User.block3Teacher", many: true }),
-    block4Teacher: (0, import_fields17.relationship)({ ref: "User.block4Students", many: false }),
-    block4Students: (0, import_fields17.relationship)({ ref: "User.block4Teacher", many: true }),
-    block5Teacher: (0, import_fields17.relationship)({ ref: "User.block5Students", many: false }),
-    block5Students: (0, import_fields17.relationship)({ ref: "User.block5Teacher", many: true }),
-    block6Teacher: (0, import_fields17.relationship)({ ref: "User.block6Students", many: false }),
-    block6Students: (0, import_fields17.relationship)({ ref: "User.block6Teacher", many: true }),
-    block7Teacher: (0, import_fields17.relationship)({ ref: "User.block7Students", many: false }),
-    block7Students: (0, import_fields17.relationship)({ ref: "User.block7Teacher", many: true }),
-    block8Teacher: (0, import_fields17.relationship)({ ref: "User.block8Students", many: false }),
-    block8Students: (0, import_fields17.relationship)({ ref: "User.block8Teacher", many: true }),
-    block9Teacher: (0, import_fields17.relationship)({ ref: "User.block9Students", many: false }),
-    block9Students: (0, import_fields17.relationship)({ ref: "User.block9Teacher", many: true }),
-    block10Teacher: (0, import_fields17.relationship)({
+    block1Teacher: (0, import_fields16.relationship)({ ref: "User.block1Students", many: false }),
+    block1Students: (0, import_fields16.relationship)({ ref: "User.block1Teacher", many: true }),
+    block2Teacher: (0, import_fields16.relationship)({ ref: "User.block2Students", many: false }),
+    block2Students: (0, import_fields16.relationship)({ ref: "User.block2Teacher", many: true }),
+    block3Teacher: (0, import_fields16.relationship)({ ref: "User.block3Students", many: false }),
+    block3Students: (0, import_fields16.relationship)({ ref: "User.block3Teacher", many: true }),
+    block4Teacher: (0, import_fields16.relationship)({ ref: "User.block4Students", many: false }),
+    block4Students: (0, import_fields16.relationship)({ ref: "User.block4Teacher", many: true }),
+    block5Teacher: (0, import_fields16.relationship)({ ref: "User.block5Students", many: false }),
+    block5Students: (0, import_fields16.relationship)({ ref: "User.block5Teacher", many: true }),
+    block6Teacher: (0, import_fields16.relationship)({ ref: "User.block6Students", many: false }),
+    block6Students: (0, import_fields16.relationship)({ ref: "User.block6Teacher", many: true }),
+    block7Teacher: (0, import_fields16.relationship)({ ref: "User.block7Students", many: false }),
+    block7Students: (0, import_fields16.relationship)({ ref: "User.block7Teacher", many: true }),
+    block8Teacher: (0, import_fields16.relationship)({ ref: "User.block8Students", many: false }),
+    block8Students: (0, import_fields16.relationship)({ ref: "User.block8Teacher", many: true }),
+    block9Teacher: (0, import_fields16.relationship)({ ref: "User.block9Students", many: false }),
+    block9Students: (0, import_fields16.relationship)({ ref: "User.block9Teacher", many: true }),
+    block10Teacher: (0, import_fields16.relationship)({
       ref: "User.block10Students",
       many: false
     }),
-    block10Students: (0, import_fields17.relationship)({
+    block10Students: (0, import_fields16.relationship)({
       ref: "User.block10Teacher",
       many: true
     }),
-    block11Teacher: (0, import_fields17.relationship)({
+    block11Teacher: (0, import_fields16.relationship)({
       ref: "User.block11Students",
       many: false
     }),
-    block11Students: (0, import_fields17.relationship)({
+    block11Students: (0, import_fields16.relationship)({
       ref: "User.block11Teacher",
       many: true
     }),
-    block12Teacher: (0, import_fields17.relationship)({
+    block12Teacher: (0, import_fields16.relationship)({
       ref: "User.block12Students",
       many: false
     }),
-    block12Students: (0, import_fields17.relationship)({
+    block12Students: (0, import_fields16.relationship)({
       ref: "User.block12Teacher",
       many: true
     }),
-    specialGroupStudents: (0, import_fields17.relationship)({ ref: "User", many: true }),
-    coTeachesWithTeacher: (0, import_fields17.relationship)({ ref: "User", many: true }),
+    specialGroupStudents: (0, import_fields16.relationship)({ ref: "User", many: true }),
+    coTeachesWithTeacher: (0, import_fields16.relationship)({ ref: "User", many: true }),
     //other relationships
-    taTeam: (0, import_fields17.relationship)({ ref: "PbisTeam.taTeacher" }),
-    studentFocusTeacher: (0, import_fields17.relationship)({
+    studentFocusTeacher: (0, import_fields16.relationship)({
       ref: "StudentFocus.teacher",
       many: true
     }),
-    studentFocusStudent: (0, import_fields17.relationship)({
+    studentFocusStudent: (0, import_fields16.relationship)({
       ref: "StudentFocus.student",
       many: true
     }),
-    studentCellPhoneViolation: (0, import_fields17.relationship)({
+    studentCellPhoneViolation: (0, import_fields16.relationship)({
       ref: "CellPhoneViolation.student",
       many: true
     }),
-    teacherCellPhoneViolation: (0, import_fields17.relationship)({
+    teacherCellPhoneViolation: (0, import_fields16.relationship)({
       ref: "CellPhoneViolation.teacher",
       many: true
     }),
-    teacherPbisCards: (0, import_fields17.relationship)({ ref: "PbisCard.teacher", many: true }),
-    studentPbisCards: (0, import_fields17.relationship)({
+    teacherPbisCards: (0, import_fields16.relationship)({ ref: "PbisCard.teacher", many: true }),
+    studentPbisCards: (0, import_fields16.relationship)({
       ref: "PbisCard.student",
       many: true,
       ui: {
         displayMode: "count"
       }
     }),
-    staffPbisCardsGiven: (0, import_fields17.relationship)({
+    staffPbisCardsGiven: (0, import_fields16.relationship)({
       ref: "StaffPbisCard.giver",
       many: true
     }),
-    staffPbisCardsReceived: (0, import_fields17.relationship)({
+    staffPbisCardsReceived: (0, import_fields16.relationship)({
       ref: "StaffPbisCard.recipient",
       many: true,
       ui: {
         displayMode: "count"
       }
     }),
-    teacherDiscipline: (0, import_fields17.relationship)({ ref: "Discipline.teacher", many: true }),
-    studentDiscipline: (0, import_fields17.relationship)({ ref: "Discipline.student", many: true }),
-    callbackItems: (0, import_fields17.relationship)({ ref: "Callback.student", many: true }),
-    callbackAssigned: (0, import_fields17.relationship)({ ref: "Callback.teacher", many: true }),
-    messageSender: (0, import_fields17.relationship)({ ref: "Message.sender", many: true }),
-    messageReceiver: (0, import_fields17.relationship)({ ref: "Message.receiver", many: true }),
-    communicatorChats: (0, import_fields17.relationship)({
+    teacherDiscipline: (0, import_fields16.relationship)({ ref: "Discipline.teacher", many: true }),
+    studentDiscipline: (0, import_fields16.relationship)({ ref: "Discipline.student", many: true }),
+    callbackItems: (0, import_fields16.relationship)({ ref: "Callback.student", many: true }),
+    callbackAssigned: (0, import_fields16.relationship)({ ref: "Callback.teacher", many: true }),
+    messageSender: (0, import_fields16.relationship)({ ref: "Message.sender", many: true }),
+    messageReceiver: (0, import_fields16.relationship)({ ref: "Message.receiver", many: true }),
+    communicatorChats: (0, import_fields16.relationship)({
       ref: "CommunicatorChat.user",
       many: true
     }),
     //PBIS Collection Winners
-    currentTaWinner: (0, import_fields17.relationship)({
+    currentTaWinner: (0, import_fields16.relationship)({
       ref: "User.studentIsCurrentWinner",
       many: false
     }),
-    previousTaWinner: (0, import_fields17.relationship)({
+    previousTaWinner: (0, import_fields16.relationship)({
       ref: "User.studentIsPreviousWinner",
       many: false
     }),
-    studentIsCurrentWinner: (0, import_fields17.relationship)({
+    studentIsCurrentWinner: (0, import_fields16.relationship)({
       ref: "User.currentTaWinner",
       many: false
     }),
-    studentIsPreviousWinner: (0, import_fields17.relationship)({
+    studentIsPreviousWinner: (0, import_fields16.relationship)({
       ref: "User.previousTaWinner",
       many: false
     }),
-    randomDrawingWins: (0, import_fields17.relationship)({
+    randomDrawingWins: (0, import_fields16.relationship)({
       ref: "RandomDrawingWin.student",
       many: true
     }),
-    birthday: (0, import_fields17.relationship)({ ref: "Birthday.student", many: false }),
-    individualPbisLevel: (0, import_fields17.integer)({ defaultValue: 0 }),
-    taTeamPbisLevel: (0, import_fields17.integer)({ defaultValue: 0 }),
-    taTeamAveragePbisCardsPerStudent: (0, import_fields17.integer)({ defaultValue: 0 }),
-    chromebookCheck: (0, import_fields17.relationship)({
+    birthday: (0, import_fields16.relationship)({ ref: "Birthday.student", many: false }),
+    individualPbisLevel: (0, import_fields16.integer)({ defaultValue: 0 }),
+    taTeamPbisLevel: (0, import_fields16.integer)({ defaultValue: 0 }),
+    taTeamAveragePbisCardsPerStudent: (0, import_fields16.integer)({ defaultValue: 0 }),
+    chromebookCheck: (0, import_fields16.relationship)({
       ref: "ChromebookCheck.student",
       many: true
     }),
     // Checks performed on chromebooks kept in this teacher's classroom
-    classroomChromebookChecks: (0, import_fields17.relationship)({
+    classroomChromebookChecks: (0, import_fields16.relationship)({
       ref: "ChromebookCheck.classroom",
       many: true
     }),
     // Important Info
-    callbackCount: (0, import_fields17.integer)({ defaultValue: 0 }),
-    totalCallbackCount: (0, import_fields17.integer)({ defaultValue: 0 }),
-    PbisCardCount: (0, import_fields17.integer)({ defaultValue: 0 }),
-    YearPbisCount: (0, import_fields17.integer)({ defaultValue: 0 }),
-    teacherSubject: (0, import_fields17.text)({ defaultValue: void 0 }),
-    taPbisCardCount: (0, import_fields17.integer)({ defaultValue: 0 }),
-    averageTimeToCompleteCallback: (0, import_fields17.integer)(),
+    callbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    totalCallbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    PbisCardCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    YearPbisCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    teacherSubject: (0, import_fields16.text)({ defaultValue: void 0 }),
+    taPbisCardCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    averageTimeToCompleteCallback: (0, import_fields16.integer)(),
     // assignments
-    block1Assignment: (0, import_fields17.text)({
+    block1Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 1 goes here"
     }),
-    block1ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block1AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block2Assignment: (0, import_fields17.text)({
+    block1ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block1AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block2Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 2 goes here"
     }),
-    block2ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block2AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block3Assignment: (0, import_fields17.text)({
+    block2ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block2AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block3Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 3 goes here"
     }),
-    block3ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block3AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block4Assignment: (0, import_fields17.text)({
+    block3ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block3AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block4Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 4 goes here"
     }),
-    block4ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block4AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block5Assignment: (0, import_fields17.text)({
+    block4ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block4AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block5Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 5 goes here"
     }),
-    block5ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block5AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block6Assignment: (0, import_fields17.text)({
+    block5ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block5AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block6Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 6 goes here"
     }),
-    block6ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block6AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block7Assignment: (0, import_fields17.text)({
+    block6ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block6AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block7Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 7 goes here"
     }),
-    block7ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block7AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block8Assignment: (0, import_fields17.text)({
+    block7ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block7AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block8Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 8 goes here"
     }),
-    block8ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block8AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block9Assignment: (0, import_fields17.text)({
+    block8ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block8AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block9Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 9 goes here"
     }),
-    block9ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block9AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block10Assignment: (0, import_fields17.text)({
+    block9ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block9AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block10Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 10 goes here"
     }),
-    block10ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block10AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block11Assignment: (0, import_fields17.text)({
+    block10ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block10AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block11Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 11 goes here"
     }),
-    block11ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block11AssignmentLastUpdated: (0, import_fields17.timestamp)(),
-    block12Assignment: (0, import_fields17.text)({
+    block11ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block11AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block12Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 12 goes here"
     }),
-    block12ClassName: (0, import_fields17.text)({ defaultValue: "Class Name Goes Here" }),
-    block12AssignmentLastUpdated: (0, import_fields17.timestamp)(),
+    block12ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block12AssignmentLastUpdated: (0, import_fields16.timestamp)(),
     // Archive of this teacher's replaced class assignments
-    assignmentHistory: (0, import_fields17.relationship)({
+    assignmentHistory: (0, import_fields16.relationship)({
       ref: "AssignmentHistory.teacher",
       many: true
     }),
     // Sorting Hat
-    sortingHat: (0, import_fields17.text)({ defaultValue: "" })
+    sortingHat: (0, import_fields16.text)({ defaultValue: "" })
   },
   hooks: {
     afterOperation: async ({ operation, item, originalItem, context }) => {
@@ -1687,9 +1649,9 @@ var User = (0, import_core16.list)({
 });
 
 // schemas/AssignmentHistory.ts
-var import_core17 = require("@keystone-6/core");
-var import_fields19 = require("@keystone-6/core/fields");
-var AssignmentHistory = (0, import_core17.list)({
+var import_core16 = require("@keystone-6/core");
+var import_fields18 = require("@keystone-6/core/fields");
+var AssignmentHistory = (0, import_core16.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1707,23 +1669,23 @@ var AssignmentHistory = (0, import_core17.list)({
     }
   },
   fields: {
-    teacher: (0, import_fields19.relationship)({ ref: "User.assignmentHistory", many: false }),
-    block: (0, import_fields19.integer)(),
-    className: (0, import_fields19.text)(),
-    assignment: (0, import_fields19.text)({ ui: { displayMode: "textarea" } }),
+    teacher: (0, import_fields18.relationship)({ ref: "User.assignmentHistory", many: false }),
+    block: (0, import_fields18.integer)(),
+    className: (0, import_fields18.text)(),
+    assignment: (0, import_fields18.text)({ ui: { displayMode: "textarea" } }),
     // When this (now-archived) assignment had originally been set.
-    dateAdded: (0, import_fields19.timestamp)(),
+    dateAdded: (0, import_fields18.timestamp)(),
     // When it was replaced by a new assignment.
-    dateRemoved: (0, import_fields19.timestamp)({
+    dateRemoved: (0, import_fields18.timestamp)({
       defaultValue: { kind: "now" }
     })
   }
 });
 
 // schemas/Birthday.ts
-var import_fields20 = require("@keystone-6/core/fields");
-var import_core18 = require("@keystone-6/core");
-var Birthday = (0, import_core18.list)({
+var import_fields19 = require("@keystone-6/core/fields");
+var import_core17 = require("@keystone-6/core");
+var Birthday = (0, import_core17.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1740,29 +1702,29 @@ var Birthday = (0, import_core18.list)({
     }
   },
   fields: {
-    cakeType: (0, import_fields20.text)(),
-    date: (0, import_fields20.timestamp)({
+    cakeType: (0, import_fields19.text)(),
+    date: (0, import_fields19.timestamp)({
       // validation: {isRequired: true},
       isIndexed: true
     }),
-    hasChosen: (0, import_fields20.checkbox)({
+    hasChosen: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has Chosen a Cake"
     }),
-    hasDelivered: (0, import_fields20.checkbox)({
+    hasDelivered: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has gotten their cake"
     }),
-    student: (0, import_fields20.relationship)({
+    student: (0, import_fields19.relationship)({
       ref: "User.birthday"
     })
   }
 });
 
 // schemas/BugReport.ts
-var import_fields21 = require("@keystone-6/core/fields");
-var import_core19 = require("@keystone-6/core");
-var BugReport = (0, import_core19.list)({
+var import_fields20 = require("@keystone-6/core/fields");
+var import_core18 = require("@keystone-6/core");
+var BugReport = (0, import_core18.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1793,27 +1755,27 @@ var BugReport = (0, import_core19.list)({
     }
   },
   fields: {
-    name: (0, import_fields21.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields21.text)({
+    name: (0, import_fields20.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields20.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    submittedBy: (0, import_fields21.relationship)({
+    submittedBy: (0, import_fields20.relationship)({
       ref: "User"
     }),
-    date: (0, import_fields21.timestamp)({
+    date: (0, import_fields20.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    read: (0, import_fields21.checkbox)({ defaultValue: false })
+    read: (0, import_fields20.checkbox)({ defaultValue: false })
   }
 });
 
 // schemas/Bullying.ts
-var import_fields22 = require("@keystone-6/core/fields");
-var import_core20 = require("@keystone-6/core");
-var Bullying = (0, import_core20.list)({
+var import_fields21 = require("@keystone-6/core/fields");
+var import_core19 = require("@keystone-6/core");
+var Bullying = (0, import_core19.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1830,51 +1792,51 @@ var Bullying = (0, import_core20.list)({
     }
   },
   fields: {
-    studentOffender: (0, import_fields22.relationship)({
+    studentOffender: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    teacherAuthor: (0, import_fields22.relationship)({
+    teacherAuthor: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    dateReported: (0, import_fields22.timestamp)({
+    dateReported: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    dateOfEvent: (0, import_fields22.timestamp)({
+    dateOfEvent: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    investigationDate: (0, import_fields22.timestamp)({
+    investigationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    studentReporter: (0, import_fields22.text)(),
-    employeeWitness: (0, import_fields22.text)(),
-    studentWitness: (0, import_fields22.text)(),
-    studentsInterviewed: (0, import_fields22.text)(),
-    initialActions: (0, import_fields22.text)(),
-    nextSteps: (0, import_fields22.text)(),
-    reporter: (0, import_fields22.text)(),
-    description: (0, import_fields22.text)(),
-    determination: (0, import_fields22.select)({
+    studentReporter: (0, import_fields21.text)(),
+    employeeWitness: (0, import_fields21.text)(),
+    studentWitness: (0, import_fields21.text)(),
+    studentsInterviewed: (0, import_fields21.text)(),
+    initialActions: (0, import_fields21.text)(),
+    nextSteps: (0, import_fields21.text)(),
+    reporter: (0, import_fields21.text)(),
+    description: (0, import_fields21.text)(),
+    determination: (0, import_fields21.select)({
       options: [
         { value: "No", label: "No" },
         { value: "Yes", label: "Yes" }
       ]
     }),
-    determinationDate: (0, import_fields22.timestamp)({
+    determinationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    determinationExplanation: (0, import_fields22.text)(),
-    assignmentInvestigator: (0, import_fields22.text)()
+    determinationExplanation: (0, import_fields21.text)(),
+    assignmentInvestigator: (0, import_fields21.text)()
   }
 });
 
 // schemas/SortingHatQuestion.ts
-var import_fields23 = require("@keystone-6/core/fields");
-var import_core21 = require("@keystone-6/core");
-var SortingHatQuestion = (0, import_core21.list)({
+var import_fields22 = require("@keystone-6/core/fields");
+var import_core20 = require("@keystone-6/core");
+var SortingHatQuestion = (0, import_core20.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1890,25 +1852,25 @@ var SortingHatQuestion = (0, import_core21.list)({
     }
   },
   fields: {
-    question: (0, import_fields23.text)({
+    question: (0, import_fields22.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    gryffindorChoice: (0, import_fields23.text)(),
-    hufflepuffChoice: (0, import_fields23.text)(),
-    ravenclawChoice: (0, import_fields23.text)(),
-    slytherinChoice: (0, import_fields23.text)(),
-    createdBy: (0, import_fields23.relationship)({
+    gryffindorChoice: (0, import_fields22.text)(),
+    hufflepuffChoice: (0, import_fields22.text)(),
+    ravenclawChoice: (0, import_fields22.text)(),
+    slytherinChoice: (0, import_fields22.text)(),
+    createdBy: (0, import_fields22.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/TrimesterAward.ts
-var import_fields24 = require("@keystone-6/core/fields");
-var import_core22 = require("@keystone-6/core");
-var TrimesterAward = (0, import_core22.list)({
+var import_fields23 = require("@keystone-6/core/fields");
+var import_core21 = require("@keystone-6/core");
+var TrimesterAward = (0, import_core21.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1925,7 +1887,7 @@ var TrimesterAward = (0, import_core22.list)({
     }
   },
   fields: {
-    howl: (0, import_fields24.select)({
+    howl: (0, import_fields23.select)({
       options: [
         { value: "Respect", label: "Respect" },
         { value: "Responsibility", label: "Responsibility" },
@@ -1933,7 +1895,7 @@ var TrimesterAward = (0, import_core22.list)({
       ],
       validation: { isRequired: true }
     }),
-    trimester: (0, import_fields24.select)({
+    trimester: (0, import_fields23.select)({
       options: [
         { value: "1", label: "1" },
         { value: "2", label: "2" },
@@ -1941,23 +1903,23 @@ var TrimesterAward = (0, import_core22.list)({
       ],
       isIndexed: true
     }),
-    date: (0, import_fields24.timestamp)({
+    date: (0, import_fields23.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    student: (0, import_fields24.relationship)({
+    student: (0, import_fields23.relationship)({
       ref: "User"
     }),
-    teacher: (0, import_fields24.relationship)({
+    teacher: (0, import_fields23.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/video.ts
-var import_fields25 = require("@keystone-6/core/fields");
-var import_core23 = require("@keystone-6/core");
-var Video = (0, import_core23.list)({
+var import_fields24 = require("@keystone-6/core/fields");
+var import_core22 = require("@keystone-6/core");
+var Video = (0, import_core22.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1973,31 +1935,31 @@ var Video = (0, import_core23.list)({
     }
   },
   fields: {
-    name: (0, import_fields25.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields25.text)({
+    name: (0, import_fields24.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields24.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    onHomePage: (0, import_fields25.checkbox)({ defaultValue: false, label: "On Home Page" }),
-    type: (0, import_fields25.select)({
+    onHomePage: (0, import_fields24.checkbox)({ defaultValue: false, label: "On Home Page" }),
+    type: (0, import_fields24.select)({
       options: [
         { value: "google drive", label: "google drive" },
         { value: "youtube", label: "Youtube" }
       ],
       validation: { isRequired: true }
     }),
-    link: (0, import_fields25.text)()
+    link: (0, import_fields24.text)()
   }
 });
 
 // mutations/AddStaff.ts
-var import_core24 = require("@keystone-6/core");
+var import_core23 = require("@keystone-6/core");
 var gql = String.raw;
-var addStaff = (base) => import_core24.graphql.field({
-  type: import_core24.graphql.String,
+var addStaff = (base) => import_core23.graphql.field({
+  type: import_core23.graphql.String,
   args: {
-    staffData: import_core24.graphql.arg({ type: import_core24.graphql.JSON })
+    staffData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Adding Staff");
@@ -2053,14 +2015,14 @@ var addStaff = (base) => import_core24.graphql.field({
 });
 
 // mutations/authenticateWithGoogle.ts
-var import_core25 = require("@keystone-6/core");
+var import_core24 = require("@keystone-6/core");
 var import_google_auth_library = require("google-auth-library");
 var CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
 var client = new import_google_auth_library.OAuth2Client();
-var authenticateUserWithGoogle = (base) => import_core25.graphql.field({
-  type: import_core25.graphql.JSON,
+var authenticateUserWithGoogle = (base) => import_core24.graphql.field({
+  type: import_core24.graphql.JSON,
   args: {
-    idToken: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
+    idToken: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) })
   },
   // Cast to any: the resolver returns a small JSON object, but the inferred
   // union of branches includes optional `undefined` props which the strict
@@ -2127,11 +2089,11 @@ var authenticateUserWithGoogle = (base) => import_core25.graphql.field({
 });
 
 // mutations/impersonateUser.ts
-var import_core26 = require("@keystone-6/core");
-var impersonateUser = (base) => import_core26.graphql.field({
-  type: import_core26.graphql.JSON,
+var import_core25 = require("@keystone-6/core");
+var impersonateUser = (base) => import_core25.graphql.field({
+  type: import_core25.graphql.JSON,
   args: {
-    userId: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
+    userId: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
   },
   resolve: async (source, { userId }, context) => {
     if (process.env.NODE_ENV === "production") {
@@ -2172,12 +2134,12 @@ var impersonateUser = (base) => import_core26.graphql.field({
 });
 
 // mutations/queryCommunicator.ts
-var import_core27 = require("@keystone-6/core");
-var queryCommunicator = (base) => import_core27.graphql.field({
-  type: import_core27.graphql.JSON,
+var import_core26 = require("@keystone-6/core");
+var queryCommunicator = (base) => import_core26.graphql.field({
+  type: import_core26.graphql.JSON,
   args: {
-    question: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) }),
-    model: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) })
+    question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) }),
+    model: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2302,12 +2264,12 @@ ${errorDetails}`;
 });
 
 // mutations/recalculateCallback.ts
-var import_core28 = require("@keystone-6/core");
+var import_core27 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core28.graphql.field({
+var recalculateCallback = (base) => import_core27.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.ID) })
+    callbackId: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -2376,11 +2338,11 @@ var recalculateCallback = (base) => import_core28.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core29 = require("@keystone-6/core");
-var sendEmail = (base) => import_core29.graphql.field({
-  type: import_core29.graphql.Boolean,
+var import_core28 = require("@keystone-6/core");
+var sendEmail = (base) => import_core28.graphql.field({
+  type: import_core28.graphql.Boolean,
   args: {
-    emailData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
+    emailData: import_core28.graphql.arg({ type: import_core28.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2399,12 +2361,12 @@ var sendEmail = (base) => import_core29.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core30 = require("@keystone-6/core");
+var import_core29 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core30.graphql.field({
-  type: import_core30.graphql.String,
+var updateStudentSchedules = (base) => import_core29.graphql.field({
+  type: import_core29.graphql.String,
   args: {
-    studentScheduleData: import_core30.graphql.arg({ type: import_core30.graphql.JSON })
+    studentScheduleData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -2492,7 +2454,7 @@ var updateStudentSchedules = (base) => import_core30.graphql.field({
 // keystone.ts
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 var keystone_default = withAuth(
-  (0, import_core31.config)({
+  (0, import_core30.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -2536,7 +2498,6 @@ var keystone_default = withAuth(
       Message,
       PbisCard,
       StaffPbisCard,
-      PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
       SortingHatQuestion,
@@ -2552,7 +2513,7 @@ var keystone_default = withAuth(
         // above is unaffected.
         plugins: [bugsinkApolloPlugin]
       },
-      extendGraphqlSchema: import_core31.graphql.extend((base) => {
+      extendGraphqlSchema: import_core30.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),

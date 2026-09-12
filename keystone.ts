@@ -24,7 +24,6 @@ import { Message } from './schemas/Message';
 import { PbisCard } from './schemas/PbisCard';
 import { StaffPbisCard } from './schemas/StaffPbisCard';
 import { PbisCollectionDate } from './schemas/PbisCollectionDate';
-import { PbisTeam } from './schemas/PbisTeam';
 import { RandomDrawingWin } from './schemas/RandomDrawingWin';
 import { StudentFocus } from './schemas/StudentFocus';
 import { User } from './schemas/User';
@@ -96,7 +95,6 @@ export default withAuth(
       Message,
       PbisCard,
       StaffPbisCard,
-      PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
       SortingHatQuestion,

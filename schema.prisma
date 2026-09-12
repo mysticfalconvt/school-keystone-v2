@@ -82,8 +82,6 @@ model User {
   block12Students                              User[]               @relation("User_block12Teacher")
   specialGroupStudents                         User[]               @relation("User_specialGroupStudents")
   coTeachesWithTeacher                         User[]               @relation("User_coTeachesWithTeacher")
-  taTeam                                       PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
-  taTeamId                                     String?              @map("taTeam")
   studentFocusTeacher                          StudentFocus[]       @relation("StudentFocus_teacher")
   studentFocusStudent                          StudentFocus[]       @relation("StudentFocus_student")
   studentCellPhoneViolation                    CellPhoneViolation[] @relation("CellPhoneViolation_student")
@@ -173,7 +171,6 @@ model User {
   from_CallbackRewardRun_lastModifiedBy        CallbackRewardRun[]  @relation("CallbackRewardRun_lastModifiedBy")
   from_Calendar_author                         Calendar[]           @relation("Calendar_author")
   from_Link_modifiedBy                         Link[]               @relation("Link_modifiedBy")
-  from_PbisTeam_lastModifiedBy                 PbisTeam[]           @relation("PbisTeam_lastModifiedBy")
   from_PbisCollectionDate_personalLevelWinners PbisCollectionDate[] @relation("PbisCollectionDate_personalLevelWinners")
   from_PbisCollectionDate_taNewLevelWinners    PbisCollectionDate[] @relation("PbisCollectionDate_taNewLevelWinners")
   from_PbisCollectionDate_staffRandomWinners   PbisCollectionDate[] @relation("PbisCollectionDate_staffRandomWinners")
@@ -197,7 +194,6 @@ model User {
   @@index([block10TeacherId])
   @@index([block11TeacherId])
   @@index([block12TeacherId])
-  @@index([taTeamId])
 }
 
 model AssignmentHistory {
@@ -471,22 +467,6 @@ model StaffPbisCard {
   @@index([giverId])
   @@index([recipientId])
   @@index([cardMessage])
-}
-
-model PbisTeam {
-  id                     String   @id @default(cuid())
-  teamName               String   @default("")
-  taTeacher              User[]   @relation("User_taTeam")
-  uncountedCards         Int?     @default(0)
-  countedCards           Int?     @default(0)
-  currentLevel           Int?     @default(0)
-  numberOfStudents       Int?
-  averageCardsPerStudent Int?     @default(0)
-  dateModified           DateTime @default(now())
-  lastModifiedBy         User?    @relation("PbisTeam_lastModifiedBy", fields: [lastModifiedById], references: [id])
-  lastModifiedById       String?  @map("lastModifiedBy")
-
-  @@index([lastModifiedById])
 }
 
 model PbisCollectionDate {

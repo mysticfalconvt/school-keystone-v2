@@ -88,7 +88,6 @@ export const User = list({
     coTeachesWithTeacher: relationship({ ref: "User", many: true }),
 
     //other relationships
-    taTeam: relationship({ ref: "PbisTeam.taTeacher" }),
     studentFocusTeacher: relationship({
       ref: "StudentFocus.teacher",
       many: true,
