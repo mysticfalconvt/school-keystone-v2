@@ -1634,32 +1634,6 @@ input ChromebookCheckCreateInput {
   message: String
 }
 
-type ChromebookAssignment {
-  id: ID!
-}
-
-input ChromebookAssignmentWhereUniqueInput {
-  id: ID
-}
-
-input ChromebookAssignmentWhereInput {
-  AND: [ChromebookAssignmentWhereInput!]
-  OR: [ChromebookAssignmentWhereInput!]
-  NOT: [ChromebookAssignmentWhereInput!]
-  id: IDFilter
-}
-
-input ChromebookAssignmentOrderByInput {
-  id: OrderDirection
-}
-
-input ChromebookAssignmentUpdateArgs {
-  where: ChromebookAssignmentWhereUniqueInput!
-  data: Empty
-}
-
-scalar Empty
-
 type CommunicatorChat {
   id: ID!
   user: User
@@ -2213,85 +2187,6 @@ input StaffPbisCardCreateInput {
   counted: Boolean
 }
 
-type PbisCollection {
-  id: ID!
-  name: String
-  collectionDate: DateTime
-  personalLevelWinners: String
-  randomDrawingWinners: String
-  taTeamsLevels: String
-  taTeamNewLevelWinners: String
-  currentPbisTeamGoal: String
-  collectedCards: String
-  dateModified: DateTime
-  lastModifiedBy: User
-}
-
-input PbisCollectionWhereUniqueInput {
-  id: ID
-}
-
-input PbisCollectionWhereInput {
-  AND: [PbisCollectionWhereInput!]
-  OR: [PbisCollectionWhereInput!]
-  NOT: [PbisCollectionWhereInput!]
-  id: IDFilter
-  name: StringFilter
-  collectionDate: DateTimeFilter
-  personalLevelWinners: StringFilter
-  randomDrawingWinners: StringFilter
-  taTeamsLevels: StringFilter
-  taTeamNewLevelWinners: StringFilter
-  currentPbisTeamGoal: StringFilter
-  collectedCards: StringFilter
-  dateModified: DateTimeFilter
-  lastModifiedBy: UserWhereInput
-}
-
-input PbisCollectionOrderByInput {
-  id: OrderDirection
-  name: OrderDirection
-  collectionDate: OrderDirection
-  personalLevelWinners: OrderDirection
-  randomDrawingWinners: OrderDirection
-  taTeamsLevels: OrderDirection
-  taTeamNewLevelWinners: OrderDirection
-  currentPbisTeamGoal: OrderDirection
-  collectedCards: OrderDirection
-  dateModified: OrderDirection
-}
-
-input PbisCollectionUpdateInput {
-  name: String
-  collectionDate: DateTime
-  personalLevelWinners: String
-  randomDrawingWinners: String
-  taTeamsLevels: String
-  taTeamNewLevelWinners: String
-  currentPbisTeamGoal: String
-  collectedCards: String
-  dateModified: DateTime
-  lastModifiedBy: UserRelateToOneForUpdateInput
-}
-
-input PbisCollectionUpdateArgs {
-  where: PbisCollectionWhereUniqueInput!
-  data: PbisCollectionUpdateInput!
-}
-
-input PbisCollectionCreateInput {
-  name: String
-  collectionDate: DateTime
-  personalLevelWinners: String
-  randomDrawingWinners: String
-  taTeamsLevels: String
-  taTeamNewLevelWinners: String
-  currentPbisTeamGoal: String
-  collectedCards: String
-  dateModified: DateTime
-  lastModifiedBy: UserRelateToOneForCreateInput
-}
-
 type PbisTeam {
   id: ID!
   teamName: String
@@ -2769,12 +2664,6 @@ type Mutation {
   updateChromebookChecks(data: [ChromebookCheckUpdateArgs!]!): [ChromebookCheck]
   deleteChromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
   deleteChromebookChecks(where: [ChromebookCheckWhereUniqueInput!]!): [ChromebookCheck]
-  createChromebookAssignment(data: Empty): ChromebookAssignment
-  createChromebookAssignments(data: [Empty]!): [ChromebookAssignment]
-  updateChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!, data: Empty): ChromebookAssignment
-  updateChromebookAssignments(data: [ChromebookAssignmentUpdateArgs!]!): [ChromebookAssignment]
-  deleteChromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
-  deleteChromebookAssignments(where: [ChromebookAssignmentWhereUniqueInput!]!): [ChromebookAssignment]
   createCommunicatorChat(data: CommunicatorChatCreateInput!): CommunicatorChat
   createCommunicatorChats(data: [CommunicatorChatCreateInput!]!): [CommunicatorChat]
   updateCommunicatorChat(where: CommunicatorChatWhereUniqueInput!, data: CommunicatorChatUpdateInput!): CommunicatorChat
@@ -2811,12 +2700,6 @@ type Mutation {
   updateStaffPbisCards(data: [StaffPbisCardUpdateArgs!]!): [StaffPbisCard]
   deleteStaffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
   deleteStaffPbisCards(where: [StaffPbisCardWhereUniqueInput!]!): [StaffPbisCard]
-  createPbisCollection(data: PbisCollectionCreateInput!): PbisCollection
-  createPbisCollections(data: [PbisCollectionCreateInput!]!): [PbisCollection]
-  updatePbisCollection(where: PbisCollectionWhereUniqueInput!, data: PbisCollectionUpdateInput!): PbisCollection
-  updatePbisCollections(data: [PbisCollectionUpdateArgs!]!): [PbisCollection]
-  deletePbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
-  deletePbisCollections(where: [PbisCollectionWhereUniqueInput!]!): [PbisCollection]
   createPbisTeam(data: PbisTeamCreateInput!): PbisTeam
   createPbisTeams(data: [PbisTeamCreateInput!]!): [PbisTeam]
   updatePbisTeam(where: PbisTeamWhereUniqueInput!, data: PbisTeamUpdateInput!): PbisTeam
@@ -2952,9 +2835,6 @@ type Query {
   chromebookCheck(where: ChromebookCheckWhereUniqueInput!): ChromebookCheck
   chromebookChecks(where: ChromebookCheckWhereInput! = {}, orderBy: [ChromebookCheckOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookCheckWhereUniqueInput): [ChromebookCheck!]
   chromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
-  chromebookAssignment(where: ChromebookAssignmentWhereUniqueInput!): ChromebookAssignment
-  chromebookAssignments(where: ChromebookAssignmentWhereInput! = {}, orderBy: [ChromebookAssignmentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChromebookAssignmentWhereUniqueInput): [ChromebookAssignment!]
-  chromebookAssignmentsCount(where: ChromebookAssignmentWhereInput! = {}): Int
   communicatorChat(where: CommunicatorChatWhereUniqueInput!): CommunicatorChat
   communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
   communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
@@ -2973,9 +2853,6 @@ type Query {
   staffPbisCard(where: StaffPbisCardWhereUniqueInput!): StaffPbisCard
   staffPbisCards(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
   staffPbisCardsCount(where: StaffPbisCardWhereInput! = {}): Int
-  pbisCollection(where: PbisCollectionWhereUniqueInput!): PbisCollection
-  pbisCollections(where: PbisCollectionWhereInput! = {}, orderBy: [PbisCollectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCollectionWhereUniqueInput): [PbisCollection!]
-  pbisCollectionsCount(where: PbisCollectionWhereInput! = {}): Int
   pbisTeam(where: PbisTeamWhereUniqueInput!): PbisTeam
   pbisTeams(where: PbisTeamWhereInput! = {}, orderBy: [PbisTeamOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisTeamWhereUniqueInput): [PbisTeam!]
   pbisTeamsCount(where: PbisTeamWhereInput! = {}): Int

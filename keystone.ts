@@ -16,7 +16,6 @@ import { Calendar } from './schemas/Calendar';
 import { Callback } from './schemas/Callback';
 import { CallbackRewardRun } from './schemas/CallbackRewardRun';
 import { CellPhoneViolation } from './schemas/CellPhoneViolation';
-import { ChromebookAssignment } from './schemas/ChromebookAssignment';
 import { CommunicatorChat } from './schemas/CommunicatorChat';
 import { ChromebookCheck } from './schemas/ChromebookCheck';
 import { Discipline } from './schemas/Discipline';
@@ -24,7 +23,6 @@ import { Link } from './schemas/Link';
 import { Message } from './schemas/Message';
 import { PbisCard } from './schemas/PbisCard';
 import { StaffPbisCard } from './schemas/StaffPbisCard';
-import { PbisCollection } from './schemas/PbisCollection';
 import { PbisCollectionDate } from './schemas/PbisCollectionDate';
 import { PbisTeam } from './schemas/PbisTeam';
 import { RandomDrawingWin } from './schemas/RandomDrawingWin';
@@ -92,14 +90,12 @@ export default withAuth(
       Calendar,
       CellPhoneViolation,
       ChromebookCheck,
-      ChromebookAssignment,
       CommunicatorChat,
       Discipline,
       Link,
       Message,
       PbisCard,
       StaffPbisCard,
-      PbisCollection,
       PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,

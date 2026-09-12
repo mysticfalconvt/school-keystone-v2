@@ -173,7 +173,6 @@ model User {
   from_CallbackRewardRun_lastModifiedBy        CallbackRewardRun[]  @relation("CallbackRewardRun_lastModifiedBy")
   from_Calendar_author                         Calendar[]           @relation("Calendar_author")
   from_Link_modifiedBy                         Link[]               @relation("Link_modifiedBy")
-  from_PbisCollection_lastModifiedBy           PbisCollection[]     @relation("PbisCollection_lastModifiedBy")
   from_PbisTeam_lastModifiedBy                 PbisTeam[]           @relation("PbisTeam_lastModifiedBy")
   from_PbisCollectionDate_personalLevelWinners PbisCollectionDate[] @relation("PbisCollectionDate_personalLevelWinners")
   from_PbisCollectionDate_taNewLevelWinners    PbisCollectionDate[] @relation("PbisCollectionDate_taNewLevelWinners")
@@ -342,10 +341,6 @@ model ChromebookCheck {
   @@index([classroomId])
 }
 
-model ChromebookAssignment {
-  id String @id @default(cuid())
-}
-
 model CommunicatorChat {
   id              String    @id @default(cuid())
   user            User?     @relation("CommunicatorChat_user", fields: [userId], references: [id])
@@ -476,23 +471,6 @@ model StaffPbisCard {
   @@index([giverId])
   @@index([recipientId])
   @@index([cardMessage])
-}
-
-model PbisCollection {
-  id                    String   @id @default(cuid())
-  name                  String   @default("")
-  collectionDate        DateTime @default(now())
-  personalLevelWinners  String   @default("")
-  randomDrawingWinners  String   @default("")
-  taTeamsLevels         String   @default("")
-  taTeamNewLevelWinners String   @default("")
-  currentPbisTeamGoal   String   @default("0")
-  collectedCards        String   @default("")
-  dateModified          DateTime @default(now())
-  lastModifiedBy        User?    @relation("PbisCollection_lastModifiedBy", fields: [lastModifiedById], references: [id])
-  lastModifiedById      String?  @map("lastModifiedBy")
-
-  @@index([lastModifiedById])
 }
 
 model PbisTeam {
