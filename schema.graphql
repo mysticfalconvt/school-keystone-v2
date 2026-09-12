@@ -106,10 +106,6 @@ type User {
   messageReceiverCount(where: MessageWhereInput! = {}): Int
   communicatorChats(where: CommunicatorChatWhereInput! = {}, orderBy: [CommunicatorChatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CommunicatorChatWhereUniqueInput): [CommunicatorChat!]
   communicatorChatsCount(where: CommunicatorChatWhereInput! = {}): Int
-  currentTaWinner: User
-  previousTaWinner: User
-  studentIsCurrentWinner: User
-  studentIsPreviousWinner: User
   randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
   birthday: Birthday
@@ -122,10 +118,7 @@ type User {
   classroomChromebookChecksCount(where: ChromebookCheckWhereInput! = {}): Int
   callbackCount: Int
   totalCallbackCount: Int
-  PbisCardCount: Int
-  YearPbisCount: Int
   teacherSubject: String
-  taPbisCardCount: Int
   averageTimeToCompleteCallback: Int
   block1Assignment: String
   block1ClassName: String
@@ -183,10 +176,6 @@ scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339
 input UserWhereUniqueInput {
   id: ID
   email: String
-  currentTaWinner: UserWhereUniqueInput
-  previousTaWinner: UserWhereUniqueInput
-  studentIsCurrentWinner: UserWhereUniqueInput
-  studentIsPreviousWinner: UserWhereUniqueInput
   birthday: BirthdayWhereUniqueInput
 }
 
@@ -265,10 +254,6 @@ input UserWhereInput {
   messageSender: MessageManyRelationFilter
   messageReceiver: MessageManyRelationFilter
   communicatorChats: CommunicatorChatManyRelationFilter
-  currentTaWinner: UserWhereInput
-  previousTaWinner: UserWhereInput
-  studentIsCurrentWinner: UserWhereInput
-  studentIsPreviousWinner: UserWhereInput
   randomDrawingWins: RandomDrawingWinManyRelationFilter
   birthday: BirthdayWhereInput
   individualPbisLevel: IntNullableFilter
@@ -278,10 +263,7 @@ input UserWhereInput {
   classroomChromebookChecks: ChromebookCheckManyRelationFilter
   callbackCount: IntNullableFilter
   totalCallbackCount: IntNullableFilter
-  PbisCardCount: IntNullableFilter
-  YearPbisCount: IntNullableFilter
   teacherSubject: StringFilter
-  taPbisCardCount: IntNullableFilter
   averageTimeToCompleteCallback: IntNullableFilter
   block1Assignment: StringFilter
   block1ClassName: StringFilter
@@ -509,10 +491,7 @@ input UserOrderByInput {
   taTeamAveragePbisCardsPerStudent: OrderDirection
   callbackCount: OrderDirection
   totalCallbackCount: OrderDirection
-  PbisCardCount: OrderDirection
-  YearPbisCount: OrderDirection
   teacherSubject: OrderDirection
-  taPbisCardCount: OrderDirection
   averageTimeToCompleteCallback: OrderDirection
   block1Assignment: OrderDirection
   block1ClassName: OrderDirection
@@ -634,10 +613,6 @@ input UserUpdateInput {
   messageSender: MessageRelateToManyForUpdateInput
   messageReceiver: MessageRelateToManyForUpdateInput
   communicatorChats: CommunicatorChatRelateToManyForUpdateInput
-  currentTaWinner: UserRelateToOneForUpdateInput
-  previousTaWinner: UserRelateToOneForUpdateInput
-  studentIsCurrentWinner: UserRelateToOneForUpdateInput
-  studentIsPreviousWinner: UserRelateToOneForUpdateInput
   randomDrawingWins: RandomDrawingWinRelateToManyForUpdateInput
   birthday: BirthdayRelateToOneForUpdateInput
   individualPbisLevel: Int
@@ -647,10 +622,7 @@ input UserUpdateInput {
   classroomChromebookChecks: ChromebookCheckRelateToManyForUpdateInput
   callbackCount: Int
   totalCallbackCount: Int
-  PbisCardCount: Int
-  YearPbisCount: Int
   teacherSubject: String
-  taPbisCardCount: Int
   averageTimeToCompleteCallback: Int
   block1Assignment: String
   block1ClassName: String
@@ -871,10 +843,6 @@ input UserCreateInput {
   messageSender: MessageRelateToManyForCreateInput
   messageReceiver: MessageRelateToManyForCreateInput
   communicatorChats: CommunicatorChatRelateToManyForCreateInput
-  currentTaWinner: UserRelateToOneForCreateInput
-  previousTaWinner: UserRelateToOneForCreateInput
-  studentIsCurrentWinner: UserRelateToOneForCreateInput
-  studentIsPreviousWinner: UserRelateToOneForCreateInput
   randomDrawingWins: RandomDrawingWinRelateToManyForCreateInput
   birthday: BirthdayRelateToOneForCreateInput
   individualPbisLevel: Int
@@ -884,10 +852,7 @@ input UserCreateInput {
   classroomChromebookChecks: ChromebookCheckRelateToManyForCreateInput
   callbackCount: Int
   totalCallbackCount: Int
-  PbisCardCount: Int
-  YearPbisCount: Int
   teacherSubject: String
-  taPbisCardCount: Int
   averageTimeToCompleteCallback: Int
   block1Assignment: String
   block1ClassName: String

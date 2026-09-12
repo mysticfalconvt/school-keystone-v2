@@ -1505,23 +1505,6 @@ var User = (0, import_core15.list)({
       ref: "CommunicatorChat.user",
       many: true
     }),
-    //PBIS Collection Winners
-    currentTaWinner: (0, import_fields16.relationship)({
-      ref: "User.studentIsCurrentWinner",
-      many: false
-    }),
-    previousTaWinner: (0, import_fields16.relationship)({
-      ref: "User.studentIsPreviousWinner",
-      many: false
-    }),
-    studentIsCurrentWinner: (0, import_fields16.relationship)({
-      ref: "User.currentTaWinner",
-      many: false
-    }),
-    studentIsPreviousWinner: (0, import_fields16.relationship)({
-      ref: "User.previousTaWinner",
-      many: false
-    }),
     randomDrawingWins: (0, import_fields16.relationship)({
       ref: "RandomDrawingWin.student",
       many: true
@@ -1542,10 +1525,7 @@ var User = (0, import_core15.list)({
     // Important Info
     callbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
     totalCallbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
-    PbisCardCount: (0, import_fields16.integer)({ defaultValue: 0 }),
-    YearPbisCount: (0, import_fields16.integer)({ defaultValue: 0 }),
     teacherSubject: (0, import_fields16.text)({ defaultValue: void 0 }),
-    taPbisCardCount: (0, import_fields16.integer)({ defaultValue: 0 }),
     averageTimeToCompleteCallback: (0, import_fields16.integer)(),
     // assignments
     block1Assignment: (0, import_fields16.text)({
