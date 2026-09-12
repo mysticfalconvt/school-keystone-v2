@@ -497,6 +497,20 @@ PBIS Card Rules:
 - Do not invent stored count fields such as PbisCardCount, YearPbisCount or
   taPbisCardCount. They were removed; only the relationship counts above exist.
 
+Counting and Ranking Rules:
+- Prefer a *Count field with a where filter over fetching rows and counting them
+  yourself. counts are computed by the database and are exact; counting rows in a
+  large JSON payload by eye is unreliable and has produced wrong answers.
+- Read the field description before using a count. Several counts mean "all time"
+  unless you pass a filter - asking for "open" or "outstanding" and then using an
+  unfiltered count is a silent error that returns a plausible but wrong number.
+- GraphQL here cannot GROUP BY. There is no way to ask "which description/category
+  /teacher appears most often" in one query. If a question needs grouping, either
+  ask for counts of specific candidate values one at a time, or say plainly that
+  the data cannot be grouped in a single query and offer the closest thing you can
+  answer exactly.
+- Never present a ranking derived from scanning many rows as if it were exact.
+
 Name and Display Rules:
 - The name field for users includes BOTH first and last name (e.g., "John Smith")
 - For searches: use { name: { contains: "John", mode: insensitive } } to find partial matches

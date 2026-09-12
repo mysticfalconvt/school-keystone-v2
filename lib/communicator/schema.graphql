@@ -111,9 +111,21 @@ type User {
   staffPbisCardsReceived(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
   """Live count of staff-to-staff PBIS cards this person has received."""
   staffPbisCardsReceivedCount(where: StaffPbisCardWhereInput! = {}): Int
+  """
+  Callback assignments this student has RECEIVED, all of them, completed or not.
+  """
   callbackItems(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
+  """
+  Live count of callbacks this student has RECEIVED. With no argument it counts every callback, including completed ones. For OPEN ones filter: callbackItemsCount(where: { dateCompleted: null }).
+  """
   callbackItemsCount(where: CallbackWhereInput! = {}): Int
+  """
+  Callback assignments this staff member has GIVEN to students, all of them, completed or not.
+  """
   callbackAssigned(where: CallbackWhereInput! = {}, orderBy: [CallbackOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CallbackWhereUniqueInput): [Callback!]
+  """
+  Live count of callbacks this staff member has GIVEN. With no argument it counts every callback ever assigned, including completed ones. For OPEN or OUTSTANDING callbacks you MUST filter: callbackAssignedCount(where: { dateCompleted: null }). Asking for "open" and counting unfiltered is a common and silent error.
+  """
   callbackAssignedCount(where: CallbackWhereInput! = {}): Int
   randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
@@ -129,10 +141,13 @@ type User {
   Stored average cards per student for this teacher's TA group, updated by the weekly PBIS collection.
   """
   taTeamAveragePbisCardsPerStudent: Int
-  """Number of callback assignments currently open for a student."""
+  """
+  Stored count of open callback assignments for a student. Prefer callbackItemsCount with an explicit filter over trusting this.
+  """
   callbackCount: Int
   totalCallbackCount: Int
   teacherSubject: String
+  """Stored average days taken to complete a callback."""
   averageTimeToCompleteCallback: Int
   block1Assignment: String
   block1ClassName: String
@@ -225,12 +240,19 @@ type RandomDrawingWin {
 type Callback {
   id: ID!
   title: String
+  """
+  The assignment text. Teachers often assign the same description to a whole class at once, so identical descriptions are common and expected.
+  """
   description: String
+  """The student who owes the work."""
   student: User
+  """The staff member who assigned the callback."""
   teacher: User
   """When the callback (late or missing work) was assigned."""
   dateAssigned: DateTime
-  """Null while the callback is still outstanding."""
+  """
+  When the student completed it. NULL means the callback is still open/outstanding - this is the only way to tell open from completed.
+  """
   dateCompleted: DateTime
   link: String
   messageFromTeacher: String

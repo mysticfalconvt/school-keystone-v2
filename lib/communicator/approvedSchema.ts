@@ -143,7 +143,18 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
       "Stored level for this teacher's TA group, updated by the weekly PBIS collection.",
     taTeamAveragePbisCardsPerStudent:
       "Stored average cards per student for this teacher's TA group, updated by the weekly PBIS collection.",
-    callbackCount: 'Number of callback assignments currently open for a student.',
+    callbackCount:
+      'Stored count of open callback assignments for a student. Prefer callbackItemsCount with an explicit filter over trusting this.',
+    callbackAssigned:
+      'Callback assignments this staff member has GIVEN to students, all of them, completed or not.',
+    callbackAssignedCount:
+      'Live count of callbacks this staff member has GIVEN. With no argument it counts every callback ever assigned, including completed ones. For OPEN or OUTSTANDING callbacks you MUST filter: callbackAssignedCount(where: { dateCompleted: null }). Asking for "open" and counting unfiltered is a common and silent error.',
+    callbackItems:
+      'Callback assignments this student has RECEIVED, all of them, completed or not.',
+    callbackItemsCount:
+      'Live count of callbacks this student has RECEIVED. With no argument it counts every callback, including completed ones. For OPEN ones filter: callbackItemsCount(where: { dateCompleted: null }).',
+    averageTimeToCompleteCallback:
+      'Stored average days taken to complete a callback.',
     taStudents: 'The students in this teacher\'s TA (advisory) group.',
     taTeacher: "The student's TA (advisory) teacher.",
   },
@@ -160,6 +171,11 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
   },
   Callback: {
     dateAssigned: 'When the callback (late or missing work) was assigned.',
-    dateCompleted: 'Null while the callback is still outstanding.',
+    dateCompleted:
+      'When the student completed it. NULL means the callback is still open/outstanding - this is the only way to tell open from completed.',
+    teacher: 'The staff member who assigned the callback.',
+    student: 'The student who owes the work.',
+    description:
+      'The assignment text. Teachers often assign the same description to a whole class at once, so identical descriptions are common and expected.',
   },
 };
