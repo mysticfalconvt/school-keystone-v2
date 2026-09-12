@@ -680,6 +680,11 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
     query: string,
     results: any,
     model: string,
+    // Must be the same limit processQuery derived from the model's context
+    // window. Without it this fell back to MAX_RESULT_CHARS and re-truncated
+    // data that had already been sized correctly, so the dynamic limit never
+    // took effect and every result was cut to 4000 chars regardless of model.
+    maxChars: number = this.MAX_RESULT_CHARS,
   ): Promise<string> {
     // Check if already truncated, if not truncate
     const alreadyTruncated = results._truncated === true;
@@ -687,7 +692,7 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
 
     const truncatedResults = alreadyTruncated
       ? results
-      : this.truncateResults(results);
+      : this.truncateResults(results, maxChars);
     const wasTruncated = truncatedResults._truncated === true;
     const truncatedSize = JSON.stringify(truncatedResults).length;
 
@@ -717,7 +722,13 @@ Terminology Rules:
 13. PBIS cards can be referred to as "PBIS cards" or "positive behavior cards"
 ${
   wasTruncated
-    ? '14. Note that the results shown are truncated/summarized due to size'
+    ? `14. CRITICAL - THE RESULTS ARE INCOMPLETE. They were cut to fit, and the
+    rows you were given are an arbitrary slice, not the top or first ones by any
+    meaningful order. Therefore you MUST NOT state or imply a maximum, minimum,
+    "most", "least", "top", "best", "worst", or any ranking or total. Say plainly
+    that the data was too large to show in full, report only what is visible and
+    label it as a partial sample, and suggest narrowing the question (a specific
+    person, class, or date range) to get a reliable answer.`
     : ''
 }`;
 
@@ -1048,6 +1059,7 @@ ${
         allQueries.join('\n---\n'),
         dataToExplain,
         model,
+        truncationLimit,
       );
 
       // Step 4: Evaluate if we have a complete answer
