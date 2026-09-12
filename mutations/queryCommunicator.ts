@@ -85,31 +85,38 @@ export const queryCommunicator = (base: any) =>
             userId: String(user.id),
           });
 
-          // Save error to database
-          await context.query.CommunicatorChat.createOne({
+          // Save error to database. Generic create is disabled on the list so
+          // users cannot forge audit records, so this purpose-built mutation
+          // writes with elevated access.
+          const failedChat = await context.sudo().query.CommunicatorChat.createOne({
             data: {
               user: { connect: { id: user.id } },
               question: args.question,
               model: args.model,
+              status: 'failed',
               hasError: 'true',
               errorMessage: errorMessage,
               rawData: { error: errorText, status: response.status },
             },
+            query: 'id',
           });
 
           // Return error response to user
           return {
+            chatId: failedChat?.id ?? null,
             error: true,
             message: `The communicator service returned an error: ${response.statusText}`,
             details: errorDetails,
-            status: response.status,
+            // Named httpStatus so it is not confused with the persisted chat
+            // status ('succeeded' / 'failed').
+            httpStatus: response.status,
           };
         }
 
         const data = await response.json();
 
         // Store the successful chat in the database
-        await context.query.CommunicatorChat.createOne({
+        const chat = await context.sudo().query.CommunicatorChat.createOne({
           data: {
             user: { connect: { id: user.id } },
             question: data.question || args.question,
@@ -118,14 +125,16 @@ export const queryCommunicator = (base: any) =>
             model: args.model,
             iterations: data.iterations || null,
             evaluationScore: data.evaluationScore || null,
+            status: 'succeeded',
             hasError: 'false',
             rawData: data.rawData || data,
-            timestamp: data.timestamp || null,
           },
+          query: 'id',
         });
 
-        // Return the response to the user
-        return data;
+        // Return the response to the user, including the persisted chat id so
+        // the client does not have to match history by question text.
+        return { ...data, chatId: chat?.id ?? null };
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -139,17 +148,21 @@ export const queryCommunicator = (base: any) =>
         });
 
         // Save error to database
+        let chatId: string | null = null;
         try {
-          await context.query.CommunicatorChat.createOne({
+          const failedChat = await context.sudo().query.CommunicatorChat.createOne({
             data: {
               user: { connect: { id: user.id } },
               question: args.question,
               model: args.model,
+              status: 'failed',
               hasError: 'true',
               errorMessage: errorMessage,
               rawData: { error: errorMessage },
             },
+            query: 'id',
           });
+          chatId = failedChat?.id ?? null;
         } catch (dbError) {
           console.error('Failed to save error to database:', dbError);
           captureError(dbError, {
@@ -159,6 +172,7 @@ export const queryCommunicator = (base: any) =>
 
         // Return error response instead of throwing
         return {
+          chatId,
           error: true,
           message: errorMessage,
         };

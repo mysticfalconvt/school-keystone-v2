@@ -89,6 +89,10 @@ export const permissionFields = {
     defaultValue: false,
     label: "User can access Communicator AI chat",
   }),
+  canManageCommunicator: checkbox({
+    defaultValue: false,
+    label: "User can see and moderate all Communicator chats",
+  }),
 };
 
 export type Permission = keyof typeof permissionFields;

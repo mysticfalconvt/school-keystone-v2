@@ -44,6 +44,7 @@ model User {
   canManagePbis                                Boolean              @default(false)
   canHaveSpecialGroups                         Boolean              @default(false)
   isCommunicatorEnabled                        Boolean              @default(false)
+  canManageCommunicator                        Boolean              @default(false)
   block1Teacher                                User?                @relation("User_block1Teacher", fields: [block1TeacherId], references: [id])
   block1TeacherId                              String?              @map("block1Teacher")
   block1Students                               User[]               @relation("User_block1Teacher")
@@ -336,6 +337,7 @@ model CommunicatorChat {
   explanation     String    @default("")
   graphqlQuery    String    @default("")
   errorMessage    String    @default("")
+  status          String    @default("pending")
   hasError        String    @default("false")
   model           String    @default("")
   iterations      Int?
@@ -343,10 +345,11 @@ model CommunicatorChat {
   userRating      Int?      @default(0)
   userComment     String    @default("")
   rawData         Json?
-  timestamp       DateTime?
   createdAt       DateTime? @default(now())
 
   @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Discipline {

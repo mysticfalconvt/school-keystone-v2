@@ -273,7 +273,7 @@ if (!sessionSecret) {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "email",
-  sessionData: "name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups",
+  sessionData: "name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled canManageCommunicator hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups",
   secretField: "password",
   initFirstItem: {
     // If there are no items in the database, keystone will ask you to create
@@ -685,76 +685,114 @@ var import_core5 = require("@keystone-6/core");
 var import_fields5 = require("@keystone-6/core/fields");
 function canManageCommunicatorChats({ session: session2 }) {
   if (!session2) return false;
-  return !!(session2.data.isSuperAdmin || session2.data.canManagePbis);
+  return !!(session2.data.isSuperAdmin || session2.data.canManageCommunicator);
 }
 function isStaff({ session: session2 }) {
   if (!session2) return false;
   return !!session2.data.isStaff;
 }
+function canUpdateChat({ session: session2 }) {
+  if (!session2) return false;
+  return !!(session2.data.isStaff || session2.data.isSuperAdmin);
+}
+function updateFilter({ session: session2 }) {
+  if (!session2) return false;
+  if (session2.data.isSuperAdmin || session2.data.canManageCommunicator) {
+    return true;
+  }
+  return { user: { id: { equals: session2.itemId } } };
+}
+var resultFieldAccess = {
+  create: () => false,
+  update: () => false
+};
 var CommunicatorChat = (0, import_core5.list)({
   access: {
     operation: {
       query: isStaff,
-      create: isStaff,
+      // Chats are created only by the queryCommunicator mutation, which uses
+      // an elevated context. Disabling the generic create keeps users from
+      // fabricating history.
+      create: () => false,
       delete: canManageCommunicatorChats,
-      update: canManageCommunicatorChats
+      update: canUpdateChat
     },
     filter: {
       query: ({ session: session2 }) => {
         if (!session2) return false;
-        if (session2.data.isSuperAdmin || session2.data.canManagePbis) {
+        if (session2.data.isSuperAdmin || session2.data.canManageCommunicator) {
           return true;
         }
         return {
           user: { id: { equals: session2.itemId } }
         };
-      }
+      },
+      update: updateFilter,
+      delete: updateFilter
     }
   },
   ui: {
     listView: {
-      initialColumns: ["user", "question", "createdAt"],
+      initialColumns: ["user", "question", "status", "createdAt"],
       pageSize: 50
     }
   },
   fields: {
     user: (0, import_fields5.relationship)({
       ref: "User.communicatorChats"
-      // ui: {
-      //   displayMode: '',
-      //   cardFields: ['name', 'email'],
-      //   linkToItem: true,
-      // },
     }),
     question: (0, import_fields5.text)({
       validation: { isRequired: true },
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     explanation: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     graphqlQuery: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     errorMessage: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
+    // Replaces hasError, which was text holding the strings 'true'/'false'.
+    // hasError is kept for one release so existing rows can be backfilled; see
+    // DATA_MODEL_CLEANUP_PLAN.md. Remove it once the backfill has run.
+    status: (0, import_fields5.select)({
+      type: "string",
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Succeeded", value: "succeeded" },
+        { label: "Failed", value: "failed" }
+      ],
+      defaultValue: "pending",
+      validation: { isRequired: true },
+      isIndexed: true,
+      access: resultFieldAccess
+    }),
+    /** @deprecated Use `status`. Retained only until existing rows are backfilled. */
     hasError: (0, import_fields5.text)({
-      defaultValue: "false"
+      defaultValue: "false",
+      access: resultFieldAccess
     }),
     model: (0, import_fields5.text)({
-      validation: { isRequired: true }
+      validation: { isRequired: true },
+      access: resultFieldAccess
     }),
-    iterations: (0, import_fields5.integer)(),
-    evaluationScore: (0, import_fields5.integer)(),
+    iterations: (0, import_fields5.integer)({ access: resultFieldAccess }),
+    evaluationScore: (0, import_fields5.integer)({ access: resultFieldAccess }),
+    // The two fields an owner is allowed to write, via the generic update.
     userRating: (0, import_fields5.integer)({
       defaultValue: 0,
       validation: {
@@ -768,15 +806,23 @@ var CommunicatorChat = (0, import_core5.list)({
         displayMode: "textarea"
       }
     }),
+    // Raw model/query payloads can contain broad student and staff records.
+    // Readable only by chat managers, and never writable through the API.
     rawData: (0, import_fields5.json)({
       ui: {
         createView: { fieldMode: "hidden" },
         itemView: { fieldMode: "read" }
+      },
+      access: {
+        read: canManageCommunicatorChats,
+        create: () => false,
+        update: () => false
       }
     }),
-    timestamp: (0, import_fields5.timestamp)(),
     createdAt: (0, import_fields5.timestamp)({
-      defaultValue: { kind: "now" }
+      defaultValue: { kind: "now" },
+      isIndexed: true,
+      access: resultFieldAccess
     })
   }
 });
@@ -1375,6 +1421,10 @@ var permissionFields = {
   isCommunicatorEnabled: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can access Communicator AI chat"
+  }),
+  canManageCommunicator: (0, import_fields15.checkbox)({
+    defaultValue: false,
+    label: "User can see and moderate all Communicator chats"
   })
 };
 var permissionsList = Object.keys(
@@ -2178,17 +2228,20 @@ ${errorDetails}`;
           extra: { status: response.status, details: errorDetails },
           userId: String(user.id)
         });
-        await context.query.CommunicatorChat.createOne({
+        const failedChat = await context.sudo().query.CommunicatorChat.createOne({
           data: {
             user: { connect: { id: user.id } },
             question: args.question,
             model: args.model,
+            status: "failed",
             hasError: "true",
             errorMessage,
             rawData: { error: errorText, status: response.status }
-          }
+          },
+          query: "id"
         });
         return {
+          chatId: failedChat?.id ?? null,
           error: true,
           message: `The communicator service returned an error: ${response.statusText}`,
           details: errorDetails,
@@ -2196,7 +2249,7 @@ ${errorDetails}`;
         };
       }
       const data = await response.json();
-      await context.query.CommunicatorChat.createOne({
+      const chat = await context.sudo().query.CommunicatorChat.createOne({
         data: {
           user: { connect: { id: user.id } },
           question: data.question || args.question,
@@ -2205,12 +2258,13 @@ ${errorDetails}`;
           model: args.model,
           iterations: data.iterations || null,
           evaluationScore: data.evaluationScore || null,
+          status: "succeeded",
           hasError: "false",
-          rawData: data.rawData || data,
-          timestamp: data.timestamp || null
-        }
+          rawData: data.rawData || data
+        },
+        query: "id"
       });
-      return data;
+      return { ...data, chatId: chat?.id ?? null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to query communicator service";
       console.error("Communicator Query Error:", error);
@@ -2218,17 +2272,21 @@ ${errorDetails}`;
         tags: { mutation: "queryCommunicator", model: args.model },
         userId: String(user.id)
       });
+      let chatId = null;
       try {
-        await context.query.CommunicatorChat.createOne({
+        const failedChat = await context.sudo().query.CommunicatorChat.createOne({
           data: {
             user: { connect: { id: user.id } },
             question: args.question,
             model: args.model,
+            status: "failed",
             hasError: "true",
             errorMessage,
             rawData: { error: errorMessage }
-          }
+          },
+          query: "id"
         });
+        chatId = failedChat?.id ?? null;
       } catch (dbError) {
         console.error("Failed to save error to database:", dbError);
         captureError(dbError, {
@@ -2236,6 +2294,7 @@ ${errorDetails}`;
         });
       }
       return {
+        chatId,
         error: true,
         message: errorMessage
       };

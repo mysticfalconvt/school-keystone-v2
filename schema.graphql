@@ -36,6 +36,7 @@ type User {
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
   isCommunicatorEnabled: Boolean
+  canManageCommunicator: Boolean
   block1Teacher: User
   block1Students(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   block1StudentsCount(where: UserWhereInput! = {}): Int
@@ -213,6 +214,7 @@ input UserWhereInput {
   canManagePbis: BooleanFilter
   canHaveSpecialGroups: BooleanFilter
   isCommunicatorEnabled: BooleanFilter
+  canManageCommunicator: BooleanFilter
   block1Teacher: UserWhereInput
   block1Students: UserManyRelationFilter
   block2Teacher: UserWhereInput
@@ -486,6 +488,7 @@ input UserOrderByInput {
   canManagePbis: OrderDirection
   canHaveSpecialGroups: OrderDirection
   isCommunicatorEnabled: OrderDirection
+  canManageCommunicator: OrderDirection
   individualPbisLevel: OrderDirection
   taTeamPbisLevel: OrderDirection
   taTeamAveragePbisCardsPerStudent: OrderDirection
@@ -572,6 +575,7 @@ input UserUpdateInput {
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
   isCommunicatorEnabled: Boolean
+  canManageCommunicator: Boolean
   block1Teacher: UserRelateToOneForUpdateInput
   block1Students: UserRelateToManyForUpdateInput
   block2Teacher: UserRelateToOneForUpdateInput
@@ -802,6 +806,7 @@ input UserCreateInput {
   canManagePbis: Boolean
   canHaveSpecialGroups: Boolean
   isCommunicatorEnabled: Boolean
+  canManageCommunicator: Boolean
   block1Teacher: UserRelateToOneForCreateInput
   block1Students: UserRelateToManyForCreateInput
   block2Teacher: UserRelateToOneForCreateInput
@@ -1591,6 +1596,7 @@ type CommunicatorChat {
   explanation: String
   graphqlQuery: String
   errorMessage: String
+  status: String
   hasError: String
   model: String
   iterations: Int
@@ -1598,7 +1604,6 @@ type CommunicatorChat {
   userRating: Int
   userComment: String
   rawData: JSON
-  timestamp: DateTime
   createdAt: DateTime
 }
 
@@ -1616,13 +1621,13 @@ input CommunicatorChatWhereInput {
   explanation: StringFilter
   graphqlQuery: StringFilter
   errorMessage: StringFilter
+  status: StringFilter
   hasError: StringFilter
   model: StringFilter
   iterations: IntNullableFilter
   evaluationScore: IntNullableFilter
   userRating: IntNullableFilter
   userComment: StringFilter
-  timestamp: DateTimeNullableFilter
   createdAt: DateTimeNullableFilter
 }
 
@@ -1632,13 +1637,13 @@ input CommunicatorChatOrderByInput {
   explanation: OrderDirection
   graphqlQuery: OrderDirection
   errorMessage: OrderDirection
+  status: OrderDirection
   hasError: OrderDirection
   model: OrderDirection
   iterations: OrderDirection
   evaluationScore: OrderDirection
   userRating: OrderDirection
   userComment: OrderDirection
-  timestamp: OrderDirection
   createdAt: OrderDirection
 }
 
@@ -1648,6 +1653,7 @@ input CommunicatorChatUpdateInput {
   explanation: String
   graphqlQuery: String
   errorMessage: String
+  status: String
   hasError: String
   model: String
   iterations: Int
@@ -1655,7 +1661,6 @@ input CommunicatorChatUpdateInput {
   userRating: Int
   userComment: String
   rawData: JSON
-  timestamp: DateTime
   createdAt: DateTime
 }
 
@@ -1670,6 +1675,7 @@ input CommunicatorChatCreateInput {
   explanation: String
   graphqlQuery: String
   errorMessage: String
+  status: String
   hasError: String
   model: String
   iterations: Int
@@ -1677,7 +1683,6 @@ input CommunicatorChatCreateInput {
   userRating: Int
   userComment: String
   rawData: JSON
-  timestamp: DateTime
   createdAt: DateTime
 }
 
