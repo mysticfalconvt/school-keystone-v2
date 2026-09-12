@@ -2746,6 +2746,37 @@ PBIS Card Rules:
 - Do not invent stored count fields such as PbisCardCount, YearPbisCount or
   taPbisCardCount. They were removed; only the relationship counts above exist.
 
+Collection Period Rules:
+- "The last collection", "this collection", "since the last collection" and
+  "this week's cards" all refer to a PBIS collection RUN, not a calendar week or
+  month. The runs are the rows of pbisCollectionDates.
+- NEVER invent a date like the first of the month for these. Fetch the latest run
+  first: query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 1)
+  { collectionDate } }, then filter cards with dateGiven gte that value.
+- If you answer with a date range, state the actual range you used so the reader
+  can see what "last collection" was taken to mean.
+
+Who Counts As A Teacher:
+- Administrators bulk-import PBIS cards hundreds at a time, so their totals are
+  not comparable to a teacher handing out cards individually. For any "who gave
+  the most cards" or similar ranking of staff, EXCLUDE them:
+  users(where: { isStaff: { equals: true }, isSuperAdmin: { equals: false } })
+- Include them only if the question explicitly asks about administrators.
+
+Counting and Ranking Rules:
+- Prefer a *Count field with a where filter over fetching rows and counting them
+  yourself. counts are computed by the database and are exact; counting rows in a
+  large JSON payload by eye is unreliable and has produced wrong answers.
+- Read the field description before using a count. Several counts mean "all time"
+  unless you pass a filter - asking for "open" or "outstanding" and then using an
+  unfiltered count is a silent error that returns a plausible but wrong number.
+- GraphQL here cannot GROUP BY. There is no way to ask "which description/category
+  /teacher appears most often" in one query. If a question needs grouping, either
+  ask for counts of specific candidate values one at a time, or say plainly that
+  the data cannot be grouped in a single query and offer the closest thing you can
+  answer exactly.
+- Never present a ranking derived from scanning many rows as if it were exact.
+
 Name and Display Rules:
 - The name field for users includes BOTH first and last name (e.g., "John Smith")
 - For searches: use { name: { contains: "John", mode: insensitive } } to find partial matches
@@ -3082,8 +3113,9 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
       const result = await this.graphql.query({ query, variables });
       console.log("Result:", result);
       if (result.errors) {
+        const isQueryShapeError = (e) => !e.path || e.path.length === 0;
         const retryableError = result.errors.find(
-          (e) => e.extensions?.code === "GRAPHQL_PARSE_FAILED" || e.message.includes("Syntax Error") || e.extensions?.code === "GRAPHQL_VALIDATION_FAILED" || e.message.includes("conflict") || e.message.includes("differing arguments") || e.message.includes("is not defined by type") || e.message.includes("UserWhereUniqueInput")
+          (e) => isQueryShapeError(e) || e.extensions?.code === "GRAPHQL_PARSE_FAILED" || e.extensions?.code === "GRAPHQL_VALIDATION_FAILED" || e.message.includes("Syntax Error") || e.message.includes("conflict") || e.message.includes("differing arguments") || e.message.includes("is not defined by type") || e.message.includes("Cannot query field") || e.message.includes("UserWhereUniqueInput")
         );
         if (retryableError && iteration < this.MAX_ITERATIONS) {
           console.log(
@@ -3103,6 +3135,13 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
             errorGuidance = `CRITICAL: You queried "${fieldName}" multiple times with different arguments. GraphQL requires aliases when querying the same field multiple times. Use descriptive aliases like "first: ${fieldName}(...)" and "second: ${fieldName}(...)" or more descriptive names based on the filter (e.g., "students: users(...)" and "staff: users(...)").`;
           } else if (retryableError.message.includes("is not defined by type")) {
             errorGuidance = `The field you used doesn't exist in that input type. Check the schema and use the correct field name and input type. Remember: user (singular) only accepts unique fields like id, while users (plural) accepts filtering fields.`;
+          } else if (retryableError.message.includes("Cannot query field")) {
+            const m = retryableError.message.match(
+              /Cannot query field "(\w+)" on type "(\w+)"/
+            );
+            const field = m ? m[1] : "that field";
+            const onType = m ? m[2] : "that type";
+            errorGuidance = `CRITICAL: "${field}" does not exist on type "${onType}". Do not guess field names. Look at the "${onType}" type in the schema you were given and use only the fields listed there. The schema you see is the complete set of what you may query - if something is not in it, it is not available and you should answer using what is, or say the data is not available.`;
           }
           currentQuestion = `${currentQuestion}
 
