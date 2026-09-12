@@ -37,6 +37,8 @@ export type Session = {
     isGuidance?: boolean;
     canManagePbis?: boolean;
     canHaveSpecialGroups?: boolean;
+    isCommunicatorEnabled?: boolean;
+    canManageCommunicator?: boolean;
     role?: {
       id: string;
       name: string;

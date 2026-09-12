@@ -6,7 +6,10 @@
     "dev": "keystone dev",
     "start": "keystone start",
     "build": "keystone build",
-    "postinstall": "keystone postinstall"
+    "postinstall": "keystone postinstall",
+    "communicator:schema": "node scripts/runTs.js scripts/buildCommunicatorSchema.ts",
+    "communicator:schema:check": "node scripts/runTs.js scripts/buildCommunicatorSchema.ts --check",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@keystone-6/auth": "^8.1.0",

@@ -44,6 +44,7 @@ model User {
   canManagePbis                                Boolean              @default(false)
   canHaveSpecialGroups                         Boolean              @default(false)
   isCommunicatorEnabled                        Boolean              @default(false)
+  canManageCommunicator                        Boolean              @default(false)
   block1Teacher                                User?                @relation("User_block1Teacher", fields: [block1TeacherId], references: [id])
   block1TeacherId                              String?              @map("block1Teacher")
   block1Students                               User[]               @relation("User_block1Teacher")
@@ -82,8 +83,6 @@ model User {
   block12Students                              User[]               @relation("User_block12Teacher")
   specialGroupStudents                         User[]               @relation("User_specialGroupStudents")
   coTeachesWithTeacher                         User[]               @relation("User_coTeachesWithTeacher")
-  taTeam                                       PbisTeam?            @relation("User_taTeam", fields: [taTeamId], references: [id])
-  taTeamId                                     String?              @map("taTeam")
   studentFocusTeacher                          StudentFocus[]       @relation("StudentFocus_teacher")
   studentFocusStudent                          StudentFocus[]       @relation("StudentFocus_student")
   studentCellPhoneViolation                    CellPhoneViolation[] @relation("CellPhoneViolation_student")
@@ -99,12 +98,6 @@ model User {
   messageSender                                Message[]            @relation("Message_sender")
   messageReceiver                              Message[]            @relation("Message_receiver")
   communicatorChats                            CommunicatorChat[]   @relation("CommunicatorChat_user")
-  currentTaWinner                              User?                @relation("User_currentTaWinner", fields: [currentTaWinnerId], references: [id])
-  currentTaWinnerId                            String?              @unique @map("currentTaWinner")
-  previousTaWinner                             User?                @relation("User_previousTaWinner", fields: [previousTaWinnerId], references: [id])
-  previousTaWinnerId                           String?              @unique @map("previousTaWinner")
-  studentIsCurrentWinner                       User?                @relation("User_currentTaWinner")
-  studentIsPreviousWinner                      User?                @relation("User_previousTaWinner")
   randomDrawingWins                            RandomDrawingWin[]   @relation("RandomDrawingWin_student")
   birthday                                     Birthday?            @relation("Birthday_student")
   individualPbisLevel                          Int?                 @default(0)
@@ -114,10 +107,7 @@ model User {
   classroomChromebookChecks                    ChromebookCheck[]    @relation("ChromebookCheck_classroom")
   callbackCount                                Int?                 @default(0)
   totalCallbackCount                           Int?                 @default(0)
-  PbisCardCount                                Int?                 @default(0)
-  YearPbisCount                                Int?                 @default(0)
   teacherSubject                               String               @default("")
-  taPbisCardCount                              Int?                 @default(0)
   averageTimeToCompleteCallback                Int?
   block1Assignment                             String               @default("Current Assignment for Block 1 goes here")
   block1ClassName                              String               @default("Class Name Goes Here")
@@ -173,8 +163,6 @@ model User {
   from_CallbackRewardRun_lastModifiedBy        CallbackRewardRun[]  @relation("CallbackRewardRun_lastModifiedBy")
   from_Calendar_author                         Calendar[]           @relation("Calendar_author")
   from_Link_modifiedBy                         Link[]               @relation("Link_modifiedBy")
-  from_PbisCollection_lastModifiedBy           PbisCollection[]     @relation("PbisCollection_lastModifiedBy")
-  from_PbisTeam_lastModifiedBy                 PbisTeam[]           @relation("PbisTeam_lastModifiedBy")
   from_PbisCollectionDate_personalLevelWinners PbisCollectionDate[] @relation("PbisCollectionDate_personalLevelWinners")
   from_PbisCollectionDate_taNewLevelWinners    PbisCollectionDate[] @relation("PbisCollectionDate_taNewLevelWinners")
   from_PbisCollectionDate_staffRandomWinners   PbisCollectionDate[] @relation("PbisCollectionDate_staffRandomWinners")
@@ -198,7 +186,6 @@ model User {
   @@index([block10TeacherId])
   @@index([block11TeacherId])
   @@index([block12TeacherId])
-  @@index([taTeamId])
 }
 
 model AssignmentHistory {
@@ -342,10 +329,6 @@ model ChromebookCheck {
   @@index([classroomId])
 }
 
-model ChromebookAssignment {
-  id String @id @default(cuid())
-}
-
 model CommunicatorChat {
   id              String    @id @default(cuid())
   user            User?     @relation("CommunicatorChat_user", fields: [userId], references: [id])
@@ -354,6 +337,7 @@ model CommunicatorChat {
   explanation     String    @default("")
   graphqlQuery    String    @default("")
   errorMessage    String    @default("")
+  status          String    @default("pending")
   hasError        String    @default("false")
   model           String    @default("")
   iterations      Int?
@@ -361,10 +345,11 @@ model CommunicatorChat {
   userRating      Int?      @default(0)
   userComment     String    @default("")
   rawData         Json?
-  timestamp       DateTime?
   createdAt       DateTime? @default(now())
 
   @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Discipline {
@@ -476,39 +461,6 @@ model StaffPbisCard {
   @@index([giverId])
   @@index([recipientId])
   @@index([cardMessage])
-}
-
-model PbisCollection {
-  id                    String   @id @default(cuid())
-  name                  String   @default("")
-  collectionDate        DateTime @default(now())
-  personalLevelWinners  String   @default("")
-  randomDrawingWinners  String   @default("")
-  taTeamsLevels         String   @default("")
-  taTeamNewLevelWinners String   @default("")
-  currentPbisTeamGoal   String   @default("0")
-  collectedCards        String   @default("")
-  dateModified          DateTime @default(now())
-  lastModifiedBy        User?    @relation("PbisCollection_lastModifiedBy", fields: [lastModifiedById], references: [id])
-  lastModifiedById      String?  @map("lastModifiedBy")
-
-  @@index([lastModifiedById])
-}
-
-model PbisTeam {
-  id                     String   @id @default(cuid())
-  teamName               String   @default("")
-  taTeacher              User[]   @relation("User_taTeam")
-  uncountedCards         Int?     @default(0)
-  countedCards           Int?     @default(0)
-  currentLevel           Int?     @default(0)
-  numberOfStudents       Int?
-  averageCardsPerStudent Int?     @default(0)
-  dateModified           DateTime @default(now())
-  lastModifiedBy         User?    @relation("PbisTeam_lastModifiedBy", fields: [lastModifiedById], references: [id])
-  lastModifiedById       String?  @map("lastModifiedBy")
-
-  @@index([lastModifiedById])
 }
 
 model PbisCollectionDate {

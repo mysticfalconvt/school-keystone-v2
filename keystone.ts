@@ -16,7 +16,6 @@ import { Calendar } from './schemas/Calendar';
 import { Callback } from './schemas/Callback';
 import { CallbackRewardRun } from './schemas/CallbackRewardRun';
 import { CellPhoneViolation } from './schemas/CellPhoneViolation';
-import { ChromebookAssignment } from './schemas/ChromebookAssignment';
 import { CommunicatorChat } from './schemas/CommunicatorChat';
 import { ChromebookCheck } from './schemas/ChromebookCheck';
 import { Discipline } from './schemas/Discipline';
@@ -24,13 +23,10 @@ import { Link } from './schemas/Link';
 import { Message } from './schemas/Message';
 import { PbisCard } from './schemas/PbisCard';
 import { StaffPbisCard } from './schemas/StaffPbisCard';
-import { PbisCollection } from './schemas/PbisCollection';
 import { PbisCollectionDate } from './schemas/PbisCollectionDate';
-import { PbisTeam } from './schemas/PbisTeam';
 import { RandomDrawingWin } from './schemas/RandomDrawingWin';
 import { StudentFocus } from './schemas/StudentFocus';
 import { User } from './schemas/User';
-// import { SchoolPbisInfo } from './schemas/SchoolPbisInfo'
 import { AssignmentHistory } from './schemas/AssignmentHistory';
 import { Birthday } from './schemas/Birthday';
 import { BugReport } from './schemas/BugReport';
@@ -49,6 +45,7 @@ import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
 import { impersonateUser } from './mutations/impersonateUser';
 import { queryCommunicator } from './mutations/queryCommunicator';
+import { availableCommunicatorModels } from './queries/availableCommunicatorModels';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
 import { updateStudentSchedules } from './mutations/updateStudentSchedules';
@@ -93,15 +90,12 @@ export default withAuth(
       Calendar,
       CellPhoneViolation,
       ChromebookCheck,
-      ChromebookAssignment,
       CommunicatorChat,
       Discipline,
       Link,
       Message,
       PbisCard,
       StaffPbisCard,
-      PbisCollection,
-      PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
       SortingHatQuestion,
@@ -127,6 +121,9 @@ export default withAuth(
             queryCommunicator: queryCommunicator(base),
             authenticateUserWithGoogle: authenticateUserWithGoogle(base),
             impersonateUser: impersonateUser(base),
+          },
+          query: {
+            availableCommunicatorModels: availableCommunicatorModels(base),
           },
         };
       }),

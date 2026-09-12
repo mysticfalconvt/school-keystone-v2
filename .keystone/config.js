@@ -140,7 +140,7 @@ var bugsinkApolloPlugin = {
 };
 
 // keystone.ts
-var import_core33 = require("@keystone-6/core");
+var import_core31 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -197,7 +197,7 @@ async function sendMail(options) {
 function logSentMessage(info) {
   console.log("[mail] message sent", { messageId: info?.messageId });
 }
-function makeANiceEmail(text24) {
+function makeANiceEmail(text22) {
   return `
     <div className="email" style="
       border: 1px solid black;
@@ -207,7 +207,7 @@ function makeANiceEmail(text24) {
       font-size: 20px;
     ">
       <h2>Hello There!</h2>
-      <p>${text24}</p>
+      <p>${text22}</p>
 
       <p>NCUJHS.Tech</p>
     </div>
@@ -273,7 +273,7 @@ if (!sessionSecret) {
 var { withAuth } = (0, import_auth.createAuth)({
   listKey: "User",
   identityField: "email",
-  sessionData: "name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups",
+  sessionData: "name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled canManageCommunicator hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups",
   secretField: "password",
   initFirstItem: {
     // If there are no items in the database, keystone will ask you to create
@@ -680,113 +680,119 @@ var CellPhoneViolation = (0, import_core4.list)({
   }
 });
 
-// schemas/ChromebookAssignment.ts
-var import_core5 = require("@keystone-6/core");
-var ChromebookAssignment = (0, import_core5.list)({
-  access: {
-    operation: {
-      query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn
-    }
-  },
-  ui: {
-    listView: {
-      initialColumns: ["number", "student", "checkLog"],
-      pageSize: 100
-    }
-  },
-  fields: {
-    // teacher: relationship({
-    //   ref: "User",
-    // }),
-    // student: relationship({
-    //   ref: "User.chromebookCheck",
-    // }),
-    // number: text(),
-    // checkLog: relationship({
-    //   ref: "ChromebookCheck.assignment",
-    //   many: true,
-    // }),
-  }
-});
-
 // schemas/CommunicatorChat.ts
-var import_core6 = require("@keystone-6/core");
+var import_core5 = require("@keystone-6/core");
 var import_fields5 = require("@keystone-6/core/fields");
 function canManageCommunicatorChats({ session: session2 }) {
   if (!session2) return false;
-  return !!(session2.data.isSuperAdmin || session2.data.canManagePbis);
+  return !!(session2.data.isSuperAdmin || session2.data.canManageCommunicator);
 }
 function isStaff({ session: session2 }) {
   if (!session2) return false;
   return !!session2.data.isStaff;
 }
-var CommunicatorChat = (0, import_core6.list)({
+function canUpdateChat({ session: session2 }) {
+  if (!session2) return false;
+  return !!(session2.data.isStaff || session2.data.isSuperAdmin);
+}
+function updateFilter({ session: session2 }) {
+  if (!session2) return false;
+  if (session2.data.isSuperAdmin || session2.data.canManageCommunicator) {
+    return true;
+  }
+  return { user: { id: { equals: session2.itemId } } };
+}
+var resultFieldAccess = {
+  create: () => false,
+  update: () => false
+};
+var CommunicatorChat = (0, import_core5.list)({
   access: {
     operation: {
       query: isStaff,
-      create: isStaff,
+      // Chats are created only by the queryCommunicator mutation, which uses
+      // an elevated context. Disabling the generic create keeps users from
+      // fabricating history.
+      create: () => false,
       delete: canManageCommunicatorChats,
-      update: canManageCommunicatorChats
+      update: canUpdateChat
     },
     filter: {
       query: ({ session: session2 }) => {
         if (!session2) return false;
-        if (session2.data.isSuperAdmin || session2.data.canManagePbis) {
+        if (session2.data.isSuperAdmin || session2.data.canManageCommunicator) {
           return true;
         }
         return {
           user: { id: { equals: session2.itemId } }
         };
-      }
+      },
+      update: updateFilter,
+      delete: updateFilter
     }
   },
   ui: {
     listView: {
-      initialColumns: ["user", "question", "createdAt"],
+      initialColumns: ["user", "question", "status", "createdAt"],
       pageSize: 50
     }
   },
   fields: {
     user: (0, import_fields5.relationship)({
       ref: "User.communicatorChats"
-      // ui: {
-      //   displayMode: '',
-      //   cardFields: ['name', 'email'],
-      //   linkToItem: true,
-      // },
     }),
     question: (0, import_fields5.text)({
       validation: { isRequired: true },
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     explanation: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     graphqlQuery: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
     errorMessage: (0, import_fields5.text)({
       ui: {
         displayMode: "textarea"
-      }
+      },
+      access: resultFieldAccess
     }),
+    // Replaces hasError, which was text holding the strings 'true'/'false'.
+    // hasError is kept for one release so existing rows can be backfilled; see
+    // DATA_MODEL_CLEANUP_PLAN.md. Remove it once the backfill has run.
+    status: (0, import_fields5.select)({
+      type: "string",
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Succeeded", value: "succeeded" },
+        { label: "Failed", value: "failed" }
+      ],
+      defaultValue: "pending",
+      validation: { isRequired: true },
+      isIndexed: true,
+      access: resultFieldAccess
+    }),
+    /** @deprecated Use `status`. Retained only until existing rows are backfilled. */
     hasError: (0, import_fields5.text)({
-      defaultValue: "false"
+      defaultValue: "false",
+      access: resultFieldAccess
     }),
     model: (0, import_fields5.text)({
-      validation: { isRequired: true }
+      validation: { isRequired: true },
+      access: resultFieldAccess
     }),
-    iterations: (0, import_fields5.integer)(),
-    evaluationScore: (0, import_fields5.integer)(),
+    iterations: (0, import_fields5.integer)({ access: resultFieldAccess }),
+    evaluationScore: (0, import_fields5.integer)({ access: resultFieldAccess }),
+    // The two fields an owner is allowed to write, via the generic update.
     userRating: (0, import_fields5.integer)({
       defaultValue: 0,
       validation: {
@@ -800,23 +806,31 @@ var CommunicatorChat = (0, import_core6.list)({
         displayMode: "textarea"
       }
     }),
+    // Raw model/query payloads can contain broad student and staff records.
+    // Readable only by chat managers, and never writable through the API.
     rawData: (0, import_fields5.json)({
       ui: {
         createView: { fieldMode: "hidden" },
         itemView: { fieldMode: "read" }
+      },
+      access: {
+        read: canManageCommunicatorChats,
+        create: () => false,
+        update: () => false
       }
     }),
-    timestamp: (0, import_fields5.timestamp)(),
     createdAt: (0, import_fields5.timestamp)({
-      defaultValue: { kind: "now" }
+      defaultValue: { kind: "now" },
+      isIndexed: true,
+      access: resultFieldAccess
     })
   }
 });
 
 // schemas/ChromebookCheck.ts
 var import_fields6 = require("@keystone-6/core/fields");
-var import_core7 = require("@keystone-6/core");
-var ChromebookCheck = (0, import_core7.list)({
+var import_core6 = require("@keystone-6/core");
+var ChromebookCheck = (0, import_core6.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -850,8 +864,8 @@ var ChromebookCheck = (0, import_core7.list)({
 
 // schemas/Discipline.ts
 var import_fields7 = require("@keystone-6/core/fields");
-var import_core8 = require("@keystone-6/core");
-var Discipline = (0, import_core8.list)({
+var import_core7 = require("@keystone-6/core");
+var Discipline = (0, import_core7.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -980,8 +994,8 @@ var Discipline = (0, import_core8.list)({
 
 // schemas/Link.ts
 var import_fields8 = require("@keystone-6/core/fields");
-var import_core9 = require("@keystone-6/core");
-var Link = (0, import_core9.list)({
+var import_core8 = require("@keystone-6/core");
+var Link = (0, import_core8.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1046,8 +1060,8 @@ var Link = (0, import_core9.list)({
 
 // schemas/Message.ts
 var import_fields9 = require("@keystone-6/core/fields");
-var import_core10 = require("@keystone-6/core");
-var Message = (0, import_core10.list)({
+var import_core9 = require("@keystone-6/core");
+var Message = (0, import_core9.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1086,8 +1100,8 @@ var Message = (0, import_core10.list)({
 
 // schemas/PbisCard.ts
 var import_fields10 = require("@keystone-6/core/fields");
-var import_core11 = require("@keystone-6/core");
-var PbisCard = (0, import_core11.list)({
+var import_core10 = require("@keystone-6/core");
+var PbisCard = (0, import_core10.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1127,7 +1141,7 @@ var PbisCard = (0, import_core11.list)({
 });
 
 // schemas/StaffPbisCard.ts
-var import_core12 = require("@keystone-6/core");
+var import_core11 = require("@keystone-6/core");
 var import_fields11 = require("@keystone-6/core/fields");
 var STAFF_CARD_DAILY_LIMIT_FOR_STUDENTS = 3;
 function startOfTodayISO() {
@@ -1135,7 +1149,7 @@ function startOfTodayISO() {
   now.setHours(0, 0, 0, 0);
   return now.toISOString();
 }
-var StaffPbisCard = (0, import_core12.list)({
+var StaffPbisCard = (0, import_core11.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1201,87 +1215,10 @@ var StaffPbisCard = (0, import_core12.list)({
   }
 });
 
-// schemas/PbisCollection.ts
-var import_fields12 = require("@keystone-6/core/fields");
-var import_core13 = require("@keystone-6/core");
-var PbisCollection = (0, import_core13.list)({
-  access: {
-    operation: {
-      query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn
-    }
-  },
-  ui: {
-    listView: {
-      initialColumns: ["name", "collectionDate"],
-      pageSize: 100
-    }
-  },
-  fields: {
-    name: (0, import_fields12.text)(),
-    collectionDate: (0, import_fields12.timestamp)({
-      validation: { isRequired: true },
-      defaultValue: { kind: "now" }
-    }),
-    personalLevelWinners: (0, import_fields12.text)({
-      ui: {
-        itemView: {
-          fieldMode: "hidden"
-        },
-        listView: {
-          fieldMode: "hidden"
-        }
-      }
-    }),
-    randomDrawingWinners: (0, import_fields12.text)({
-      ui: {
-        itemView: {
-          fieldMode: "hidden"
-        },
-        listView: {
-          fieldMode: "hidden"
-        }
-      }
-    }),
-    taTeamsLevels: (0, import_fields12.text)({
-      ui: {
-        itemView: {
-          fieldMode: "hidden"
-        },
-        listView: {
-          fieldMode: "hidden"
-        }
-      }
-    }),
-    taTeamNewLevelWinners: (0, import_fields12.text)({
-      ui: {
-        itemView: {
-          fieldMode: "hidden"
-        },
-        listView: {
-          fieldMode: "hidden"
-        }
-      }
-    }),
-    currentPbisTeamGoal: (0, import_fields12.text)({
-      defaultValue: "0",
-      validation: { isRequired: true }
-    }),
-    collectedCards: (0, import_fields12.text)(),
-    dateModified: (0, import_fields12.timestamp)({
-      validation: { isRequired: true },
-      defaultValue: { kind: "now" }
-    }),
-    lastModifiedBy: (0, import_fields12.relationship)({ ref: "User" })
-  }
-});
-
 // schemas/PbisCollectionDate.ts
-var import_fields13 = require("@keystone-6/core/fields");
-var import_core14 = require("@keystone-6/core");
-var PbisCollectionDate = (0, import_core14.list)({
+var import_fields12 = require("@keystone-6/core/fields");
+var import_core12 = require("@keystone-6/core");
+var PbisCollectionDate = (0, import_core12.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1297,72 +1234,35 @@ var PbisCollectionDate = (0, import_core14.list)({
     }
   },
   fields: {
-    collectionDate: (0, import_fields13.timestamp)({
+    collectionDate: (0, import_fields12.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    randomDrawingWinners: (0, import_fields13.relationship)({
+    randomDrawingWinners: (0, import_fields12.relationship)({
       ref: "RandomDrawingWin.collectionDate",
       many: true
     }),
-    personalLevelWinners: (0, import_fields13.relationship)({
+    personalLevelWinners: (0, import_fields12.relationship)({
       ref: "User",
       many: true
     }),
-    taNewLevelWinners: (0, import_fields13.relationship)({
+    taNewLevelWinners: (0, import_fields12.relationship)({
       ref: "User",
       many: true
     }),
-    staffRandomWinners: (0, import_fields13.relationship)({
+    staffRandomWinners: (0, import_fields12.relationship)({
       ref: "User",
       many: true
     }),
-    collectedCards: (0, import_fields13.text)(),
-    lastModifiedBy: (0, import_fields13.relationship)({ ref: "User" })
-  }
-});
-
-// schemas/PbisTeam.ts
-var import_fields14 = require("@keystone-6/core/fields");
-var import_core15 = require("@keystone-6/core");
-var PbisTeam = (0, import_core15.list)({
-  access: {
-    operation: {
-      query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
-      update: isSignedIn
-    }
-  },
-  ui: {
-    listView: {
-      initialColumns: ["teamName", "taTeacher"],
-      pageSize: 100
-    }
-  },
-  fields: {
-    teamName: (0, import_fields14.text)(),
-    taTeacher: (0, import_fields14.relationship)({
-      ref: "User.taTeam",
-      many: true
-    }),
-    uncountedCards: (0, import_fields14.integer)({ defaultValue: 0 }),
-    countedCards: (0, import_fields14.integer)({ defaultValue: 0 }),
-    currentLevel: (0, import_fields14.integer)({ defaultValue: 0 }),
-    numberOfStudents: (0, import_fields14.integer)(),
-    averageCardsPerStudent: (0, import_fields14.integer)({ defaultValue: 0 }),
-    dateModified: (0, import_fields14.timestamp)({
-      validation: { isRequired: true },
-      defaultValue: { kind: "now" }
-    }),
-    lastModifiedBy: (0, import_fields14.relationship)({ ref: "User" })
+    collectedCards: (0, import_fields12.text)(),
+    lastModifiedBy: (0, import_fields12.relationship)({ ref: "User" })
   }
 });
 
 // schemas/RandomDrawingWin.ts
-var import_fields15 = require("@keystone-6/core/fields");
-var import_core16 = require("@keystone-6/core");
-var RandomDrawingWin = (0, import_core16.list)({
+var import_fields13 = require("@keystone-6/core/fields");
+var import_core13 = require("@keystone-6/core");
+var RandomDrawingWin = (0, import_core13.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1378,21 +1278,21 @@ var RandomDrawingWin = (0, import_core16.list)({
     }
   },
   fields: {
-    student: (0, import_fields15.relationship)({
+    student: (0, import_fields13.relationship)({
       ref: "User.randomDrawingWins"
     }),
-    collectionDate: (0, import_fields15.relationship)({
+    collectionDate: (0, import_fields13.relationship)({
       ref: "PbisCollectionDate.randomDrawingWinners",
       many: false
     }),
-    lastModifiedBy: (0, import_fields15.relationship)({ ref: "User" })
+    lastModifiedBy: (0, import_fields13.relationship)({ ref: "User" })
   }
 });
 
 // schemas/StudentFocus.ts
-var import_fields16 = require("@keystone-6/core/fields");
-var import_core17 = require("@keystone-6/core");
-var StudentFocus = (0, import_core17.list)({
+var import_fields14 = require("@keystone-6/core/fields");
+var import_core14 = require("@keystone-6/core");
+var StudentFocus = (0, import_core14.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1408,19 +1308,19 @@ var StudentFocus = (0, import_core17.list)({
     }
   },
   fields: {
-    comments: (0, import_fields16.text)({
+    comments: (0, import_fields14.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    category: (0, import_fields16.text)(),
-    student: (0, import_fields16.relationship)({
+    category: (0, import_fields14.text)(),
+    student: (0, import_fields14.relationship)({
       ref: "User.studentFocusStudent"
     }),
-    teacher: (0, import_fields16.relationship)({
+    teacher: (0, import_fields14.relationship)({
       ref: "User.studentFocusTeacher"
     }),
-    dateCreated: (0, import_fields16.timestamp)({
+    dateCreated: (0, import_fields14.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     })
@@ -1428,99 +1328,103 @@ var StudentFocus = (0, import_core17.list)({
 });
 
 // schemas/User.ts
-var import_core18 = require("@keystone-6/core");
-var import_fields18 = require("@keystone-6/core/fields");
+var import_core15 = require("@keystone-6/core");
+var import_fields16 = require("@keystone-6/core/fields");
 
 // schemas/fields.ts
-var import_fields17 = require("@keystone-6/core/fields");
+var import_fields15 = require("@keystone-6/core/fields");
 var permissionFields = {
-  canManageCalendar: (0, import_fields17.checkbox)({
+  canManageCalendar: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can Update and delete any  Calendar Event"
   }),
-  canSeeOtherUsers: (0, import_fields17.checkbox)({
+  canSeeOtherUsers: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can query other users"
   }),
-  canManageUsers: (0, import_fields17.checkbox)({
+  canManageUsers: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can Edit other users"
   }),
-  canManageRoles: (0, import_fields17.checkbox)({
+  canManageRoles: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can CRUD roles"
   }),
-  canManageLinks: (0, import_fields17.checkbox)({
+  canManageLinks: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see and manage Links"
   }),
-  canManageDiscipline: (0, import_fields17.checkbox)({
+  canManageDiscipline: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see and manage Discipline Referrals"
   }),
-  canSeeAllDiscipline: (0, import_fields17.checkbox)({
+  canSeeAllDiscipline: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see Referrals"
   }),
-  canSeeAllTeacherEvents: (0, import_fields17.checkbox)({
+  canSeeAllTeacherEvents: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see TeacherEvents"
   }),
-  canSeeStudentEvents: (0, import_fields17.checkbox)({
+  canSeeStudentEvents: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see Student Events"
   }),
-  canSeeOwnCallback: (0, import_fields17.checkbox)({
+  canSeeOwnCallback: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see own callback"
   }),
-  canSeeAllCallback: (0, import_fields17.checkbox)({
+  canSeeAllCallback: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can see all callback"
   }),
-  hasTA: (0, import_fields17.checkbox)({
+  hasTA: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User has a TA"
   }),
-  hasClasses: (0, import_fields17.checkbox)({
+  hasClasses: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User teaches classes"
   }),
-  isStudent: (0, import_fields17.checkbox)({
+  isStudent: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a student"
   }),
-  isParent: (0, import_fields17.checkbox)({
+  isParent: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a parent"
   }),
-  isStaff: (0, import_fields17.checkbox)({
+  isStaff: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a staff member"
   }),
-  isTeacher: (0, import_fields17.checkbox)({
+  isTeacher: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a teacher"
   }),
-  isGuidance: (0, import_fields17.checkbox)({
+  isGuidance: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is Guidance"
   }),
-  isSuperAdmin: (0, import_fields17.checkbox)({
+  isSuperAdmin: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User is a super admin"
   }),
-  canManagePbis: (0, import_fields17.checkbox)({
+  canManagePbis: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can manage PBIS"
   }),
-  canHaveSpecialGroups: (0, import_fields17.checkbox)({
+  canHaveSpecialGroups: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can have special groups"
   }),
-  isCommunicatorEnabled: (0, import_fields17.checkbox)({
+  isCommunicatorEnabled: (0, import_fields15.checkbox)({
     defaultValue: false,
     label: "User can access Communicator AI chat"
+  }),
+  canManageCommunicator: (0, import_fields15.checkbox)({
+    defaultValue: false,
+    label: "User can see and moderate all Communicator chats"
   })
 };
 var permissionsList = Object.keys(
@@ -1531,7 +1435,7 @@ var permissionsList = Object.keys(
 var NUMBER_OF_BLOCKS = 12;
 
 // schemas/User.ts
-var User = (0, import_core18.list)({
+var User = (0, import_core15.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1551,217 +1455,196 @@ var User = (0, import_core18.list)({
     }
   },
   fields: {
-    name: (0, import_fields18.text)({ isIndexed: true, validation: { isRequired: true } }),
-    preferredName: (0, import_fields18.text)(),
-    email: (0, import_fields18.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
-    password: (0, import_fields18.password)({ validation: { isRequired: true } }),
-    taStudents: (0, import_fields18.relationship)({ ref: "User.taTeacher", many: true }),
-    taTeacher: (0, import_fields18.relationship)({ ref: "User.taStudents", many: false }),
-    parent: (0, import_fields18.relationship)({ ref: "User.children", many: true }),
-    children: (0, import_fields18.relationship)({ ref: "User.parent", many: true }),
+    name: (0, import_fields16.text)({ isIndexed: true, validation: { isRequired: true } }),
+    preferredName: (0, import_fields16.text)(),
+    email: (0, import_fields16.text)({ validation: { isRequired: true }, isIndexed: "unique" }),
+    password: (0, import_fields16.password)({ validation: { isRequired: true } }),
+    taStudents: (0, import_fields16.relationship)({ ref: "User.taTeacher", many: true }),
+    taTeacher: (0, import_fields16.relationship)({ ref: "User.taStudents", many: false }),
+    parent: (0, import_fields16.relationship)({ ref: "User.children", many: true }),
+    children: (0, import_fields16.relationship)({ ref: "User.parent", many: true }),
     ...permissionFields,
     //classes
-    block1Teacher: (0, import_fields18.relationship)({ ref: "User.block1Students", many: false }),
-    block1Students: (0, import_fields18.relationship)({ ref: "User.block1Teacher", many: true }),
-    block2Teacher: (0, import_fields18.relationship)({ ref: "User.block2Students", many: false }),
-    block2Students: (0, import_fields18.relationship)({ ref: "User.block2Teacher", many: true }),
-    block3Teacher: (0, import_fields18.relationship)({ ref: "User.block3Students", many: false }),
-    block3Students: (0, import_fields18.relationship)({ ref: "User.block3Teacher", many: true }),
-    block4Teacher: (0, import_fields18.relationship)({ ref: "User.block4Students", many: false }),
-    block4Students: (0, import_fields18.relationship)({ ref: "User.block4Teacher", many: true }),
-    block5Teacher: (0, import_fields18.relationship)({ ref: "User.block5Students", many: false }),
-    block5Students: (0, import_fields18.relationship)({ ref: "User.block5Teacher", many: true }),
-    block6Teacher: (0, import_fields18.relationship)({ ref: "User.block6Students", many: false }),
-    block6Students: (0, import_fields18.relationship)({ ref: "User.block6Teacher", many: true }),
-    block7Teacher: (0, import_fields18.relationship)({ ref: "User.block7Students", many: false }),
-    block7Students: (0, import_fields18.relationship)({ ref: "User.block7Teacher", many: true }),
-    block8Teacher: (0, import_fields18.relationship)({ ref: "User.block8Students", many: false }),
-    block8Students: (0, import_fields18.relationship)({ ref: "User.block8Teacher", many: true }),
-    block9Teacher: (0, import_fields18.relationship)({ ref: "User.block9Students", many: false }),
-    block9Students: (0, import_fields18.relationship)({ ref: "User.block9Teacher", many: true }),
-    block10Teacher: (0, import_fields18.relationship)({
+    block1Teacher: (0, import_fields16.relationship)({ ref: "User.block1Students", many: false }),
+    block1Students: (0, import_fields16.relationship)({ ref: "User.block1Teacher", many: true }),
+    block2Teacher: (0, import_fields16.relationship)({ ref: "User.block2Students", many: false }),
+    block2Students: (0, import_fields16.relationship)({ ref: "User.block2Teacher", many: true }),
+    block3Teacher: (0, import_fields16.relationship)({ ref: "User.block3Students", many: false }),
+    block3Students: (0, import_fields16.relationship)({ ref: "User.block3Teacher", many: true }),
+    block4Teacher: (0, import_fields16.relationship)({ ref: "User.block4Students", many: false }),
+    block4Students: (0, import_fields16.relationship)({ ref: "User.block4Teacher", many: true }),
+    block5Teacher: (0, import_fields16.relationship)({ ref: "User.block5Students", many: false }),
+    block5Students: (0, import_fields16.relationship)({ ref: "User.block5Teacher", many: true }),
+    block6Teacher: (0, import_fields16.relationship)({ ref: "User.block6Students", many: false }),
+    block6Students: (0, import_fields16.relationship)({ ref: "User.block6Teacher", many: true }),
+    block7Teacher: (0, import_fields16.relationship)({ ref: "User.block7Students", many: false }),
+    block7Students: (0, import_fields16.relationship)({ ref: "User.block7Teacher", many: true }),
+    block8Teacher: (0, import_fields16.relationship)({ ref: "User.block8Students", many: false }),
+    block8Students: (0, import_fields16.relationship)({ ref: "User.block8Teacher", many: true }),
+    block9Teacher: (0, import_fields16.relationship)({ ref: "User.block9Students", many: false }),
+    block9Students: (0, import_fields16.relationship)({ ref: "User.block9Teacher", many: true }),
+    block10Teacher: (0, import_fields16.relationship)({
       ref: "User.block10Students",
       many: false
     }),
-    block10Students: (0, import_fields18.relationship)({
+    block10Students: (0, import_fields16.relationship)({
       ref: "User.block10Teacher",
       many: true
     }),
-    block11Teacher: (0, import_fields18.relationship)({
+    block11Teacher: (0, import_fields16.relationship)({
       ref: "User.block11Students",
       many: false
     }),
-    block11Students: (0, import_fields18.relationship)({
+    block11Students: (0, import_fields16.relationship)({
       ref: "User.block11Teacher",
       many: true
     }),
-    block12Teacher: (0, import_fields18.relationship)({
+    block12Teacher: (0, import_fields16.relationship)({
       ref: "User.block12Students",
       many: false
     }),
-    block12Students: (0, import_fields18.relationship)({
+    block12Students: (0, import_fields16.relationship)({
       ref: "User.block12Teacher",
       many: true
     }),
-    specialGroupStudents: (0, import_fields18.relationship)({ ref: "User", many: true }),
-    coTeachesWithTeacher: (0, import_fields18.relationship)({ ref: "User", many: true }),
+    specialGroupStudents: (0, import_fields16.relationship)({ ref: "User", many: true }),
+    coTeachesWithTeacher: (0, import_fields16.relationship)({ ref: "User", many: true }),
     //other relationships
-    taTeam: (0, import_fields18.relationship)({ ref: "PbisTeam.taTeacher" }),
-    studentFocusTeacher: (0, import_fields18.relationship)({
+    studentFocusTeacher: (0, import_fields16.relationship)({
       ref: "StudentFocus.teacher",
       many: true
     }),
-    studentFocusStudent: (0, import_fields18.relationship)({
+    studentFocusStudent: (0, import_fields16.relationship)({
       ref: "StudentFocus.student",
       many: true
     }),
-    studentCellPhoneViolation: (0, import_fields18.relationship)({
+    studentCellPhoneViolation: (0, import_fields16.relationship)({
       ref: "CellPhoneViolation.student",
       many: true
     }),
-    teacherCellPhoneViolation: (0, import_fields18.relationship)({
+    teacherCellPhoneViolation: (0, import_fields16.relationship)({
       ref: "CellPhoneViolation.teacher",
       many: true
     }),
-    teacherPbisCards: (0, import_fields18.relationship)({ ref: "PbisCard.teacher", many: true }),
-    studentPbisCards: (0, import_fields18.relationship)({
+    teacherPbisCards: (0, import_fields16.relationship)({ ref: "PbisCard.teacher", many: true }),
+    studentPbisCards: (0, import_fields16.relationship)({
       ref: "PbisCard.student",
       many: true,
       ui: {
         displayMode: "count"
       }
     }),
-    staffPbisCardsGiven: (0, import_fields18.relationship)({
+    staffPbisCardsGiven: (0, import_fields16.relationship)({
       ref: "StaffPbisCard.giver",
       many: true
     }),
-    staffPbisCardsReceived: (0, import_fields18.relationship)({
+    staffPbisCardsReceived: (0, import_fields16.relationship)({
       ref: "StaffPbisCard.recipient",
       many: true,
       ui: {
         displayMode: "count"
       }
     }),
-    teacherDiscipline: (0, import_fields18.relationship)({ ref: "Discipline.teacher", many: true }),
-    studentDiscipline: (0, import_fields18.relationship)({ ref: "Discipline.student", many: true }),
-    callbackItems: (0, import_fields18.relationship)({ ref: "Callback.student", many: true }),
-    callbackAssigned: (0, import_fields18.relationship)({ ref: "Callback.teacher", many: true }),
-    messageSender: (0, import_fields18.relationship)({ ref: "Message.sender", many: true }),
-    messageReceiver: (0, import_fields18.relationship)({ ref: "Message.receiver", many: true }),
-    communicatorChats: (0, import_fields18.relationship)({
+    teacherDiscipline: (0, import_fields16.relationship)({ ref: "Discipline.teacher", many: true }),
+    studentDiscipline: (0, import_fields16.relationship)({ ref: "Discipline.student", many: true }),
+    callbackItems: (0, import_fields16.relationship)({ ref: "Callback.student", many: true }),
+    callbackAssigned: (0, import_fields16.relationship)({ ref: "Callback.teacher", many: true }),
+    messageSender: (0, import_fields16.relationship)({ ref: "Message.sender", many: true }),
+    messageReceiver: (0, import_fields16.relationship)({ ref: "Message.receiver", many: true }),
+    communicatorChats: (0, import_fields16.relationship)({
       ref: "CommunicatorChat.user",
       many: true
     }),
-    //PBIS Collection Winners
-    currentTaWinner: (0, import_fields18.relationship)({
-      ref: "User.studentIsCurrentWinner",
-      many: false
-    }),
-    previousTaWinner: (0, import_fields18.relationship)({
-      ref: "User.studentIsPreviousWinner",
-      many: false
-    }),
-    studentIsCurrentWinner: (0, import_fields18.relationship)({
-      ref: "User.currentTaWinner",
-      many: false
-    }),
-    studentIsPreviousWinner: (0, import_fields18.relationship)({
-      ref: "User.previousTaWinner",
-      many: false
-    }),
-    randomDrawingWins: (0, import_fields18.relationship)({
+    randomDrawingWins: (0, import_fields16.relationship)({
       ref: "RandomDrawingWin.student",
       many: true
     }),
-    birthday: (0, import_fields18.relationship)({ ref: "Birthday.student", many: false }),
-    individualPbisLevel: (0, import_fields18.integer)({ defaultValue: 0 }),
-    taTeamPbisLevel: (0, import_fields18.integer)({ defaultValue: 0 }),
-    taTeamAveragePbisCardsPerStudent: (0, import_fields18.integer)({ defaultValue: 0 }),
-    chromebookCheck: (0, import_fields18.relationship)({
+    birthday: (0, import_fields16.relationship)({ ref: "Birthday.student", many: false }),
+    individualPbisLevel: (0, import_fields16.integer)({ defaultValue: 0 }),
+    taTeamPbisLevel: (0, import_fields16.integer)({ defaultValue: 0 }),
+    taTeamAveragePbisCardsPerStudent: (0, import_fields16.integer)({ defaultValue: 0 }),
+    chromebookCheck: (0, import_fields16.relationship)({
       ref: "ChromebookCheck.student",
       many: true
     }),
     // Checks performed on chromebooks kept in this teacher's classroom
-    classroomChromebookChecks: (0, import_fields18.relationship)({
+    classroomChromebookChecks: (0, import_fields16.relationship)({
       ref: "ChromebookCheck.classroom",
       many: true
     }),
     // Important Info
-    callbackCount: (0, import_fields18.integer)({ defaultValue: 0 }),
-    totalCallbackCount: (0, import_fields18.integer)({ defaultValue: 0 }),
-    PbisCardCount: (0, import_fields18.integer)({ defaultValue: 0 }),
-    YearPbisCount: (0, import_fields18.integer)({ defaultValue: 0 }),
-    teacherSubject: (0, import_fields18.text)({ defaultValue: void 0 }),
-    taPbisCardCount: (0, import_fields18.integer)({ defaultValue: 0 }),
-    averageTimeToCompleteCallback: (0, import_fields18.integer)(),
+    callbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    totalCallbackCount: (0, import_fields16.integer)({ defaultValue: 0 }),
+    teacherSubject: (0, import_fields16.text)({ defaultValue: void 0 }),
+    averageTimeToCompleteCallback: (0, import_fields16.integer)(),
     // assignments
-    block1Assignment: (0, import_fields18.text)({
+    block1Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 1 goes here"
     }),
-    block1ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block1AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block2Assignment: (0, import_fields18.text)({
+    block1ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block1AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block2Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 2 goes here"
     }),
-    block2ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block2AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block3Assignment: (0, import_fields18.text)({
+    block2ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block2AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block3Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 3 goes here"
     }),
-    block3ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block3AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block4Assignment: (0, import_fields18.text)({
+    block3ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block3AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block4Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 4 goes here"
     }),
-    block4ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block4AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block5Assignment: (0, import_fields18.text)({
+    block4ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block4AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block5Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 5 goes here"
     }),
-    block5ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block5AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block6Assignment: (0, import_fields18.text)({
+    block5ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block5AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block6Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 6 goes here"
     }),
-    block6ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block6AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block7Assignment: (0, import_fields18.text)({
+    block6ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block6AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block7Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 7 goes here"
     }),
-    block7ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block7AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block8Assignment: (0, import_fields18.text)({
+    block7ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block7AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block8Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 8 goes here"
     }),
-    block8ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block8AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block9Assignment: (0, import_fields18.text)({
+    block8ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block8AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block9Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 9 goes here"
     }),
-    block9ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block9AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block10Assignment: (0, import_fields18.text)({
+    block9ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block9AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block10Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 10 goes here"
     }),
-    block10ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block10AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block11Assignment: (0, import_fields18.text)({
+    block10ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block10AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block11Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 11 goes here"
     }),
-    block11ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block11AssignmentLastUpdated: (0, import_fields18.timestamp)(),
-    block12Assignment: (0, import_fields18.text)({
+    block11ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block11AssignmentLastUpdated: (0, import_fields16.timestamp)(),
+    block12Assignment: (0, import_fields16.text)({
       defaultValue: "Current Assignment for Block 12 goes here"
     }),
-    block12ClassName: (0, import_fields18.text)({ defaultValue: "Class Name Goes Here" }),
-    block12AssignmentLastUpdated: (0, import_fields18.timestamp)(),
+    block12ClassName: (0, import_fields16.text)({ defaultValue: "Class Name Goes Here" }),
+    block12AssignmentLastUpdated: (0, import_fields16.timestamp)(),
     // Archive of this teacher's replaced class assignments
-    assignmentHistory: (0, import_fields18.relationship)({
+    assignmentHistory: (0, import_fields16.relationship)({
       ref: "AssignmentHistory.teacher",
       many: true
     }),
     // Sorting Hat
-    sortingHat: (0, import_fields18.text)({ defaultValue: "" })
+    sortingHat: (0, import_fields16.text)({ defaultValue: "" })
   },
   hooks: {
     afterOperation: async ({ operation, item, originalItem, context }) => {
@@ -1796,9 +1679,9 @@ var User = (0, import_core18.list)({
 });
 
 // schemas/AssignmentHistory.ts
-var import_core19 = require("@keystone-6/core");
-var import_fields20 = require("@keystone-6/core/fields");
-var AssignmentHistory = (0, import_core19.list)({
+var import_core16 = require("@keystone-6/core");
+var import_fields18 = require("@keystone-6/core/fields");
+var AssignmentHistory = (0, import_core16.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1816,23 +1699,23 @@ var AssignmentHistory = (0, import_core19.list)({
     }
   },
   fields: {
-    teacher: (0, import_fields20.relationship)({ ref: "User.assignmentHistory", many: false }),
-    block: (0, import_fields20.integer)(),
-    className: (0, import_fields20.text)(),
-    assignment: (0, import_fields20.text)({ ui: { displayMode: "textarea" } }),
+    teacher: (0, import_fields18.relationship)({ ref: "User.assignmentHistory", many: false }),
+    block: (0, import_fields18.integer)(),
+    className: (0, import_fields18.text)(),
+    assignment: (0, import_fields18.text)({ ui: { displayMode: "textarea" } }),
     // When this (now-archived) assignment had originally been set.
-    dateAdded: (0, import_fields20.timestamp)(),
+    dateAdded: (0, import_fields18.timestamp)(),
     // When it was replaced by a new assignment.
-    dateRemoved: (0, import_fields20.timestamp)({
+    dateRemoved: (0, import_fields18.timestamp)({
       defaultValue: { kind: "now" }
     })
   }
 });
 
 // schemas/Birthday.ts
-var import_fields21 = require("@keystone-6/core/fields");
-var import_core20 = require("@keystone-6/core");
-var Birthday = (0, import_core20.list)({
+var import_fields19 = require("@keystone-6/core/fields");
+var import_core17 = require("@keystone-6/core");
+var Birthday = (0, import_core17.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1849,29 +1732,29 @@ var Birthday = (0, import_core20.list)({
     }
   },
   fields: {
-    cakeType: (0, import_fields21.text)(),
-    date: (0, import_fields21.timestamp)({
+    cakeType: (0, import_fields19.text)(),
+    date: (0, import_fields19.timestamp)({
       // validation: {isRequired: true},
       isIndexed: true
     }),
-    hasChosen: (0, import_fields21.checkbox)({
+    hasChosen: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has Chosen a Cake"
     }),
-    hasDelivered: (0, import_fields21.checkbox)({
+    hasDelivered: (0, import_fields19.checkbox)({
       defaultValue: false,
       label: "Has gotten their cake"
     }),
-    student: (0, import_fields21.relationship)({
+    student: (0, import_fields19.relationship)({
       ref: "User.birthday"
     })
   }
 });
 
 // schemas/BugReport.ts
-var import_fields22 = require("@keystone-6/core/fields");
-var import_core21 = require("@keystone-6/core");
-var BugReport = (0, import_core21.list)({
+var import_fields20 = require("@keystone-6/core/fields");
+var import_core18 = require("@keystone-6/core");
+var BugReport = (0, import_core18.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1902,27 +1785,27 @@ var BugReport = (0, import_core21.list)({
     }
   },
   fields: {
-    name: (0, import_fields22.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields22.text)({
+    name: (0, import_fields20.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields20.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    submittedBy: (0, import_fields22.relationship)({
+    submittedBy: (0, import_fields20.relationship)({
       ref: "User"
     }),
-    date: (0, import_fields22.timestamp)({
+    date: (0, import_fields20.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    read: (0, import_fields22.checkbox)({ defaultValue: false })
+    read: (0, import_fields20.checkbox)({ defaultValue: false })
   }
 });
 
 // schemas/Bullying.ts
-var import_fields23 = require("@keystone-6/core/fields");
-var import_core22 = require("@keystone-6/core");
-var Bullying = (0, import_core22.list)({
+var import_fields21 = require("@keystone-6/core/fields");
+var import_core19 = require("@keystone-6/core");
+var Bullying = (0, import_core19.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1939,51 +1822,51 @@ var Bullying = (0, import_core22.list)({
     }
   },
   fields: {
-    studentOffender: (0, import_fields23.relationship)({
+    studentOffender: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    teacherAuthor: (0, import_fields23.relationship)({
+    teacherAuthor: (0, import_fields21.relationship)({
       ref: "User"
     }),
-    dateReported: (0, import_fields23.timestamp)({
+    dateReported: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    dateOfEvent: (0, import_fields23.timestamp)({
+    dateOfEvent: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    investigationDate: (0, import_fields23.timestamp)({
+    investigationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    studentReporter: (0, import_fields23.text)(),
-    employeeWitness: (0, import_fields23.text)(),
-    studentWitness: (0, import_fields23.text)(),
-    studentsInterviewed: (0, import_fields23.text)(),
-    initialActions: (0, import_fields23.text)(),
-    nextSteps: (0, import_fields23.text)(),
-    reporter: (0, import_fields23.text)(),
-    description: (0, import_fields23.text)(),
-    determination: (0, import_fields23.select)({
+    studentReporter: (0, import_fields21.text)(),
+    employeeWitness: (0, import_fields21.text)(),
+    studentWitness: (0, import_fields21.text)(),
+    studentsInterviewed: (0, import_fields21.text)(),
+    initialActions: (0, import_fields21.text)(),
+    nextSteps: (0, import_fields21.text)(),
+    reporter: (0, import_fields21.text)(),
+    description: (0, import_fields21.text)(),
+    determination: (0, import_fields21.select)({
       options: [
         { value: "No", label: "No" },
         { value: "Yes", label: "Yes" }
       ]
     }),
-    determinationDate: (0, import_fields23.timestamp)({
+    determinationDate: (0, import_fields21.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    determinationExplanation: (0, import_fields23.text)(),
-    assignmentInvestigator: (0, import_fields23.text)()
+    determinationExplanation: (0, import_fields21.text)(),
+    assignmentInvestigator: (0, import_fields21.text)()
   }
 });
 
 // schemas/SortingHatQuestion.ts
-var import_fields24 = require("@keystone-6/core/fields");
-var import_core23 = require("@keystone-6/core");
-var SortingHatQuestion = (0, import_core23.list)({
+var import_fields22 = require("@keystone-6/core/fields");
+var import_core20 = require("@keystone-6/core");
+var SortingHatQuestion = (0, import_core20.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -1999,25 +1882,25 @@ var SortingHatQuestion = (0, import_core23.list)({
     }
   },
   fields: {
-    question: (0, import_fields24.text)({
+    question: (0, import_fields22.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    gryffindorChoice: (0, import_fields24.text)(),
-    hufflepuffChoice: (0, import_fields24.text)(),
-    ravenclawChoice: (0, import_fields24.text)(),
-    slytherinChoice: (0, import_fields24.text)(),
-    createdBy: (0, import_fields24.relationship)({
+    gryffindorChoice: (0, import_fields22.text)(),
+    hufflepuffChoice: (0, import_fields22.text)(),
+    ravenclawChoice: (0, import_fields22.text)(),
+    slytherinChoice: (0, import_fields22.text)(),
+    createdBy: (0, import_fields22.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/TrimesterAward.ts
-var import_fields25 = require("@keystone-6/core/fields");
-var import_core24 = require("@keystone-6/core");
-var TrimesterAward = (0, import_core24.list)({
+var import_fields23 = require("@keystone-6/core/fields");
+var import_core21 = require("@keystone-6/core");
+var TrimesterAward = (0, import_core21.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -2034,7 +1917,7 @@ var TrimesterAward = (0, import_core24.list)({
     }
   },
   fields: {
-    howl: (0, import_fields25.select)({
+    howl: (0, import_fields23.select)({
       options: [
         { value: "Respect", label: "Respect" },
         { value: "Responsibility", label: "Responsibility" },
@@ -2042,7 +1925,7 @@ var TrimesterAward = (0, import_core24.list)({
       ],
       validation: { isRequired: true }
     }),
-    trimester: (0, import_fields25.select)({
+    trimester: (0, import_fields23.select)({
       options: [
         { value: "1", label: "1" },
         { value: "2", label: "2" },
@@ -2050,23 +1933,23 @@ var TrimesterAward = (0, import_core24.list)({
       ],
       isIndexed: true
     }),
-    date: (0, import_fields25.timestamp)({
+    date: (0, import_fields23.timestamp)({
       validation: { isRequired: true },
       defaultValue: { kind: "now" }
     }),
-    student: (0, import_fields25.relationship)({
+    student: (0, import_fields23.relationship)({
       ref: "User"
     }),
-    teacher: (0, import_fields25.relationship)({
+    teacher: (0, import_fields23.relationship)({
       ref: "User"
     })
   }
 });
 
 // schemas/video.ts
-var import_fields26 = require("@keystone-6/core/fields");
-var import_core25 = require("@keystone-6/core");
-var Video = (0, import_core25.list)({
+var import_fields24 = require("@keystone-6/core/fields");
+var import_core22 = require("@keystone-6/core");
+var Video = (0, import_core22.list)({
   access: {
     operation: {
       query: isSignedIn,
@@ -2082,31 +1965,31 @@ var Video = (0, import_core25.list)({
     }
   },
   fields: {
-    name: (0, import_fields26.text)({ validation: { isRequired: true } }),
-    description: (0, import_fields26.text)({
+    name: (0, import_fields24.text)({ validation: { isRequired: true } }),
+    description: (0, import_fields24.text)({
       ui: {
         displayMode: "textarea"
       }
     }),
-    onHomePage: (0, import_fields26.checkbox)({ defaultValue: false, label: "On Home Page" }),
-    type: (0, import_fields26.select)({
+    onHomePage: (0, import_fields24.checkbox)({ defaultValue: false, label: "On Home Page" }),
+    type: (0, import_fields24.select)({
       options: [
         { value: "google drive", label: "google drive" },
         { value: "youtube", label: "Youtube" }
       ],
       validation: { isRequired: true }
     }),
-    link: (0, import_fields26.text)()
+    link: (0, import_fields24.text)()
   }
 });
 
 // mutations/AddStaff.ts
-var import_core26 = require("@keystone-6/core");
+var import_core23 = require("@keystone-6/core");
 var gql = String.raw;
-var addStaff = (base) => import_core26.graphql.field({
-  type: import_core26.graphql.String,
+var addStaff = (base) => import_core23.graphql.field({
+  type: import_core23.graphql.String,
   args: {
-    staffData: import_core26.graphql.arg({ type: import_core26.graphql.JSON })
+    staffData: import_core23.graphql.arg({ type: import_core23.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Adding Staff");
@@ -2162,14 +2045,14 @@ var addStaff = (base) => import_core26.graphql.field({
 });
 
 // mutations/authenticateWithGoogle.ts
-var import_core27 = require("@keystone-6/core");
+var import_core24 = require("@keystone-6/core");
 var import_google_auth_library = require("google-auth-library");
 var CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
 var client = new import_google_auth_library.OAuth2Client();
-var authenticateUserWithGoogle = (base) => import_core27.graphql.field({
-  type: import_core27.graphql.JSON,
+var authenticateUserWithGoogle = (base) => import_core24.graphql.field({
+  type: import_core24.graphql.JSON,
   args: {
-    idToken: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.String) })
+    idToken: import_core24.graphql.arg({ type: import_core24.graphql.nonNull(import_core24.graphql.String) })
   },
   // Cast to any: the resolver returns a small JSON object, but the inferred
   // union of branches includes optional `undefined` props which the strict
@@ -2236,11 +2119,11 @@ var authenticateUserWithGoogle = (base) => import_core27.graphql.field({
 });
 
 // mutations/impersonateUser.ts
-var import_core28 = require("@keystone-6/core");
-var impersonateUser = (base) => import_core28.graphql.field({
-  type: import_core28.graphql.JSON,
+var import_core25 = require("@keystone-6/core");
+var impersonateUser = (base) => import_core25.graphql.field({
+  type: import_core25.graphql.JSON,
   args: {
-    userId: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.String) })
+    userId: import_core25.graphql.arg({ type: import_core25.graphql.nonNull(import_core25.graphql.String) })
   },
   resolve: async (source, { userId }, context) => {
     if (process.env.NODE_ENV === "production") {
@@ -2281,12 +2164,1070 @@ var impersonateUser = (base) => import_core28.graphql.field({
 });
 
 // mutations/queryCommunicator.ts
-var import_core29 = require("@keystone-6/core");
-var queryCommunicator = (base) => import_core29.graphql.field({
-  type: import_core29.graphql.JSON,
+var import_core26 = require("@keystone-6/core");
+
+// lib/communicator/graphqlExecutor.ts
+var import_fs = require("fs");
+var import_path = require("path");
+var SCHEMA_PATH = (0, import_path.join)(process.cwd(), "lib", "communicator", "schema.graphql");
+var SCHEMA_CACHE_TTL = 5 * 60 * 1e3;
+var cachedSchema = null;
+var cachedAt = 0;
+function loadCommunicatorSchema(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && cachedSchema && now - cachedAt < SCHEMA_CACHE_TTL) {
+    return cachedSchema;
+  }
+  try {
+    cachedSchema = (0, import_fs.readFileSync)(SCHEMA_PATH, "utf-8");
+    cachedAt = now;
+    return cachedSchema;
+  } catch (error) {
+    throw new Error(
+      `Could not load the Communicator GraphQL schema from ${SCHEMA_PATH}`
+    );
+  }
+}
+var CallerScopedGraphQL = class {
+  constructor(context) {
+    this.context = context;
+  }
+  async query(request) {
+    const result = await this.context.graphql.raw({
+      query: request.query,
+      variables: request.variables
+    });
+    return {
+      data: result.data,
+      errors: result.errors?.map((e) => ({
+        message: e.message,
+        locations: e.locations,
+        path: e.path?.map((p) => String(p)),
+        extensions: e.extensions
+      }))
+    };
+  }
+  async getSchema(forceRefresh = false) {
+    return loadCommunicatorSchema(forceRefresh);
+  }
+};
+
+// lib/communicator/lmStudio.ts
+var LM_STUDIO_ENDPOINT = process.env.LM_STUDIO_ENDPOINT;
+function requireEndpoint() {
+  if (!LM_STUDIO_ENDPOINT) {
+    throw new Error(
+      "LM_STUDIO_ENDPOINT is not configured. Set it to the OpenAI-compatible base URL of your LM Studio server, e.g. http://10.0.0.156:1234/v1"
+    );
+  }
+  return LM_STUDIO_ENDPOINT;
+}
+var LMStudioClient = class {
+  // Resolved lazily, not in the constructor: this class is exported as a
+  // singleton, so throwing at construction would take the whole server down at
+  // import time instead of failing the one request that needs it.
+  get baseUrl() {
+    return requireEndpoint();
+  }
+  // REST API endpoint doesn't use the /v1 prefix, so strip it if present
+  get restApiBaseUrl() {
+    return this.baseUrl.replace(/\/v1\/?$/, "");
+  }
+  /**
+   * Get available models from LM Studio (OpenAI-compatible endpoint)
+   * Returns empty array if LM Studio is down
+   */
+  async getModels() {
+    try {
+      const response = await fetch(`${this.baseUrl}/models`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        console.error("LM Studio models request failed:", response.statusText);
+        return [];
+      }
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Failed to fetch models from LM Studio:", error);
+      return [];
+    }
+  }
+  /**
+   * Get available models with token limits from LM Studio REST API
+   * Uses the /api/v0/models endpoint which includes max_context_length
+   * Falls back to OpenAI-compatible endpoint if REST API fails
+   */
+  async getModelsWithLimits() {
+    try {
+      const response = await fetch(`${this.restApiBaseUrl}/api/v0/models`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data || [];
+      }
+      console.warn(
+        "LM Studio REST API not available, falling back to OpenAI-compatible endpoint"
+      );
+      const openaiModels = await this.getModels();
+      return openaiModels.map((model) => ({
+        id: model.id,
+        object: model.object,
+        type: "llm",
+        max_context_length: 0
+        // Unknown from OpenAI-compatible endpoint
+      }));
+    } catch (error) {
+      console.error(
+        "Failed to fetch models with limits from LM Studio:",
+        error
+      );
+      try {
+        const openaiModels = await this.getModels();
+        return openaiModels.map((model) => ({
+          id: model.id,
+          object: model.object,
+          type: "llm",
+          max_context_length: 0
+          // Unknown from OpenAI-compatible endpoint
+        }));
+      } catch (fallbackError) {
+        console.error("Fallback also failed:", fallbackError);
+        return [];
+      }
+    }
+  }
+  /**
+   * Send a chat completion request to LM Studio
+   */
+  async chatCompletion(request) {
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(request)
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `LM Studio request failed: ${response.statusText}. ${errorText}`
+      );
+    }
+    return await response.json();
+  }
+  /**
+   * Helper method for simple text completions
+   */
+  async complete(model, prompt, systemPrompt, temperature = 0.7, maxTokens) {
+    const messages = [];
+    if (systemPrompt) {
+      messages.push({ role: "system", content: systemPrompt });
+    }
+    messages.push({ role: "user", content: prompt });
+    const response = await this.chatCompletion({
+      model,
+      messages,
+      temperature,
+      ...maxTokens && { max_tokens: maxTokens }
+    });
+    return response.choices[0]?.message?.content || "";
+  }
+  /**
+   * Chat completion with tool calling support
+   */
+  async chatCompletionWithTools(request) {
+    return this.chatCompletion(request);
+  }
+};
+var lmStudio = new LMStudioClient();
+
+// lib/communicator/queryGenerator.ts
+var EVALUATE_RESPONSE_TOOL = {
+  type: "function",
+  function: {
+    name: "evaluate_response",
+    description: "Evaluate whether the current data and explanation fully answer the user's question.",
+    parameters: {
+      type: "object",
+      properties: {
+        score: {
+          type: "number",
+          description: "Score from 1-10 indicating how well the question was answered (10 = perfect, 1 = not answered)"
+        },
+        is_complete: {
+          type: "boolean",
+          description: "Whether the answer is complete and satisfactory"
+        },
+        missing_information: {
+          type: "string",
+          description: "What information is missing or needed for a complete answer (empty if complete)"
+        },
+        suggested_followup: {
+          type: "string",
+          description: "A follow-up question to get the missing information (empty if complete)"
+        }
+      },
+      required: ["score", "is_complete"]
+    }
+  }
+};
+var IDENTIFY_TYPES_TOOL = {
+  type: "function",
+  function: {
+    name: "identify_schema_types",
+    description: "Identify which GraphQL types are needed to answer the user's question.",
+    parameters: {
+      type: "object",
+      properties: {
+        types: {
+          type: "array",
+          items: { type: "string" },
+          description: 'List of GraphQL type names needed (e.g., ["User", "Post"])'
+        },
+        reasoning: {
+          type: "string",
+          description: "Brief explanation of why these types are needed"
+        }
+      },
+      required: ["types"]
+    }
+  }
+};
+var GRAPHQL_TOOL = {
+  type: "function",
+  function: {
+    name: "generate_graphql_query",
+    description: "Generate a valid GraphQL query based on the user question and available schema. The query should fetch all necessary data to answer the user's question.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "The complete GraphQL query string including operation type, field selections, and any necessary arguments"
+        },
+        variables: {
+          type: "object",
+          description: "Optional variables for the GraphQL query"
+        },
+        reasoning: {
+          type: "string",
+          description: "Brief explanation of why this query was chosen"
+        }
+      },
+      required: ["query"]
+    }
+  }
+};
+var QueryGeneratorService = class {
+  // GraphQL access scoped to the requesting user. Supplied per request.
+  constructor(graphql10) {
+    this.graphql = graphql10;
+  }
+  // Token/character limits for context management
+  MAX_RESULT_CHARS = 4e3;
+  // ~1000 tokens - more conservative
+  MAX_TOKENS = 2e3;
+  // Max tokens for LLM responses
+  MAX_ITERATIONS = 4;
+  // Max follow-up queries
+  MIN_SCORE_THRESHOLD = 6;
+  // Minimum score to consider complete
+  MAX_TOOL_ATTEMPTS = 2;
+  // Retries when a model botches a tool call
+  /**
+   * Truncate large JSON results to fit within token limits
+   */
+  truncateResults(results, maxChars = this.MAX_RESULT_CHARS) {
+    const jsonString = JSON.stringify(results, null, 2);
+    if (jsonString.length <= maxChars) {
+      return results;
+    }
+    console.log(
+      `\u26A0\uFE0F Results too large (${jsonString.length} chars), truncating...`
+    );
+    if (Array.isArray(results)) {
+      const truncated = [];
+      let currentLength = 2;
+      for (const item of results) {
+        const itemString = JSON.stringify(item, null, 2);
+        if (currentLength + itemString.length + 2 > maxChars) {
+          break;
+        }
+        truncated.push(item);
+        currentLength += itemString.length + 2;
+      }
+      return {
+        _truncated: true,
+        _totalItems: results.length,
+        _showingItems: truncated.length,
+        data: truncated
+      };
+    }
+    if (typeof results === "object" && results !== null) {
+      const truncated = { _truncated: false };
+      let totalSize = 0;
+      for (const [key, value] of Object.entries(results)) {
+        if (Array.isArray(value)) {
+          const truncatedArray = [];
+          let arraySize = 0;
+          for (const item of value) {
+            const itemString = JSON.stringify(item, null, 2);
+            if (totalSize + arraySize + itemString.length > maxChars) {
+              break;
+            }
+            truncatedArray.push(item);
+            arraySize += itemString.length;
+          }
+          if (truncatedArray.length < value.length) {
+            truncated[key] = truncatedArray;
+            truncated._truncated = true;
+            truncated[`_${key}_total`] = value.length;
+            truncated[`_${key}_showing`] = truncatedArray.length;
+          } else {
+            truncated[key] = value;
+          }
+          totalSize += arraySize;
+        } else {
+          truncated[key] = value;
+        }
+      }
+      return truncated;
+    }
+    return {
+      _truncated: true,
+      _note: "Results were too large and have been truncated",
+      _preview: jsonString.substring(0, maxChars) + "..."
+    };
+  }
+  /**
+   * Parse the schema to extract a type summary (just type names and descriptions)
+   * Excludes Mutation type since we only support queries
+   */
+  getTypeSummary(schema) {
+    const lines = schema.split("\n");
+    const summary = ["Available GraphQL Types:\n"];
+    for (const line of lines) {
+      const match = line.match(/^(type|input|enum|interface)\s+(\w+)/);
+      if (match && match[2] !== "Mutation") {
+        summary.push(line.trim());
+      }
+    }
+    return summary.join("\n");
+  }
+  /**
+   * Extract specific types from the full schema
+   * Always includes Query type and excludes Mutation type
+   * Automatically includes related input types for filters/sorting
+   */
+  extractTypes(schema, typeNames) {
+    const lines = schema.split("\n");
+    const result = [];
+    let inType = false;
+    const typesToExtract = new Set(typeNames);
+    typesToExtract.add("Query");
+    const relatedInputs = /* @__PURE__ */ new Set();
+    for (const typeName of typeNames) {
+      relatedInputs.add(`${typeName}WhereInput`);
+      relatedInputs.add(`${typeName}OrderByInput`);
+      relatedInputs.add(`${typeName}WhereUniqueInput`);
+      relatedInputs.add(`${typeName}ManyRelationFilter`);
+    }
+    relatedInputs.forEach((inputType) => {
+      typesToExtract.add(inputType);
+    });
+    typesToExtract.add("OrderDirection");
+    typesToExtract.add("QueryMode");
+    typesToExtract.add("StringFilter");
+    typesToExtract.add("StringNullableFilter");
+    typesToExtract.add("IntNullableFilter");
+    typesToExtract.add("BooleanFilter");
+    typesToExtract.add("DateTimeFilter");
+    typesToExtract.add("DateTimeNullableFilter");
+    typesToExtract.add("IDFilter");
+    typesToExtract.add("NestedStringFilter");
+    for (const line of lines) {
+      const typeMatch = line.match(
+        /^(type|input|enum|interface|scalar)\s+(\w+)/
+      );
+      if (typeMatch && typeMatch[2]) {
+        const typeName = typeMatch[2];
+        if (typeName === "Mutation") {
+          inType = false;
+          continue;
+        }
+        if (typesToExtract.has(typeName)) {
+          inType = true;
+          result.push(line);
+        } else {
+          inType = false;
+        }
+        continue;
+      }
+      if (inType) {
+        result.push(line);
+        if (line.trim() === "}") {
+          inType = false;
+          result.push("");
+        }
+      }
+    }
+    return result.join("\n");
+  }
+  /**
+   * Step 1: Identify which schema types are relevant
+   */
+  async identifyRelevantTypes(question, model) {
+    const schema = await this.graphql.getSchema();
+    const typeSummary = this.getTypeSummary(schema);
+    console.log("Type summary length:", typeSummary.length, "characters");
+    const systemPrompt = `You are a GraphQL schema analyzer. Given a user's question and a list of available GraphQL types, identify which types are needed to answer the question.`;
+    const userPrompt = `${typeSummary}
+
+User Question: "${question}"
+
+Use the identify_schema_types tool to specify which types are needed.`;
+    const response = await lmStudio.chatCompletionWithTools({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      tools: [IDENTIFY_TYPES_TOOL],
+      tool_choice: "required",
+      temperature: 0.2,
+      max_tokens: 500
+      // Type identification should be brief
+    });
+    const choice = response.choices[0];
+    if (!choice || !choice.message.tool_calls || choice.message.tool_calls.length === 0) {
+      throw new Error("LLM did not identify types using the tool");
+    }
+    const toolCall = choice.message.tool_calls[0];
+    if (!toolCall) {
+      throw new Error("No tool call returned");
+    }
+    const args = this.parseToolArguments(toolCall.function.arguments) ?? {};
+    console.log("Identified types:", args.types);
+    console.log("Reasoning:", args.reasoning);
+    return {
+      types: Array.isArray(args.types) ? args.types : [],
+      reasoning: args.reasoning || "No reasoning provided"
+    };
+  }
+  /**
+   * Step 2: Generate a GraphQL query with only relevant types
+   */
+  async generateQuery(question, model, userId, userName) {
+    const { types } = await this.identifyRelevantTypes(question, model);
+    const fullSchema = await this.graphql.getSchema();
+    const relevantSchema = this.extractTypes(fullSchema, types);
+    console.log("Relevant schema length:", relevantSchema.length, "characters");
+    console.log("Relevant schema:\n", relevantSchema);
+    const now = /* @__PURE__ */ new Date();
+    const currentDate = now.toISOString().split("T")[0];
+    const currentDateTime = now.toISOString();
+    const userContextSection = userId || userName ? `
+CURRENT USER CONTEXT (Teacher-focused):
+${userId ? `- User ID: ${userId}` : ""}
+${userName ? `- User Name: ${userName}` : ""}
+- CRITICAL: The current user is a TEACHER unless specified otherwise
+- When the teacher asks about "me", "my", "I", etc., use this information to filter queries as a TEACHER
+
+Teacher Query Patterns (IMPORTANT):
+- "my students" or "students in my class" \u2192 Use block1Students, block2Students, etc. fields where the current user is the teacher
+- "my block 1 class" or "my period 1" \u2192 Use block1Students where current user is block1Teacher
+- "my callbacks" \u2192 Filter callbacks where teacher = current user (callbacks are late assignments assigned by teachers)
+- "callbacks I assigned" \u2192 Filter callbacks where teacher = current user
+- "PBIS cards I gave" \u2192 Filter pbisCards where teacher = current user
+- "my TA students" \u2192 Use taStudents where current user is taTeacher
+
+Example queries for teachers:
+- "Show my block 1 students" \u2192 query { user(where: { id: "${userId}" }) { block1Students { name } } }
+- "My callbacks" \u2192 query { callbacks(where: { teacher: { id: { equals: "${userId}" } } }) { student { name } title } }
+- "PBIS cards I gave" \u2192 query { pbisCards(where: { teacher: { id: { equals: "${userId}" } } }) { student { name } category } }
+` : "";
+    const systemPrompt = `You are a GraphQL query generator for a KeystoneJS GraphQL API. Given a user's natural language question and a GraphQL schema, your job is to generate a valid GraphQL query that will fetch the data needed to answer the question.
+
+CURRENT DATE/TIME:
+- Today's Date: ${currentDate}
+- Current DateTime: ${currentDateTime}
+- Use this information to calculate date ranges for queries like "last week", "this month", "yesterday", etc.
+- For date comparisons, use ISO 8601 format (YYYY-MM-DDTHH:MM:SS.sssZ)
+${userContextSection}
+
+Important guidelines:
+1. Generate syntactically correct GraphQL queries
+2. Only use fields and types that exist in the provided schema
+3. Include all necessary fields to answer the user's question
+4. Use appropriate filters, sorting, and pagination if needed
+5. Keep queries efficient - don't over-fetch data
+6. CRITICAL: You must ONLY generate queries (query { ... }), NEVER mutations or subscriptions
+7. If the user asks to create, update, or delete data, you must refuse and explain that only read operations are allowed
+8. CRITICAL - Field Aliases: If you need to query the same field multiple times with different arguments, you MUST use aliases
+   This applies to ALL fields: users, teachers, students, callbacks, pbisCards, etc.
+   Example - WRONG: query { users(where: {...}) { id } users(where: {...}) { id } }
+   Example - WRONG: query { teachers(where: {...}) { id } teachers(where: {...}) { id } }
+   Example - CORRECT: query { students: users(where: {...}) { id } staff: users(where: {...}) { id } }
+   Example - CORRECT: query { mathTeachers: teachers(where: {...}) { id } scienceTeachers: teachers(where: {...}) { id } }
+   ALWAYS use descriptive aliases when querying the same field multiple times - this is REQUIRED by GraphQL
+
+KeystoneJS Filter Syntax (IMPORTANT):
+- For boolean fields, use: { fieldName: { equals: true } } NOT { fieldName: true }
+- For string fields, use: { fieldName: { equals: "value" } } or { contains: "value" }
+- CRITICAL - Case-Insensitive Text Search: ALWAYS use mode: "insensitive" for string filters to make searches case-insensitive
+  Example: { name: { contains: "john", mode: insensitive } }
+  Example: { name: { equals: "Smith", mode: insensitive } }
+  This ensures searches work regardless of capitalization (e.g., "John", "JOHN", "john" all match)
+- For number comparisons: { fieldName: { gt: 5, lt: 10 } }
+- For sorting, use: orderBy: [{ fieldName: asc }] or orderBy: [{ fieldName: desc }]
+- For limiting results: take: 10
+- For skipping results: skip: 5
+- CRITICAL - Relationship Filters: When filtering on relationships, you MUST use "some", "none", or "every"
+  Example: { students: { some: { name: { contains: "John", mode: insensitive } } } }
+  Example: { teacher: { name: { equals: "Smith", mode: insensitive } } } // for single relationships
+  NEVER: { students: { name: { contains: "John" } } } // WRONG - missing "some"
+
+CRITICAL - User Query Types (MUST UNDERSTAND):
+- user (singular) uses UserWhereUniqueInput - ONLY accepts unique fields like { id: "..." }
+  WRONG: user(where: { name: "John", isTeacher: true }) \u2190 name and isTeacher are NOT unique fields
+  CORRECT: user(where: { id: "123" }) \u2190 only use for unique lookups by ID
+- users (plural) uses UserWhereInput - accepts filtering fields like name, isStaff, isStudent, etc.
+  CORRECT: users(where: { name: { contains: "John", mode: insensitive }, isStaff: { equals: true } })
+- When filtering by name, isStaff, isStudent, or any non-unique field, ALWAYS use users (plural), NEVER user (singular)
+- People here say "teacher" to mean anyone who works at the school, so DEFAULT to isStaff
+  DEFAULT: users(where: { isStaff: { equals: true } })
+  isTeacher does exist and marks classroom teachers specifically (those with a TA group or
+  assigned classes - roughly half of staff). Use it ONLY when the question clearly means
+  classroom teachers as distinct from other staff.
+
+Domain-Specific Rules (CRITICAL):
+- ALL users (teachers, staff, students) are in the same "users" table
+- When asking about TEACHERS or STAFF: ALWAYS filter by { isStaff: { equals: true } } using users (plural)
+- When asking about STUDENTS: ALWAYS filter by { isStudent: { equals: true } } using users (plural)
+- CRITICAL: "teacher" in a question usually means any employee, so default to isStaff: { equals: true }. Only use isTeacher when the question means classroom teachers as opposed to other staff.
+- CRITICAL: If the question asks about a student (e.g., "what teachers does [name] have"), you MUST:
+  1. Use users (plural) not user (singular) when filtering by name
+  2. Combine name filter with isStudent filter: { isStudent: { equals: true }, name: { contains: "name", mode: insensitive } }
+
+Callback Assignment Terminology (CRITICAL):
+- "Callbacks" are LATE ASSIGNMENTS or MISSING WORK assigned by teachers to students
+- Terms that mean callbacks: "late work", "late assignments", "callback assignments", "missing work", "callbacks"
+- Callbacks have a teacher (who assigned it) and student (who needs to complete it)
+
+Callback Query Rules for Teachers:
+- When a TEACHER asks "my callbacks" or "callbacks I assigned", query callbacks table with teacher filter
+- CORRECT: query { callbacks(where: { teacher: { id: { equals: "..." } } }) { id title student { name } dateAssigned } }
+- callbackCount on User is for STUDENTS (callbacks assigned TO them), not teachers
+- For counting teacher's callbacks: query callbacks table with teacher filter and count results
+
+PBIS Card Rules:
+- Card counts on User are RELATIONSHIP counts, computed live. They are always accurate.
+  - studentPbisCardsCount = cards a student RECEIVED
+  - teacherPbisCardsCount = cards a staff member GAVE
+  - staffPbisCardsReceivedCount / staffPbisCardsGivenCount = staff-to-staff cards
+- Each accepts the same filters as the underlying list, so date ranges go inside it:
+  studentPbisCardsCount(where: { dateGiven: { gte: "2026-09-01T00:00:00.000Z" } })
+  With no argument it counts every card on record.
+- CRITICAL: these counts CANNOT be used in orderBy. UserOrderByInput has no card
+  fields at all. There is no way to sort users by cards in the query.
+- So for "who has the most cards" style questions, DO NOT try to sort. Fetch the
+  candidates with their count and let the explanation step find the maximum:
+  query { users(where: { isStudent: { equals: true } }) { id name studentPbisCardsCount } }
+- When a TEACHER asks "how many PBIS cards have I given", use teacherPbisCardsCount,
+  or query the pbisCards list filtered by teacher if you need the individual cards.
+- Do not invent stored count fields such as PbisCardCount, YearPbisCount or
+  taPbisCardCount. They were removed; only the relationship counts above exist.
+
+Collection Period Rules:
+- "The last collection", "this collection", "since the last collection" and
+  "this week's cards" all refer to a PBIS collection RUN, not a calendar week or
+  month. The runs are the rows of pbisCollectionDates.
+- NEVER invent a date like the first of the month for these. Fetch the latest run
+  first: query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 1)
+  { collectionDate } }, then filter cards with dateGiven gte that value.
+- If you answer with a date range, state the actual range you used so the reader
+  can see what "last collection" was taken to mean.
+
+Who Counts As A Teacher:
+- Administrators bulk-import PBIS cards hundreds at a time, so their totals are
+  not comparable to a teacher handing out cards individually. For any "who gave
+  the most cards" or similar ranking of staff, EXCLUDE them:
+  users(where: { isStaff: { equals: true }, isSuperAdmin: { equals: false } })
+- Include them only if the question explicitly asks about administrators.
+
+Counting and Ranking Rules:
+- Prefer a *Count field with a where filter over fetching rows and counting them
+  yourself. counts are computed by the database and are exact; counting rows in a
+  large JSON payload by eye is unreliable and has produced wrong answers.
+- Read the field description before using a count. Several counts mean "all time"
+  unless you pass a filter - asking for "open" or "outstanding" and then using an
+  unfiltered count is a silent error that returns a plausible but wrong number.
+- GraphQL here cannot GROUP BY. There is no way to ask "which description/category
+  /teacher appears most often" in one query. If a question needs grouping, either
+  ask for counts of specific candidate values one at a time, or say plainly that
+  the data cannot be grouped in a single query and offer the closest thing you can
+  answer exactly.
+- Never present a ranking derived from scanning many rows as if it were exact.
+
+Name and Display Rules:
+- The name field for users includes BOTH first and last name (e.g., "John Smith")
+- For searches: use { name: { contains: "John", mode: insensitive } } to find partial matches
+- ALWAYS use mode: insensitive for all name searches to handle case variations
+- For teacher/student relationships: questions like "what teachers does John Smith have" mean checking block1Teacher, block2Teacher, etc.
+- For class rosters: questions like "what students does Mr Smith have" mean checking block1Students, block2Students, etc.
+
+Example correct queries:
+query { users(where: { isStaff: { equals: true } }, orderBy: [{ name: asc }], take: 10) { id name callbackCount } }
+query { users(where: { isStudent: { equals: true } }) { id name studentPbisCardsCount } }
+query { users(where: { isStudent: { equals: true }, name: { contains: "Korbin", mode: insensitive } }, take: 1) { id name block1Teacher { id name } block2Teacher { id name } } }
+query { callbacks(where: { student: { name: { contains: "John", mode: insensitive } } }) { id student { name } title } }
+query { pbisCards(where: { teacher: { id: { equals: "123" } } }) { id student { name } category dateGiven } }
+query { students: users(where: { isStudent: { equals: true } }) { id name } staff: users(where: { isStaff: { equals: true } }) { id name } }
+query { user(where: { id: "123" }) { id name } }
+query { users(where: { name: { contains: "Smith", mode: insensitive }, isStaff: { equals: true } }) { id name } }
+
+GraphQL Schema:
+${relevantSchema}`;
+    const userPrompt = `Generate a GraphQL query to answer this question: "${question}"
+
+Use the generate_graphql_query tool to provide your answer.`;
+    let lastFailure = "";
+    for (let attempt = 1; attempt <= this.MAX_TOOL_ATTEMPTS; attempt++) {
+      const attemptPrompt = attempt === 1 ? userPrompt : `${userPrompt}
+
+Your previous attempt failed: ${lastFailure}
+Call the generate_graphql_query tool with a "query" argument whose value is the complete GraphQL query as a single string.`;
+      const response = await lmStudio.chatCompletionWithTools({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: attemptPrompt }
+        ],
+        tools: [GRAPHQL_TOOL],
+        tool_choice: "required",
+        temperature: 0.2,
+        max_tokens: 1e3
+        // Queries should be concise
+      });
+      const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+      if (!toolCall) {
+        lastFailure = "the model replied without calling the tool";
+        console.warn(`\u26A0\uFE0F Query generation attempt ${attempt}: ${lastFailure}`);
+        continue;
+      }
+      const args = this.parseToolArguments(toolCall.function.arguments);
+      const queryArgs = this.extractQueryArgs(args);
+      if (!queryArgs) {
+        lastFailure = `the tool call did not include a "query" string (arguments: ${String(
+          toolCall.function.arguments
+        ).substring(0, 300)})`;
+        console.warn(`\u26A0\uFE0F Query generation attempt ${attempt}: ${lastFailure}`);
+        continue;
+      }
+      if (!this.isQueryOperation(queryArgs.query)) {
+        throw new Error(
+          "Operation not allowed. Only read operations (queries) are permitted. Mutations and subscriptions are not supported."
+        );
+      }
+      return {
+        query: queryArgs.query,
+        variables: queryArgs.variables,
+        reasoning: queryArgs.reasoning || "No reasoning provided"
+      };
+    }
+    throw new Error(
+      `The model "${model}" did not return a usable GraphQL query after ${this.MAX_TOOL_ATTEMPTS} attempts: ${lastFailure}`
+    );
+  }
+  /**
+   * Tool-call arguments are supposed to be a JSON string, but local models
+   * sometimes double-encode them or emit invalid JSON. Returns null when the
+   * arguments can't be parsed.
+   */
+  parseToolArguments(raw) {
+    if (raw && typeof raw === "object") {
+      return raw;
+    }
+    if (typeof raw !== "string") {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === "string") {
+        try {
+          return JSON.parse(parsed);
+        } catch {
+          return null;
+        }
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+  /**
+   * Pull the generated query out of the tool arguments, tolerating the wrapper
+   * shapes and field aliases models use instead of a bare { query, ... }.
+   */
+  extractQueryArgs(args) {
+    if (!args || typeof args !== "object") {
+      return null;
+    }
+    const containers = [args, args.arguments, args.parameters, args.input];
+    for (const container of containers) {
+      if (!container || typeof container !== "object") {
+        continue;
+      }
+      const value = container.query ?? container.graphql_query ?? container.graphqlQuery;
+      if (typeof value === "string" && value.trim()) {
+        return {
+          query: value.trim(),
+          variables: container.variables,
+          reasoning: container.reasoning
+        };
+      }
+    }
+    return null;
+  }
+  /**
+   * Validate that a GraphQL operation is a query (not mutation or subscription)
+   */
+  isQueryOperation(graphqlString) {
+    const normalized = graphqlString.replace(/#.*/g, "").replace(/\s+/g, " ").trim();
+    if (/^\s*(mutation|subscription)\s*[{\(]/i.test(normalized)) {
+      return false;
+    }
+    if (/^\s*query\s*[{\(]/i.test(normalized)) {
+      return true;
+    }
+    if (/^\s*\{/.test(normalized)) {
+      return true;
+    }
+    return false;
+  }
+  /**
+   * Generate an explanation of query results
+   */
+  async explainResults(question, query, results, model, maxChars = this.MAX_RESULT_CHARS) {
+    const alreadyTruncated = results._truncated === true;
+    const originalSize = JSON.stringify(results).length;
+    const truncatedResults = alreadyTruncated ? results : this.truncateResults(results, maxChars);
+    const wasTruncated = truncatedResults._truncated === true;
+    const truncatedSize = JSON.stringify(truncatedResults).length;
+    console.log(
+      `Results size: ${originalSize} chars -> ${truncatedSize} chars (truncated: ${wasTruncated}, already: ${alreadyTruncated})`
+    );
+    const systemPrompt = `You are a helpful assistant that explains data to teachers. Given a user's question, the GraphQL query that was executed, and the results, provide a clear, concise, natural language explanation of the answer.
+
+Guidelines:
+1. Directly answer the user's question
+2. Be specific and cite actual data from the results (names, titles, descriptions, etc.)
+3. Keep it concise but complete
+4. Use natural, conversational language
+5. If the results are empty or don't contain relevant data, clearly state that
+6. IMPORTANT: Do NOT include or mention any IDs (user IDs, record IDs, etc.) in your response - users don't need to see internal identifiers
+7. IMPORTANT: Do NOT include email addresses in your response unless the user specifically asked for emails
+8. CRITICAL: Format your response using Markdown - use headers (##, ###), lists (-, *), **bold**, and proper formatting for readability
+
+Name Display Rules:
+9. When displaying names, use FIRST NAME ONLY for brevity and friendliness (e.g., "John" not "John Smith")
+10. Extract the first name from the full name field (names are stored as "FirstName LastName")
+
+Terminology Rules:
+11. Use "callback assignment" or "late assignment" instead of just "callback" when explaining to make it clear
+12. Example: "John has 3 callback assignments" or "Sarah has 2 late assignments" (NOT "John has 3 callbacks")
+13. PBIS cards can be referred to as "PBIS cards" or "positive behavior cards"
+${wasTruncated ? `14. CRITICAL - THE RESULTS ARE INCOMPLETE. They were cut to fit, and the
+    rows you were given are an arbitrary slice, not the top or first ones by any
+    meaningful order. Therefore you MUST NOT state or imply a maximum, minimum,
+    "most", "least", "top", "best", "worst", or any ranking or total. Say plainly
+    that the data was too large to show in full, report only what is visible and
+    label it as a partial sample, and suggest narrowing the question (a specific
+    person, class, or date range) to get a reliable answer.` : ""}`;
+    const userPrompt = `User's Question: "${question}"
+
+GraphQL Query Executed:
+\`\`\`graphql
+${query}
+\`\`\`
+
+Query Results${wasTruncated ? " (truncated for brevity)" : ""}:
+\`\`\`json
+${JSON.stringify(truncatedResults, null, 2)}
+\`\`\`
+
+Please explain what this data tells us in answer to the user's question. Format your response in Markdown with appropriate headers, lists, and formatting for readability.`;
+    const explanation = await lmStudio.complete(
+      model,
+      userPrompt,
+      systemPrompt,
+      0.7,
+      this.MAX_TOKENS
+      // Add max_tokens parameter
+    );
+    return explanation.trim();
+  }
+  /**
+   * Evaluate if the response adequately answers the question
+   */
+  async evaluateResponse(originalQuestion, explanation, allData, model) {
+    const systemPrompt = `You are a quality evaluator for question-answering systems. Your job is to determine if a response adequately answers the user's original question.
+
+CRITICAL RULES:
+1. If the response is incomplete (is_complete = false), you MUST provide a suggested_followup question
+2. If results are empty or no data found, suggest trying alternate spellings, checking if the person is a student vs staff, or broadening the search
+3. If data exists but doesn't answer the question, suggest what additional information is needed
+4. The suggested_followup should be a clear, actionable question that can be used to refine the search`;
+    const isEmpty = allData.length === 0 || allData.length === 1 && (JSON.stringify(allData[0]).length < 50 || JSON.stringify(allData[0]) === "{}" || Array.isArray(allData[0]) && allData[0].length === 0);
+    const userPrompt = `Original Question: "${originalQuestion}"
+
+Current Explanation:
+${explanation}
+
+Available Data Summary:
+${JSON.stringify(allData, null, 2).substring(0, 2e3)}
+${isEmpty ? "\n\u26A0\uFE0F WARNING: The data appears to be empty or no results were found. Consider suggesting alternate search strategies." : ""}
+
+Evaluate whether this explanation fully answers the original question. Use the evaluate_response tool.
+${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_followup with alternative search strategies." : ""}`;
+    const response = await lmStudio.chatCompletionWithTools({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      tools: [EVALUATE_RESPONSE_TOOL],
+      tool_choice: "required",
+      temperature: 0.3,
+      max_tokens: 500
+    });
+    const choice = response.choices[0];
+    if (!choice || !choice.message.tool_calls || choice.message.tool_calls.length === 0) {
+      return { score: 7, isComplete: true };
+    }
+    const toolCall = choice.message.tool_calls[0];
+    if (!toolCall) {
+      return { score: 7, isComplete: true };
+    }
+    const args = this.parseToolArguments(toolCall.function.arguments);
+    if (!args || typeof args !== "object") {
+      return { score: 7, isComplete: true };
+    }
+    console.log(
+      `Evaluation - Score: ${args.score}/10, Complete: ${args.is_complete}`
+    );
+    if (!args.is_complete) {
+      console.log(`Missing: ${args.missing_information}`);
+      console.log(
+        `Suggested followup: ${args.suggested_followup || "(none provided)"}`
+      );
+    }
+    let suggestedFollowup = args.suggested_followup;
+    if (!args.is_complete && !suggestedFollowup) {
+      if (args.missing_information) {
+        suggestedFollowup = `Find ${args.missing_information.toLowerCase()}`;
+      } else {
+        suggestedFollowup = `Search for more information related to: ${originalQuestion}`;
+      }
+      console.log(`\u26A0\uFE0F Generated fallback followup: ${suggestedFollowup}`);
+    }
+    return {
+      score: args.score,
+      isComplete: args.is_complete,
+      missingInfo: args.missing_information,
+      suggestedFollowup
+    };
+  }
+  /**
+   * Calculate dynamic truncation limit based on model context length
+   */
+  calculateTruncationLimit(modelContextLength) {
+    if (!modelContextLength || modelContextLength === 0) {
+      return this.MAX_RESULT_CHARS;
+    }
+    const reservedTokens = 1e3 + 200 + 500 + this.MAX_TOKENS;
+    const safetyBuffer = 0.2;
+    const availableTokens = modelContextLength - reservedTokens;
+    const tokensForResults = availableTokens * (1 - safetyBuffer);
+    const maxChars = Math.max(1e3, Math.floor(tokensForResults * 4));
+    console.log(
+      `Dynamic truncation: context=${modelContextLength}, available=${tokensForResults} tokens, maxChars=${maxChars}`
+    );
+    return maxChars;
+  }
+  /**
+   * Complete flow with iterative refinement: Generate query, execute, evaluate, and refine if needed
+   */
+  async processQuery(question, model, userId, userName) {
+    let modelContextLength;
+    try {
+      const models = await lmStudio.getModelsWithLimits();
+      const currentModel = models.find((m) => m.id === model);
+      modelContextLength = currentModel?.max_context_length;
+      console.log(
+        `Model ${model} context length: ${modelContextLength || "unknown"}`
+      );
+    } catch (error) {
+      console.warn("Could not fetch model context length:", error);
+    }
+    let currentQuestion = question;
+    let allQueries = [];
+    let allData = [];
+    let finalExplanation = "";
+    let iteration = 0;
+    while (iteration < this.MAX_ITERATIONS) {
+      iteration++;
+      console.log(`
+=== Iteration ${iteration} ===`);
+      console.log(`Question: ${currentQuestion}`);
+      let generated;
+      try {
+        generated = await this.generateQuery(
+          currentQuestion,
+          model,
+          userId,
+          userName
+        );
+      } catch (error) {
+        if (allData.length > 0 && finalExplanation) {
+          console.warn(
+            `\u26A0\uFE0F Follow-up query generation failed on iteration ${iteration}, returning earlier results:`,
+            error
+          );
+          iteration -= 1;
+          break;
+        }
+        throw error;
+      }
+      const { query, variables, reasoning } = generated;
+      allQueries.push(query);
+      console.log("Generated query:", query);
+      const result = await this.graphql.query({ query, variables });
+      console.log("Result:", result);
+      if (result.errors) {
+        const isQueryShapeError = (e) => !e.path || e.path.length === 0;
+        const retryableError = result.errors.find(
+          (e) => isQueryShapeError(e) || e.extensions?.code === "GRAPHQL_PARSE_FAILED" || e.extensions?.code === "GRAPHQL_VALIDATION_FAILED" || e.message.includes("Syntax Error") || e.message.includes("conflict") || e.message.includes("differing arguments") || e.message.includes("is not defined by type") || e.message.includes("Cannot query field") || e.message.includes("UserWhereUniqueInput")
+        );
+        if (retryableError && iteration < this.MAX_ITERATIONS) {
+          console.log(
+            `\u26A0\uFE0F GraphQL ${retryableError.message.includes("Syntax Error") ? "parse" : "validation"} error detected, retrying with error context...`
+          );
+          console.log("Error:", retryableError.message);
+          let errorGuidance = "";
+          if (retryableError.extensions?.code === "GRAPHQL_PARSE_FAILED" || retryableError.message.includes("Syntax Error")) {
+            const loc = retryableError.locations?.[0];
+            const where = loc ? ` The parser stopped at line ${loc.line}, column ${loc.column}.` : "";
+            errorGuidance = `CRITICAL: Your query is not valid GraphQL - it failed to parse, so none of it ran.${where} Common causes: unbalanced { } or ( ), a trailing comma, a missing field name, or the query being cut off before it finished. Rewrite the whole query from scratch as ONE complete, syntactically valid query operation. Do not send a fragment or a partial query.`;
+          } else if (retryableError.message.includes("UserWhereUniqueInput")) {
+            errorGuidance = `CRITICAL ERROR: You used user (singular) with fields that don't exist in UserWhereUniqueInput. UserWhereUniqueInput ONLY accepts unique fields like { id: "..." }. When filtering by name, isStaff, isStudent, or any non-unique field, you MUST use users (plural) instead. Also, "teacher" in a question usually means any employee, so prefer isStaff unless the question specifically means classroom teachers.`;
+          } else if (retryableError.message.includes("conflict") || retryableError.message.includes("differing arguments")) {
+            const fieldMatch = retryableError.message.match(/Fields "(\w+)"/);
+            const fieldName = fieldMatch ? fieldMatch[1] : "the same field";
+            errorGuidance = `CRITICAL: You queried "${fieldName}" multiple times with different arguments. GraphQL requires aliases when querying the same field multiple times. Use descriptive aliases like "first: ${fieldName}(...)" and "second: ${fieldName}(...)" or more descriptive names based on the filter (e.g., "students: users(...)" and "staff: users(...)").`;
+          } else if (retryableError.message.includes("is not defined by type")) {
+            errorGuidance = `The field you used doesn't exist in that input type. Check the schema and use the correct field name and input type. Remember: user (singular) only accepts unique fields like id, while users (plural) accepts filtering fields.`;
+          } else if (retryableError.message.includes("Cannot query field")) {
+            const m = retryableError.message.match(
+              /Cannot query field "(\w+)" on type "(\w+)"/
+            );
+            const field = m ? m[1] : "that field";
+            const onType = m ? m[2] : "that type";
+            errorGuidance = `CRITICAL: "${field}" does not exist on type "${onType}". Do not guess field names. Look at the "${onType}" type in the schema you were given and use only the fields listed there. The schema you see is the complete set of what you may query - if something is not in it, it is not available and you should answer using what is, or say the data is not available.`;
+          }
+          currentQuestion = `${currentQuestion}
+
+IMPORTANT: The previous query failed with this error: "${retryableError.message}". ${errorGuidance} Please fix the query to resolve this issue.`;
+          continue;
+        }
+        throw new Error(
+          `GraphQL query failed: ${result.errors.map((e) => e.message).join(", ")}`
+        );
+      }
+      allData.push(result.data);
+      let combinedData2 = allData.length === 1 ? allData[0] : { iteration_results: allData };
+      const truncationLimit = this.calculateTruncationLimit(modelContextLength);
+      const dataToExplain = this.truncateResults(combinedData2, truncationLimit);
+      finalExplanation = await this.explainResults(
+        question,
+        // Use original question
+        allQueries.join("\n---\n"),
+        dataToExplain,
+        model,
+        truncationLimit
+      );
+      if (iteration < this.MAX_ITERATIONS) {
+        const evaluation = await this.evaluateResponse(
+          question,
+          finalExplanation,
+          allData,
+          model
+        );
+        if (evaluation.isComplete || evaluation.score >= this.MIN_SCORE_THRESHOLD) {
+          console.log(`\u2713 Answer is complete (score: ${evaluation.score}/10)`);
+          return {
+            query: allQueries.join("\n---\n"),
+            variables,
+            reasoning,
+            data: combinedData2,
+            explanation: finalExplanation,
+            iterations: iteration,
+            evaluationScore: evaluation.score
+          };
+        }
+        if (evaluation.suggestedFollowup) {
+          console.log(`\u21BB Needs refinement - following up...`);
+          currentQuestion = evaluation.suggestedFollowup;
+        } else {
+          if (evaluation.missingInfo) {
+            currentQuestion = `Find ${evaluation.missingInfo.toLowerCase()}`;
+            console.log(`\u21BB Generated fallback followup: ${currentQuestion}`);
+          } else {
+            const hasStudentFilter = allQueries.some(
+              (q) => q.includes("isStudent")
+            );
+            if (!hasStudentFilter && question.toLowerCase().includes("student")) {
+              currentQuestion = `${question} (make sure to search for students only)`;
+              console.log(`\u21BB Adding student filter to followup`);
+            } else {
+              console.log(`\u26A0 Incomplete but no clear followup - stopping`);
+              break;
+            }
+          }
+        }
+      }
+    }
+    console.log(`\u2713 Max iterations reached (${this.MAX_ITERATIONS})`);
+    const combinedData = allData.length === 1 ? allData[0] : { iteration_results: allData };
+    return {
+      query: allQueries.join("\n---\n"),
+      variables: void 0,
+      reasoning: "Multi-step query process",
+      data: combinedData,
+      explanation: finalExplanation,
+      iterations: iteration
+    };
+  }
+};
+function createQueryGenerator(graphql10) {
+  return new QueryGeneratorService(graphql10);
+}
+
+// mutations/queryCommunicator.ts
+var MAX_QUESTION_LENGTH = 2e3;
+var queryCommunicator = (base) => import_core26.graphql.field({
+  type: import_core26.graphql.JSON,
   args: {
-    question: import_core29.graphql.arg({ type: import_core29.graphql.nonNull(import_core29.graphql.String) }),
-    model: import_core29.graphql.arg({ type: import_core29.graphql.nonNull(import_core29.graphql.String) })
+    question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) }),
+    model: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2301,11 +3242,14 @@ var queryCommunicator = (base) => import_core29.graphql.field({
         "You do not have permission to use the communicator. Please contact an administrator."
       );
     }
-    const COMMUNICATOR_ENDPOINT = process.env.COMMUNICATOR_ENDPOINT;
-    const COMMUNICATOR_API_KEY = process.env.COMMUNICATOR_API_KEY;
-    if (!COMMUNICATOR_ENDPOINT || !COMMUNICATOR_API_KEY) {
-      console.error("Communicator service configuration is missing");
-      throw new Error("Communicator service is not configured");
+    const question = args.question.trim();
+    if (!question) {
+      throw new Error("Please enter a question.");
+    }
+    if (question.length > MAX_QUESTION_LENGTH) {
+      throw new Error(
+        `Questions are limited to ${MAX_QUESTION_LENGTH} characters.`
+      );
     }
     const user = await context.query.User.findOne({
       where: { id: session2.itemId },
@@ -2314,88 +3258,58 @@ var queryCommunicator = (base) => import_core29.graphql.field({
     if (!user) {
       throw new Error("User not found");
     }
+    const persist = (data) => context.sudo().query.CommunicatorChat.createOne({
+      data: { user: { connect: { id: user.id } }, ...data },
+      query: "id"
+    });
     try {
-      const response = await fetch(`${COMMUNICATOR_ENDPOINT}/query`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": COMMUNICATOR_API_KEY
-        },
-        body: JSON.stringify({
-          question: args.question,
-          model: args.model,
-          includeRawData: true,
-          userId: user.id,
-          userName: user.name
-        })
+      const generator = createQueryGenerator(new CallerScopedGraphQL(context));
+      const result = await generator.processQuery(
+        question,
+        args.model,
+        String(user.id),
+        user.name
+      );
+      const chat = await persist({
+        question,
+        explanation: result.explanation || null,
+        graphqlQuery: result.query || null,
+        model: args.model,
+        iterations: result.iterations || null,
+        evaluationScore: result.evaluationScore || null,
+        status: "succeeded",
+        hasError: "false",
+        rawData: result.data ?? null
       });
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorDetails = errorText;
-        try {
-          const errorJson = JSON.parse(errorText);
-          errorDetails = JSON.stringify(errorJson, null, 2);
-        } catch {
-        }
-        const errorMessage = `Communicator API error (${response.status} ${response.statusText}):
-${errorDetails}`;
-        console.error(errorMessage);
-        captureError(new Error(errorMessage), {
-          tags: { mutation: "queryCommunicator", model: args.model },
-          extra: { status: response.status, details: errorDetails },
-          userId: String(user.id)
-        });
-        await context.query.CommunicatorChat.createOne({
-          data: {
-            user: { connect: { id: user.id } },
-            question: args.question,
-            model: args.model,
-            hasError: "true",
-            errorMessage,
-            rawData: { error: errorText, status: response.status }
-          }
-        });
-        return {
-          error: true,
-          message: `The communicator service returned an error: ${response.statusText}`,
-          details: errorDetails,
-          status: response.status
-        };
-      }
-      const data = await response.json();
-      await context.query.CommunicatorChat.createOne({
-        data: {
-          user: { connect: { id: user.id } },
-          question: data.question || args.question,
-          explanation: data.explanation || null,
-          graphqlQuery: data.graphqlQuery || null,
-          model: args.model,
-          iterations: data.iterations || null,
-          evaluationScore: data.evaluationScore || null,
-          hasError: "false",
-          rawData: data.rawData || data,
-          timestamp: data.timestamp || null
-        }
-      });
-      return data;
+      return {
+        chatId: chat?.id ?? null,
+        question,
+        explanation: result.explanation ?? null,
+        graphqlQuery: result.query ?? null,
+        iterations: result.iterations ?? null,
+        evaluationScore: result.evaluationScore ?? null,
+        rawData: result.data ?? null,
+        error: false,
+        message: null
+      };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to query communicator service";
-      console.error("Communicator Query Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to process the communicator request";
+      console.error("Communicator Query Error:", errorMessage);
       captureError(error, {
         tags: { mutation: "queryCommunicator", model: args.model },
         userId: String(user.id)
       });
+      let chatId = null;
       try {
-        await context.query.CommunicatorChat.createOne({
-          data: {
-            user: { connect: { id: user.id } },
-            question: args.question,
-            model: args.model,
-            hasError: "true",
-            errorMessage,
-            rawData: { error: errorMessage }
-          }
+        const failedChat = await persist({
+          question,
+          model: args.model,
+          status: "failed",
+          hasError: "true",
+          errorMessage,
+          rawData: { error: errorMessage }
         });
+        chatId = failedChat?.id ?? null;
       } catch (dbError) {
         console.error("Failed to save error to database:", dbError);
         captureError(dbError, {
@@ -2403,6 +3317,13 @@ ${errorDetails}`;
         });
       }
       return {
+        chatId,
+        question,
+        explanation: null,
+        graphqlQuery: null,
+        iterations: null,
+        evaluationScore: null,
+        rawData: null,
         error: true,
         message: errorMessage
       };
@@ -2410,13 +3331,45 @@ ${errorDetails}`;
   }
 });
 
+// queries/availableCommunicatorModels.ts
+var import_core27 = require("@keystone-6/core");
+var availableCommunicatorModels = (base) => import_core27.graphql.field({
+  type: import_core27.graphql.JSON,
+  resolve: async (source, args, context) => {
+    const session2 = await context.session;
+    if (!session2) {
+      throw new Error("You must be logged in to use the communicator");
+    }
+    if (!session2.data.isStaff) {
+      throw new Error("Only staff members can access the communicator");
+    }
+    if (!session2.data.isCommunicatorEnabled) {
+      throw new Error(
+        "You do not have permission to use the communicator. Please contact an administrator."
+      );
+    }
+    try {
+      const models = await lmStudio.getModelsWithLimits();
+      return models.map((m) => ({
+        id: m.id,
+        type: m.type ?? null,
+        maxContextLength: m.max_context_length ?? null
+      }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to list models";
+      console.error("availableCommunicatorModels:", message);
+      return { error: true, message, models: [] };
+    }
+  }
+});
+
 // mutations/recalculateCallback.ts
-var import_core30 = require("@keystone-6/core");
+var import_core28 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core30.graphql.field({
+var recalculateCallback = (base) => import_core28.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core30.graphql.arg({ type: import_core30.graphql.nonNull(import_core30.graphql.ID) })
+    callbackId: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -2485,11 +3438,11 @@ var recalculateCallback = (base) => import_core30.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core31 = require("@keystone-6/core");
-var sendEmail = (base) => import_core31.graphql.field({
-  type: import_core31.graphql.Boolean,
+var import_core29 = require("@keystone-6/core");
+var sendEmail = (base) => import_core29.graphql.field({
+  type: import_core29.graphql.Boolean,
   args: {
-    emailData: import_core31.graphql.arg({ type: import_core31.graphql.JSON })
+    emailData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -2508,12 +3461,12 @@ var sendEmail = (base) => import_core31.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core32 = require("@keystone-6/core");
+var import_core30 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core32.graphql.field({
-  type: import_core32.graphql.String,
+var updateStudentSchedules = (base) => import_core30.graphql.field({
+  type: import_core30.graphql.String,
   args: {
-    studentScheduleData: import_core32.graphql.arg({ type: import_core32.graphql.JSON })
+    studentScheduleData: import_core30.graphql.arg({ type: import_core30.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -2601,7 +3554,7 @@ var updateStudentSchedules = (base) => import_core32.graphql.field({
 // keystone.ts
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 var keystone_default = withAuth(
-  (0, import_core33.config)({
+  (0, import_core31.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -2639,15 +3592,12 @@ var keystone_default = withAuth(
       Calendar,
       CellPhoneViolation,
       ChromebookCheck,
-      ChromebookAssignment,
       CommunicatorChat,
       Discipline,
       Link,
       Message,
       PbisCard,
       StaffPbisCard,
-      PbisCollection,
-      PbisTeam,
       PbisCollectionDate,
       RandomDrawingWin,
       SortingHatQuestion,
@@ -2663,7 +3613,7 @@ var keystone_default = withAuth(
         // above is unaffected.
         plugins: [bugsinkApolloPlugin]
       },
-      extendGraphqlSchema: import_core33.graphql.extend((base) => {
+      extendGraphqlSchema: import_core31.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
@@ -2673,6 +3623,9 @@ var keystone_default = withAuth(
             queryCommunicator: queryCommunicator(base),
             authenticateUserWithGoogle: authenticateUserWithGoogle(base),
             impersonateUser: impersonateUser(base)
+          },
+          query: {
+            availableCommunicatorModels: availableCommunicatorModels(base)
           }
         };
       })

@@ -88,7 +88,6 @@ export const User = list({
     coTeachesWithTeacher: relationship({ ref: "User", many: true }),
 
     //other relationships
-    taTeam: relationship({ ref: "PbisTeam.taTeacher" }),
     studentFocusTeacher: relationship({
       ref: "StudentFocus.teacher",
       many: true,
@@ -135,23 +134,6 @@ export const User = list({
       many: true,
     }),
 
-    //PBIS Collection Winners
-    currentTaWinner: relationship({
-      ref: "User.studentIsCurrentWinner",
-      many: false,
-    }),
-    previousTaWinner: relationship({
-      ref: "User.studentIsPreviousWinner",
-      many: false,
-    }),
-    studentIsCurrentWinner: relationship({
-      ref: "User.currentTaWinner",
-      many: false,
-    }),
-    studentIsPreviousWinner: relationship({
-      ref: "User.previousTaWinner",
-      many: false,
-    }),
     randomDrawingWins: relationship({
       ref: "RandomDrawingWin.student",
       many: true,
@@ -173,10 +155,7 @@ export const User = list({
     // Important Info
     callbackCount: integer({ defaultValue: 0 }),
     totalCallbackCount: integer({ defaultValue: 0 }),
-    PbisCardCount: integer({ defaultValue: 0 }),
-    YearPbisCount: integer({ defaultValue: 0 }),
     teacherSubject: text({ defaultValue: undefined }),
-    taPbisCardCount: integer({ defaultValue: 0 }),
     averageTimeToCompleteCallback: integer(),
 
     // assignments
