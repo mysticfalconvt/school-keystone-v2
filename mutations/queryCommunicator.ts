@@ -1,5 +1,9 @@
 import { graphql } from '@keystone-6/core';
 import { captureError } from '../lib/bugsink';
+import { CallerScopedGraphQL } from '../lib/communicator/graphqlExecutor';
+import { createQueryGenerator } from '../lib/communicator/queryGenerator';
+
+const MAX_QUESTION_LENGTH = 2000;
 
 export const queryCommunicator = (base: any) =>
   graphql.field({
@@ -28,12 +32,14 @@ export const queryCommunicator = (base: any) =>
         );
       }
 
-      const COMMUNICATOR_ENDPOINT = process.env.COMMUNICATOR_ENDPOINT;
-      const COMMUNICATOR_API_KEY = process.env.COMMUNICATOR_API_KEY;
-
-      if (!COMMUNICATOR_ENDPOINT || !COMMUNICATOR_API_KEY) {
-        console.error('Communicator service configuration is missing');
-        throw new Error('Communicator service is not configured');
+      const question = args.question.trim();
+      if (!question) {
+        throw new Error('Please enter a question.');
+      }
+      if (question.length > MAX_QUESTION_LENGTH) {
+        throw new Error(
+          `Questions are limited to ${MAX_QUESTION_LENGTH} characters.`,
+        );
       }
 
       // Get user details
@@ -46,121 +52,78 @@ export const queryCommunicator = (base: any) =>
         throw new Error('User not found');
       }
 
-      try {
-        // Make request to external communicator service
-        const response = await fetch(`${COMMUNICATOR_ENDPOINT}/query`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': COMMUNICATOR_API_KEY,
-          },
-          body: JSON.stringify({
-            question: args.question,
-            model: args.model,
-            includeRawData: true,
-            userId: user.id,
-            userName: user.name,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          let errorDetails = errorText;
-
-          // Try to parse error as JSON for better formatting
-          try {
-            const errorJson = JSON.parse(errorText);
-            errorDetails = JSON.stringify(errorJson, null, 2);
-          } catch {
-            // Keep original text if not JSON
-          }
-
-          const errorMessage = `Communicator API error (${response.status} ${response.statusText}):\n${errorDetails}`;
-          console.error(errorMessage);
-          // Returned to the caller rather than thrown, so Bugsink is the only
-          // place this ever shows up.
-          captureError(new Error(errorMessage), {
-            tags: { mutation: 'queryCommunicator', model: args.model },
-            extra: { status: response.status, details: errorDetails },
-            userId: String(user.id),
-          });
-
-          // Save error to database. Generic create is disabled on the list so
-          // users cannot forge audit records, so this purpose-built mutation
-          // writes with elevated access.
-          const failedChat = await context.sudo().query.CommunicatorChat.createOne({
-            data: {
-              user: { connect: { id: user.id } },
-              question: args.question,
-              model: args.model,
-              status: 'failed',
-              hasError: 'true',
-              errorMessage: errorMessage,
-              rawData: { error: errorText, status: response.status },
-            },
-            query: 'id',
-          });
-
-          // Return error response to user
-          return {
-            chatId: failedChat?.id ?? null,
-            error: true,
-            message: `The communicator service returned an error: ${response.statusText}`,
-            details: errorDetails,
-            // Named httpStatus so it is not confused with the persisted chat
-            // status ('succeeded' / 'failed').
-            httpStatus: response.status,
-          };
-        }
-
-        const data = await response.json();
-
-        // Store the successful chat in the database
-        const chat = await context.sudo().query.CommunicatorChat.createOne({
-          data: {
-            user: { connect: { id: user.id } },
-            question: data.question || args.question,
-            explanation: data.explanation || null,
-            graphqlQuery: data.graphqlQuery || null,
-            model: args.model,
-            iterations: data.iterations || null,
-            evaluationScore: data.evaluationScore || null,
-            status: 'succeeded',
-            hasError: 'false',
-            rawData: data.rawData || data,
-          },
+      // Chats are written by this mutation only; generic create is disabled on
+      // the list, so persistence runs with elevated access.
+      const persist = (data: Record<string, any>) =>
+        context.sudo().query.CommunicatorChat.createOne({
+          data: { user: { connect: { id: user.id } }, ...data },
           query: 'id',
         });
 
-        // Return the response to the user, including the persisted chat id so
-        // the client does not have to match history by question text.
-        return { ...data, chatId: chat?.id ?? null };
+      try {
+        // The pipeline runs in this process and executes generated queries in
+        // the caller's own Keystone context, so the model can only reach data
+        // this user is allowed to see.
+        const generator = createQueryGenerator(new CallerScopedGraphQL(context));
+
+        const result = await generator.processQuery(
+          question,
+          args.model,
+          String(user.id),
+          user.name as string,
+        );
+
+        const chat = await persist({
+          question,
+          explanation: result.explanation || null,
+          graphqlQuery: result.query || null,
+          model: args.model,
+          iterations: result.iterations || null,
+          evaluationScore: result.evaluationScore || null,
+          status: 'succeeded',
+          hasError: 'false',
+          rawData: result.data ?? null,
+        });
+
+        // Success and failure return the same key set so the client sees one
+        // shape. The JSON scalar also rejects undefined, so optional values are
+        // normalised to null.
+        return {
+          chatId: chat?.id ?? null,
+          question,
+          explanation: result.explanation ?? null,
+          graphqlQuery: result.query ?? null,
+          iterations: result.iterations ?? null,
+          evaluationScore: result.evaluationScore ?? null,
+          rawData: result.data ?? null,
+          error: false,
+          message: null,
+        };
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to query communicator service';
+            : 'Failed to process the communicator request';
 
-        console.error('Communicator Query Error:', error);
+        console.error('Communicator Query Error:', errorMessage);
         captureError(error, {
           tags: { mutation: 'queryCommunicator', model: args.model },
           userId: String(user.id),
         });
 
-        // Save error to database
+        // Persist the failure so it shows up in history and in the failure
+        // filter. A database problem here must not be reported as if the model
+        // itself failed, so it is logged separately and the original error is
+        // still returned.
         let chatId: string | null = null;
         try {
-          const failedChat = await context.sudo().query.CommunicatorChat.createOne({
-            data: {
-              user: { connect: { id: user.id } },
-              question: args.question,
-              model: args.model,
-              status: 'failed',
-              hasError: 'true',
-              errorMessage: errorMessage,
-              rawData: { error: errorMessage },
-            },
-            query: 'id',
+          const failedChat = await persist({
+            question,
+            model: args.model,
+            status: 'failed',
+            hasError: 'true',
+            errorMessage,
+            rawData: { error: errorMessage },
           });
           chatId = failedChat?.id ?? null;
         } catch (dbError) {
@@ -170,9 +133,14 @@ export const queryCommunicator = (base: any) =>
           });
         }
 
-        // Return error response instead of throwing
         return {
           chatId,
+          question,
+          explanation: null,
+          graphqlQuery: null,
+          iterations: null,
+          evaluationScore: null,
+          rawData: null,
           error: true,
           message: errorMessage,
         };

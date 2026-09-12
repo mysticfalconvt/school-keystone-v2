@@ -2749,6 +2749,7 @@ type Query {
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
+  availableCommunicatorModels: JSON
 }
 
 union AuthenticatedItem = User
