@@ -1047,7 +1047,7 @@ ${
    * with collections.
    */
   private readonly COLLECTION_SCOPED =
-    /\b(?:last|this|latest|current|previous)\s+collection\b|\bcollection\s+(?:period|run)\b|\bsince\s+the\s+last\s+collection\b/i;
+    /\b(?:last|this|latest|current|previous)\s+(?:\w+\s+){0,2}collection\b|\bcollection\s+(?:period|run)\b/i;
 
   private async seedCollectionDates(
     question: string,

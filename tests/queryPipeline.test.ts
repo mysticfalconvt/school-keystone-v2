@@ -71,6 +71,11 @@ describe('collection-scoped detection', () => {
       'how many cards in the current collection',
       'totals for this collection period',
       'what did the last collection run count',
+      // Real question that missed: the qualifier and the noun are not adjacent.
+      // The model recovered by asking for the dates itself, which cost a model
+      // call the seed exists to save.
+      'which teacher had the most cards given in the last pbis collection',
+      'who got the most cards in this pbis collection',
     ]) {
       assert.ok(matches(q), `should have matched: ${q}`);
     }
@@ -85,6 +90,8 @@ describe('collection-scoped detection', () => {
       'show my block 1 students',
       'how many cards did Michael Ingram give in September',
       'list the students with open callbacks',
+      // The qualifier has to actually be qualifying the collection.
+      'this student collected the most cards last year',
     ]) {
       assert.ok(!matches(q), `should not have matched: ${q}`);
     }

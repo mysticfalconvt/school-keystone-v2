@@ -3148,7 +3148,7 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
    * loose pattern would put an extra query on questions that have nothing to do
    * with collections.
    */
-  COLLECTION_SCOPED = /\b(?:last|this|latest|current|previous)\s+collection\b|\bcollection\s+(?:period|run)\b|\bsince\s+the\s+last\s+collection\b/i;
+  COLLECTION_SCOPED = /\b(?:last|this|latest|current|previous)\s+(?:\w+\s+){0,2}collection\b|\bcollection\s+(?:period|run)\b/i;
   async seedCollectionDates(question) {
     if (!this.COLLECTION_SCOPED.test(question)) return null;
     const query = "query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2) { id collectionDate } }";
