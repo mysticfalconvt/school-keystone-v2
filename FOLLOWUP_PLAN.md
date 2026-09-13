@@ -86,14 +86,27 @@ that gets turned off.
 
 ## Phase 2: Finish the cleanup that is already safe
 
-### 2.1 Remove `CommunicatorChat.hasError`
+### 2.1 Remove `CommunicatorChat.hasError` — done in code, column drop pending
 
-The backfill ran in production and was verified: 26 succeeded, 12 failed, no
-rows left at `pending`. `status` is now authoritative and `hasError` is a
-duplicate that the mutation still dual-writes.
+The field is gone from `schemas/CommunicatorChat.ts` and both dual-writes are
+gone from `queryCommunicator`. `schema.graphql` and `schema.prisma` are
+regenerated; the Communicator contract is unchanged, because `CommunicatorChat`
+is not a list the model can see.
 
-Delete the field, drop the dual-write in `queryCommunicator`, regenerate, and
-apply. One column drop, no data at risk.
+No consumer selected it. Both dashboard history queries already read `status`,
+and the `queryResponse.hasError` checks in `communicatorChat.tsx` read the
+mutation's JSON result, which never carried the field — they are dead
+comparisons against `undefined`, already ORed with the real `error` flag. The
+only other occurrence anywhere is the stale schema snapshot in the retired
+standalone `communicator` service.
+
+`sql/2026-09-13-drop-communicator-chat-haserror.sql` drops the column. **Deploy
+first, then run it.** The order matters in one direction only: an extra column
+the application no longer knows about is harmless, since it is NOT NULL with a
+default, but dropping it while the previous release is still writing to it
+would fail every insert. The preflight in that file checks for rows left at
+`pending` and for any row where `status` and `hasError` disagree, either of
+which means an outcome is about to be lost.
 
 ### 2.2 Remove the dashboard's dead Communicator service path
 

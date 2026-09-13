@@ -208,7 +208,7 @@ This model is active and should be migrated, not simply pruned.
 
 Most of this section is now done. Remaining work is called out at the end.
 
-- ~~`hasError` is text containing `'true'` or `'false'`~~ — replaced by `status` (`pending` / `succeeded` / `failed`), indexed. `hasError` is retained for one release so existing rows can be backfilled.
+- ~~`hasError` is text containing `'true'` or `'false'`~~ — replaced by `status` (`pending` / `succeeded` / `failed`), indexed. `hasError` is now removed from the list and the mutation; `sql/2026-09-13-drop-communicator-chat-haserror.sql` drops the column.
 - ~~`timestamp` and `createdAt` can represent the same event with different sources~~ — `timestamp` removed. It was within 0.017s of `createdAt` on all 26 rows that had it, so it carried no information. `createdAt` is authoritative and indexed.
 - ~~`rawData` ... may retain broad student/staff query results~~ — read restricted to chat managers, never writable through the API, and no longer selected by dashboard history queries.
 - ~~`userRating` and `userComment` are writable only by users with the all-chat management permission~~ — owners can now update their own chat, and field-level rules make every result/audit field read-only so a record cannot be edited after the fact.
@@ -218,7 +218,6 @@ Most of this section is now done. Remaining work is called out at the end.
 
 Still open:
 
-- `hasError` removal, after `sql/2026-09-12-communicator-chat-backfill.sql` has run and been verified in production.
 - Retention policy for `rawData` and questions. Access is restricted now, but nothing expires.
 - The mutation returns `chatId`, but the dashboard still matches history by question text. Switching to the returned id is Phase 7 of the migration plan.
 - `queryCommunicator` still returns untyped JSON rather than a typed result object.

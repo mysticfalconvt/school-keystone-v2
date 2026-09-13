@@ -1597,7 +1597,6 @@ type CommunicatorChat {
   graphqlQuery: String
   errorMessage: String
   status: String
-  hasError: String
   model: String
   iterations: Int
   evaluationScore: Int
@@ -1622,7 +1621,6 @@ input CommunicatorChatWhereInput {
   graphqlQuery: StringFilter
   errorMessage: StringFilter
   status: StringFilter
-  hasError: StringFilter
   model: StringFilter
   iterations: IntNullableFilter
   evaluationScore: IntNullableFilter
@@ -1638,7 +1636,6 @@ input CommunicatorChatOrderByInput {
   graphqlQuery: OrderDirection
   errorMessage: OrderDirection
   status: OrderDirection
-  hasError: OrderDirection
   model: OrderDirection
   iterations: OrderDirection
   evaluationScore: OrderDirection
@@ -1654,7 +1651,6 @@ input CommunicatorChatUpdateInput {
   graphqlQuery: String
   errorMessage: String
   status: String
-  hasError: String
   model: String
   iterations: Int
   evaluationScore: Int
@@ -1676,7 +1672,6 @@ input CommunicatorChatCreateInput {
   graphqlQuery: String
   errorMessage: String
   status: String
-  hasError: String
   model: String
   iterations: Int
   evaluationScore: Int

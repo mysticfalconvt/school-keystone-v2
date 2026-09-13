@@ -766,9 +766,9 @@ var CommunicatorChat = (0, import_core5.list)({
       },
       access: resultFieldAccess
     }),
-    // Replaces hasError, which was text holding the strings 'true'/'false'.
-    // hasError is kept for one release so existing rows can be backfilled; see
-    // DATA_MODEL_CLEANUP_PLAN.md. Remove it once the backfill has run.
+    // Replaced hasError, which was text holding the strings 'true'/'false'.
+    // The backfill in sql/2026-09-12-communicator-chat-backfill.sql has run and
+    // been verified, so this is now the only record of the outcome.
     status: (0, import_fields5.select)({
       type: "string",
       options: [
@@ -779,11 +779,6 @@ var CommunicatorChat = (0, import_core5.list)({
       defaultValue: "pending",
       validation: { isRequired: true },
       isIndexed: true,
-      access: resultFieldAccess
-    }),
-    /** @deprecated Use `status`. Retained only until existing rows are backfilled. */
-    hasError: (0, import_fields5.text)({
-      defaultValue: "false",
       access: resultFieldAccess
     }),
     model: (0, import_fields5.text)({
@@ -3289,7 +3284,6 @@ var queryCommunicator = (base) => import_core26.graphql.field({
         iterations: result.iterations || null,
         evaluationScore: result.evaluationScore || null,
         status: "succeeded",
-        hasError: "false",
         rawData: result.data ?? null
       });
       return {
@@ -3316,7 +3310,6 @@ var queryCommunicator = (base) => import_core26.graphql.field({
           question,
           model,
           status: "failed",
-          hasError: "true",
           errorMessage,
           rawData: { error: errorMessage }
         });

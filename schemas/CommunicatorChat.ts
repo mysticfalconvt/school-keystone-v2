@@ -109,9 +109,9 @@ export const CommunicatorChat = list({
       },
       access: resultFieldAccess,
     }),
-    // Replaces hasError, which was text holding the strings 'true'/'false'.
-    // hasError is kept for one release so existing rows can be backfilled; see
-    // DATA_MODEL_CLEANUP_PLAN.md. Remove it once the backfill has run.
+    // Replaced hasError, which was text holding the strings 'true'/'false'.
+    // The backfill in sql/2026-09-12-communicator-chat-backfill.sql has run and
+    // been verified, so this is now the only record of the outcome.
     status: select({
       type: 'string',
       options: [
@@ -122,11 +122,6 @@ export const CommunicatorChat = list({
       defaultValue: 'pending',
       validation: { isRequired: true },
       isIndexed: true,
-      access: resultFieldAccess,
-    }),
-    /** @deprecated Use `status`. Retained only until existing rows are backfilled. */
-    hasError: text({
-      defaultValue: 'false',
       access: resultFieldAccess,
     }),
     model: text({

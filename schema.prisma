@@ -338,7 +338,6 @@ model CommunicatorChat {
   graphqlQuery    String    @default("")
   errorMessage    String    @default("")
   status          String    @default("pending")
-  hasError        String    @default("false")
   model           String    @default("")
   iterations      Int?
   evaluationScore Int?

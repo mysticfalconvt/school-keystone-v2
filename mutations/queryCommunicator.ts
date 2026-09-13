@@ -90,7 +90,6 @@ export const queryCommunicator = (base: any) =>
           iterations: result.iterations || null,
           evaluationScore: result.evaluationScore || null,
           status: 'succeeded',
-          hasError: 'false',
           rawData: result.data ?? null,
         });
 
@@ -130,7 +129,6 @@ export const queryCommunicator = (base: any) =>
             question,
             model,
             status: 'failed',
-            hasError: 'true',
             errorMessage,
             rawData: { error: errorMessage },
           });
