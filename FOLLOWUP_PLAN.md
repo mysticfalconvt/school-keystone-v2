@@ -108,23 +108,30 @@ would fail every insert. The preflight in that file checks for rows left at
 `pending` and for any row where `status` and `hasError` disagree, either of
 which means an outcome is about to be lost.
 
-### 2.2 Remove the dashboard's dead Communicator service path
+### 2.2 Remove the dashboard's dead Communicator service path — done
 
-Nothing calls these now that the pipeline runs in this service:
+Deleted on the `remove-dead-communicator-service-path` branch of
+`../SchoolDashboard`: `pages/api/communicator/query.ts` and the whole of
+`lib/communicator/`. Nothing outside those files imported any of them; the
+dashboard's typecheck and its 608 tests pass without them.
 
-- `../SchoolDashboard/pages/api/communicator/query.ts`
-- `../SchoolDashboard/lib/communicator/` — `graphql.ts`, `auth.ts`,
-  `lmStudio.ts`, `queryGenerator.ts`, `types.ts`, `schema.graphql`
+The access-log check was waived rather than performed — nothing in either
+repository has called that route since the pipeline moved in-process.
 
-Confirm no access-log traffic to `/api/communicator/query` first. The copied
-`schema.graphql` there is the stale snapshot the whole contract work replaced;
-leaving it invites someone to edit the wrong file.
+Two things the deletion settled that are worth carrying into 2.3. Its auth
+returned true when `COMMUNICATOR_API_KEYS` was unset, so the route was open: an
+unauthenticated endpoint running LLM calls against school data. And that
+variable, along with the dashboard's `LM_STUDIO_*` settings, now appears
+nowhere in that repository, so it only needs removing from the deployment
+environment.
 
 ### 2.3 Drop the dead environment variables
 
-`COMMUNICATOR_ENDPOINT` and `COMMUNICATOR_API_KEY` here, `COMMUNICATOR_API_KEYS`
-in the dashboard. Also `COOKIE_SECRET` and `API_KEY`, which are in `.env` but
-read nowhere in this repository.
+`COMMUNICATOR_ENDPOINT` and `COMMUNICATOR_API_KEY` here. Also `COOKIE_SECRET`
+and `API_KEY`, which are in `.env` but read nowhere in this repository.
+
+`COMMUNICATOR_API_KEYS` in the dashboard is already unreferenced in source as
+of 2.2 — what is left there is removing it from the deployment environment.
 
 ### 2.4 Drop the vestigial `model` argument
 
