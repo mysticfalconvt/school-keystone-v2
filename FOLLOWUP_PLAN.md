@@ -276,9 +276,23 @@ these exactly" is a correct answer while a wrong number is not.
 The Carrie/Jessica case is written into the prompt as the worked example,
 because the failure mode is a confident number rather than an error.
 
-**This one is unverified.** Whether the model actually refuses instead of
-guessing needs the callback-description question run against a real endpoint.
-It is the first thing to try.
+**Tested, failed, fixed, still unverified.** Run against a real endpoint, the
+model did exactly what the prompt forbade: fetched all 263 callbacks and
+grouped them by eye, answering Vicky with 11. The right answer is Jessica with
+144 — and her group is *more than half of the 263 rows the model was given*.
+
+The stored `rawData` settles what it saw: 60,182 characters, `_truncated`
+undefined, all 263 rows present. Not a truncation problem.
+
+The rules were in the wrong prompt. They sat in the query-generation system
+prompt, and the false claim is made in `explainResults`, which never saw them.
+This is the same mistake the plan records about field descriptions — a rule is
+only obeyed where it is read — made one level up. The rules are now in the
+explanation prompt, where the ranking claim is actually written, and they apply
+whether or not the data was truncated: complete data does not make eyeball
+counting reliable, it only removes the excuse.
+
+Needs another run of the same question to know whether it took.
 
 ### 4.3 Remaining semantics gaps — done
 

@@ -297,6 +297,55 @@ describe('parsing the lookup signal', () => {
   });
 });
 
+describe('the explanation prompt', () => {
+  /** Capture the system prompt explainResults sends. */
+  async function systemPromptFor(results: any) {
+    const { service } = build();
+    const original = lmStudio.complete;
+    let captured = '';
+    (lmStudio as any).complete = async (
+      _model: string,
+      _user: string,
+      system: string,
+    ) => {
+      captured = system;
+      return 'explanation';
+    };
+    try {
+      await quietly(() =>
+        service.explainResults('who has the most', 'query { a }', results, 'm', 100000),
+      );
+    } finally {
+      (lmStudio as any).complete = original;
+    }
+    return captured;
+  }
+
+  test('forbids counting repeated values by eye, even on complete data', async () => {
+    // The rule used to live only in the query-generation prompt, which is not
+    // where the claim gets made. Asked which teacher had the most callbacks
+    // sharing a description, the explanation step was handed all 263 rows
+    // untruncated and answered 11 for one teacher when another had 144.
+    const complete = { callbacks: [{ id: '1', description: 'x' }] };
+    const prompt = await systemPromptFor(complete);
+
+    assert.ok(!prompt.includes('THE RESULTS ARE INCOMPLETE'), 'not truncated');
+    assert.match(prompt, /CANNOT reliably count/i);
+    assert.match(prompt, /even\s+when the results are complete/i);
+    assert.match(prompt, /cannot rank these reliably/i);
+  });
+
+  test('still warns separately when the data really was cut', async () => {
+    const truncated = { _truncated: true, callbacks: [], _callbacks_total: 263 };
+    const prompt = await systemPromptFor(truncated);
+
+    assert.match(prompt, /THE RESULTS ARE INCOMPLETE/);
+    // Both rules apply: incomplete data and unreliable counting are different
+    // problems and the second one does not go away when the first does.
+    assert.match(prompt, /CANNOT reliably count/i);
+  });
+});
+
 describe('sizing results against the context window', () => {
   const { priv } = build();
   const limit = (ctx?: number) => priv.calculateTruncationLimit(ctx);

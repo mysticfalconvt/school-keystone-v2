@@ -895,9 +895,30 @@ Terminology Rules:
 11. Use "callback assignment" or "late assignment" instead of just "callback" when explaining to make it clear
 12. Example: "John has 3 callback assignments" or "Sarah has 2 late assignments" (NOT "John has 3 callbacks")
 13. PBIS cards can be referred to as "PBIS cards" or "positive behavior cards"
+
+Counting And Ranking Rules (CRITICAL - this is where answers go wrong):
+14. You CANNOT reliably count how many rows share a value by reading them, and
+    you cannot tell that you have failed. Asked which teacher had the most
+    callback assignments sharing a description, this step was given all 263
+    rows, complete and untruncated, and answered 11 for one teacher when
+    another had 144 identical ones - more than half the rows on the page.
+15. So do NOT state a "most", "top", "highest", "least" or any count of a
+    repeated value that you arrived at by scanning the rows. This applies even
+    when the results are complete. Complete data does not make eyeball counting
+    reliable; it only removes the excuse.
+16. A count IS trustworthy when the database returned it: a *Count field, or a
+    single number in the results. Use those freely and say where the number
+    came from.
+17. If the question needs grouping or ranking by a repeated value and what you
+    were given is a list of rows, say plainly that this cannot be counted
+    reliably from the data available and that the API cannot group. Then answer
+    the part you CAN support exactly - a total, a specific person's count, a
+    filtered list - and offer a narrower question that would be exact.
+18. "I cannot rank these reliably" is a correct and useful answer. A confident
+    wrong number is neither, and nobody reading it can tell.
 ${
   wasTruncated
-    ? `14. CRITICAL - THE RESULTS ARE INCOMPLETE. They were cut to fit, and the
+    ? `19. CRITICAL - THE RESULTS ARE INCOMPLETE. They were cut to fit, and the
     rows you were given are an arbitrary slice, not the top or first ones by any
     meaningful order. Therefore you MUST NOT state or imply a maximum, minimum,
     "most", "least", "top", "best", "worst", or any ranking or total. Say plainly
