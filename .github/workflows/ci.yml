@@ -1,0 +1,45 @@
+# The checks that used to be "run tsc and read the code".
+#
+# Nothing here needs a database or a model endpoint: the Keystone artifacts and
+# the Communicator contract are both derived from the checked-in config, and the
+# test suite is pure. That is deliberate - a check that needs infrastructure is
+# a check that gets turned off.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` runs keystone postinstall, which fails if schema.graphql or
+      # schema.prisma are behind the lists.
+      - name: Install
+        run: npm ci
+
+      - name: Keystone artifacts match the lists
+        run: npx keystone postinstall
+
+      # Fails when schema.graphql has moved and lib/communicator/schema.graphql
+      # was not regenerated. A newly added field is excluded by default, so this
+      # is how it gets noticed before it silently becomes invisible - or
+      # visible - to the model.
+      - name: Communicator contract is current
+        run: npm run communicator:schema:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test

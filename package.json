@@ -9,6 +9,7 @@
     "postinstall": "keystone postinstall",
     "communicator:schema": "node scripts/runTs.js scripts/buildCommunicatorSchema.ts",
     "communicator:schema:check": "node scripts/runTs.js scripts/buildCommunicatorSchema.ts --check",
+    "test": "node scripts/runTests.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -65,8 +65,14 @@ export const APPROVED_TYPES = [
  * Authentication state is excluded outright. Permission flags are excluded
  * because they describe who may do what, not anything a staff question is
  * about, and listing them invites the model to reason about authorization.
- * isStaff / isStudent / isTeacher / isParent / isSuperAdmin / hasTA /
- * hasClasses stay, because questions genuinely turn on them.
+ * isStaff / isStudent / isTeacher / isParent / isSuperAdmin / isGuidance /
+ * hasTA / hasClasses stay, because questions genuinely turn on them.
+ *
+ * Every name here must be a field the generated schema actually puts on User;
+ * a typo or a leftover would sit here looking like protection while doing
+ * nothing, so the test suite asserts it. Bullying and BugReport relate to User
+ * one-directionally, so there is nothing on User to deny for them - their types
+ * are excluded instead.
  */
 export const USER_FIELD_DENY = [
   // Authentication and account recovery
@@ -108,12 +114,6 @@ export const USER_FIELD_DENY = [
   'messageReceiverCount',
   'communicatorChats',
   'communicatorChatsCount',
-  'bugReports',
-  'bugReportsCount',
-  'studentBullying',
-  'studentBullyingCount',
-  'teacherBullying',
-  'teacherBullyingCount',
   'sortingHat',
 ];
 

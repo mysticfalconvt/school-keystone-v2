@@ -24,43 +24,63 @@ a pipeline that looked like it was working.
 
 ## Phase 1: Verify what shipped
 
-### 1.1 Exercise the access rules as a non-manager
+### 1.1 Exercise the access rules as a non-manager — resolved by reading Keystone
 
-The `sudo()` write path is proven by production traffic. Two rules are not:
+The two open questions were both about Keystone's own mechanics, and both are
+settled in `@keystone-6/core`, so no sign-in was needed:
 
-- `rawData` read is restricted to chat managers. If Keystone raises an error
-  rather than returning null for a denied field read, an ordinary staff user's
-  history query fails. Only visible when signed in as someone without
-  `canManageCommunicator`.
-- An owner may set `userRating` and `userComment` on their own chat and nothing
-  else. Field-level rules are easy to get wrong in either direction.
+- **A denied field read returns null. It does not throw.** `outputTypeField`
+  resolves `if (!fieldAccess) return null` before it ever touches the value, so
+  an ordinary staff user selecting `rawData` gets `rawData: null` and the rest
+  of the query succeeds. No access change, no redeploy.
+- **Field-level update rules only cover fields present in the input.**
+  `enforceFieldLevelAccessControl` iterates `Object.keys(inputData)`, so an
+  owner writing `userRating` and `userComment` passes, and an owner writing
+  `question` is refused with `you cannot update the fields ["question"]`.
 
-Check as three users: a plain enabled staff member, a chat manager, and a
-superadmin. Confirm the first can read their own history and rate a chat, and
-cannot see `rawData` or edit `question`.
+`auth.ts` carries `isStaff`, `isSuperAdmin`, `isCommunicatorEnabled` and
+`canManageCommunicator` in `sessionData`, so the access functions see real
+values rather than undefined.
 
-If the first case breaks it is a one-line access change and a redeploy. No
-database involvement, so no rollback.
+What this does not prove is the row filter at runtime — that a non-manager's
+`communicatorChats` query returns only their own rows. That needs a database,
+and it is the first thing to cover if 1.2 ever gets its integration half.
 
-### 1.2 Add a backend test script
+### 1.2 Add a backend test script — pure tests done
 
-There is no `test` script in this repository at all. Everything shipped is
-backed by `tsc` and by reading the code.
+`npm test` exists. `scripts/runTests.js` bundles `tests/*.test.ts` with the
+esbuild that Keystone already brings in and hands the result to node's built-in
+test runner, so the suite is TypeScript without a test framework or a
+transpiler in `devDependencies`.
 
-Minimum worth having, using `@keystone-6/core/testing`:
+`tests/buildApprovedSchema.test.ts` covers the contract: that `buildSchema`
+accepts it, that it carries no mutation and no object type outside the
+allowlist, that no denied `User` field survives on the type or its inputs, that
+no input type belonging to an unapproved list is reachable, and that no
+argument on an approved type reaches one. Two of those are written against the
+generated schema rather than against the allowlist, so they keep holding when a
+new `canSomething` permission is added or a deny entry is deleted — the
+direction the allowlist-iterating tests cannot catch. A second set drives the
+pruner with a hand-written source schema to pin the rules themselves.
 
-- Access control on `CommunicatorChat` for the five roles above.
+Still outstanding, both needing a database:
+
+- Access control on `CommunicatorChat` across the roles in 1.1.
 - The `queryCommunicator` boundary checks: signed out, non-staff, staff without
   `isCommunicatorEnabled`, enabled staff.
-- `buildApprovedSchema`: that the generated contract excludes auth fields and
-  per-list inputs for unapproved lists, and that `buildSchema` accepts it. This
-  one is pure and needs no database — it is the cheapest real test here and it
-  guards the security boundary that took two attempts to get right.
 
-### 1.3 Wire the contract drift check into CI
+Note that `@keystone-6/core/testing` is only `resetDatabase` in 6.5 — the old
+`setupTestEnv` is gone, so these go through `getContext` from
+`@keystone-6/core/context` against a throwaway Postgres.
 
-`npm run communicator:schema:check` exits 1 when `schema.graphql` has moved and
-the contract has not been regenerated. It only helps if something runs it.
+### 1.3 Wire the contract drift check into CI — done
+
+`.github/workflows/ci.yml` runs, on push to master and on every pull request:
+`npm ci`, `npx keystone postinstall` (fails if `schema.graphql` or
+`schema.prisma` are behind the lists), `npm run communicator:schema:check`,
+`npm run typecheck`, `npm test`. None of it needs a database or a model
+endpoint, which is the point — a check that needs infrastructure is a check
+that gets turned off.
 
 ---
 
