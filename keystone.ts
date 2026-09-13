@@ -45,7 +45,6 @@ import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
 import { impersonateUser } from './mutations/impersonateUser';
 import { queryCommunicator } from './mutations/queryCommunicator';
-import { availableCommunicatorModels } from './queries/availableCommunicatorModels';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
 import { updateStudentSchedules } from './mutations/updateStudentSchedules';
@@ -121,9 +120,6 @@ export default withAuth(
             queryCommunicator: queryCommunicator(base),
             authenticateUserWithGoogle: authenticateUserWithGoogle(base),
             impersonateUser: impersonateUser(base),
-          },
-          query: {
-            availableCommunicatorModels: availableCommunicatorModels(base),
           },
         };
       }),

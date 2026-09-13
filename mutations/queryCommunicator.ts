@@ -1,6 +1,7 @@
 import { graphql } from '@keystone-6/core';
 import { captureError } from '../lib/bugsink';
 import { CallerScopedGraphQL } from '../lib/communicator/graphqlExecutor';
+import { getCommunicatorModel } from '../lib/communicator/lmStudio';
 import { createQueryGenerator } from '../lib/communicator/queryGenerator';
 
 const MAX_QUESTION_LENGTH = 2000;
@@ -11,7 +12,12 @@ export const queryCommunicator = (base: any) =>
 
     args: {
       question: graphql.arg({ type: graphql.nonNull(graphql.String) }),
-      model: graphql.arg({ type: graphql.nonNull(graphql.String) }),
+      // Accepted but ignored. The model is configuration (COMMUNICATOR_MODEL)
+      // rather than a user choice. Kept optional rather than removed so a
+      // browser tab left open on the old page keeps working instead of failing
+      // validation on an unknown argument; it can be deleted once no client
+      // sends it.
+      model: graphql.arg({ type: graphql.String }),
     },
     resolve: async (source, args, context) => {
       const session = await context.session;
@@ -31,6 +37,9 @@ export const queryCommunicator = (base: any) =>
           'You do not have permission to use the communicator. Please contact an administrator.',
         );
       }
+
+      // Configuration, not a user choice. args.model is ignored if supplied.
+      const model = getCommunicatorModel();
 
       const question = args.question.trim();
       if (!question) {
@@ -68,7 +77,7 @@ export const queryCommunicator = (base: any) =>
 
         const result = await generator.processQuery(
           question,
-          args.model,
+          model,
           String(user.id),
           user.name as string,
         );
@@ -77,7 +86,7 @@ export const queryCommunicator = (base: any) =>
           question,
           explanation: result.explanation || null,
           graphqlQuery: result.query || null,
-          model: args.model,
+          model,
           iterations: result.iterations || null,
           evaluationScore: result.evaluationScore || null,
           status: 'succeeded',
@@ -107,7 +116,7 @@ export const queryCommunicator = (base: any) =>
 
         console.error('Communicator Query Error:', errorMessage);
         captureError(error, {
-          tags: { mutation: 'queryCommunicator', model: args.model },
+          tags: { mutation: 'queryCommunicator', model },
           userId: String(user.id),
         });
 
@@ -119,7 +128,7 @@ export const queryCommunicator = (base: any) =>
         try {
           const failedChat = await persist({
             question,
-            model: args.model,
+            model,
             status: 'failed',
             hasError: 'true',
             errorMessage,

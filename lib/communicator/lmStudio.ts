@@ -23,6 +23,21 @@ function requireEndpoint(): string {
   return LM_STUDIO_ENDPOINT;
 }
 
+// The model every Communicator request uses.
+//
+// Users used to pick this from a dropdown, which existed while different models
+// were being trialled. In practice one model is always the one loaded on the
+// LLM box, so the choice was noise that let a user pick something unloaded and
+// get a confusing failure. It is configuration now, not a user decision.
+// The resolved value is still recorded on each CommunicatorChat, so the history
+// shows which model produced any given answer.
+const DEFAULT_COMMUNICATOR_MODEL = 'openai/gpt-oss-120b';
+
+export function getCommunicatorModel(): string {
+  const configured = process.env.COMMUNICATOR_MODEL?.trim();
+  return configured || DEFAULT_COMMUNICATOR_MODEL;
+}
+
 export class LMStudioClient {
   // Resolved lazily, not in the constructor: this class is exported as a
   // singleton, so throwing at construction would take the whole server down at

@@ -140,7 +140,7 @@ var bugsinkApolloPlugin = {
 };
 
 // keystone.ts
-var import_core31 = require("@keystone-6/core");
+var import_core30 = require("@keystone-6/core");
 
 // auth.ts
 var import_auth = require("@keystone-6/auth");
@@ -2222,6 +2222,11 @@ function requireEndpoint() {
   }
   return LM_STUDIO_ENDPOINT;
 }
+var DEFAULT_COMMUNICATOR_MODEL = "openai/gpt-oss-120b";
+function getCommunicatorModel() {
+  const configured = process.env.COMMUNICATOR_MODEL?.trim();
+  return configured || DEFAULT_COMMUNICATOR_MODEL;
+}
 var LMStudioClient = class {
   // Resolved lazily, not in the constructor: this class is exported as a
   // singleton, so throwing at construction would take the whole server down at
@@ -2428,8 +2433,8 @@ var GRAPHQL_TOOL = {
 };
 var QueryGeneratorService = class {
   // GraphQL access scoped to the requesting user. Supplied per request.
-  constructor(graphql10) {
-    this.graphql = graphql10;
+  constructor(graphql9) {
+    this.graphql = graphql9;
   }
   // Token/character limits for context management
   MAX_RESULT_CHARS = 4e3;
@@ -3217,8 +3222,8 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
     };
   }
 };
-function createQueryGenerator(graphql10) {
-  return new QueryGeneratorService(graphql10);
+function createQueryGenerator(graphql9) {
+  return new QueryGeneratorService(graphql9);
 }
 
 // mutations/queryCommunicator.ts
@@ -3227,7 +3232,12 @@ var queryCommunicator = (base) => import_core26.graphql.field({
   type: import_core26.graphql.JSON,
   args: {
     question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) }),
-    model: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
+    // Accepted but ignored. The model is configuration (COMMUNICATOR_MODEL)
+    // rather than a user choice. Kept optional rather than removed so a
+    // browser tab left open on the old page keeps working instead of failing
+    // validation on an unknown argument; it can be deleted once no client
+    // sends it.
+    model: import_core26.graphql.arg({ type: import_core26.graphql.String })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -3242,6 +3252,7 @@ var queryCommunicator = (base) => import_core26.graphql.field({
         "You do not have permission to use the communicator. Please contact an administrator."
       );
     }
+    const model = getCommunicatorModel();
     const question = args.question.trim();
     if (!question) {
       throw new Error("Please enter a question.");
@@ -3266,7 +3277,7 @@ var queryCommunicator = (base) => import_core26.graphql.field({
       const generator = createQueryGenerator(new CallerScopedGraphQL(context));
       const result = await generator.processQuery(
         question,
-        args.model,
+        model,
         String(user.id),
         user.name
       );
@@ -3274,7 +3285,7 @@ var queryCommunicator = (base) => import_core26.graphql.field({
         question,
         explanation: result.explanation || null,
         graphqlQuery: result.query || null,
-        model: args.model,
+        model,
         iterations: result.iterations || null,
         evaluationScore: result.evaluationScore || null,
         status: "succeeded",
@@ -3296,14 +3307,14 @@ var queryCommunicator = (base) => import_core26.graphql.field({
       const errorMessage = error instanceof Error ? error.message : "Failed to process the communicator request";
       console.error("Communicator Query Error:", errorMessage);
       captureError(error, {
-        tags: { mutation: "queryCommunicator", model: args.model },
+        tags: { mutation: "queryCommunicator", model },
         userId: String(user.id)
       });
       let chatId = null;
       try {
         const failedChat = await persist({
           question,
-          model: args.model,
+          model,
           status: "failed",
           hasError: "true",
           errorMessage,
@@ -3331,45 +3342,13 @@ var queryCommunicator = (base) => import_core26.graphql.field({
   }
 });
 
-// queries/availableCommunicatorModels.ts
-var import_core27 = require("@keystone-6/core");
-var availableCommunicatorModels = (base) => import_core27.graphql.field({
-  type: import_core27.graphql.JSON,
-  resolve: async (source, args, context) => {
-    const session2 = await context.session;
-    if (!session2) {
-      throw new Error("You must be logged in to use the communicator");
-    }
-    if (!session2.data.isStaff) {
-      throw new Error("Only staff members can access the communicator");
-    }
-    if (!session2.data.isCommunicatorEnabled) {
-      throw new Error(
-        "You do not have permission to use the communicator. Please contact an administrator."
-      );
-    }
-    try {
-      const models = await lmStudio.getModelsWithLimits();
-      return models.map((m) => ({
-        id: m.id,
-        type: m.type ?? null,
-        maxContextLength: m.max_context_length ?? null
-      }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to list models";
-      console.error("availableCommunicatorModels:", message);
-      return { error: true, message, models: [] };
-    }
-  }
-});
-
 // mutations/recalculateCallback.ts
-var import_core28 = require("@keystone-6/core");
+var import_core27 = require("@keystone-6/core");
 var gql2 = String.raw;
-var recalculateCallback = (base) => import_core28.graphql.field({
+var recalculateCallback = (base) => import_core27.graphql.field({
   type: base.object("Callback"),
   args: {
-    callbackId: import_core28.graphql.arg({ type: import_core28.graphql.nonNull(import_core28.graphql.ID) })
+    callbackId: import_core27.graphql.arg({ type: import_core27.graphql.nonNull(import_core27.graphql.ID) })
   },
   resolve: async (source, args, context) => {
     const callbackID = args.callbackId;
@@ -3438,11 +3417,11 @@ var recalculateCallback = (base) => import_core28.graphql.field({
 });
 
 // mutations/sendEmail.ts
-var import_core29 = require("@keystone-6/core");
-var sendEmail = (base) => import_core29.graphql.field({
-  type: import_core29.graphql.Boolean,
+var import_core28 = require("@keystone-6/core");
+var sendEmail = (base) => import_core28.graphql.field({
+  type: import_core28.graphql.Boolean,
   args: {
-    emailData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
+    emailData: import_core28.graphql.arg({ type: import_core28.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;
@@ -3461,12 +3440,12 @@ var sendEmail = (base) => import_core29.graphql.field({
 });
 
 // mutations/updateStudentSchedules.ts
-var import_core30 = require("@keystone-6/core");
+var import_core29 = require("@keystone-6/core");
 var gql3 = String.raw;
-var updateStudentSchedules = (base) => import_core30.graphql.field({
-  type: import_core30.graphql.String,
+var updateStudentSchedules = (base) => import_core29.graphql.field({
+  type: import_core29.graphql.String,
   args: {
-    studentScheduleData: import_core30.graphql.arg({ type: import_core30.graphql.JSON })
+    studentScheduleData: import_core29.graphql.arg({ type: import_core29.graphql.JSON })
   },
   resolve: async (source, args, context) => {
     console.log("Updating Student Schedules");
@@ -3554,7 +3533,7 @@ var updateStudentSchedules = (base) => import_core30.graphql.field({
 // keystone.ts
 var databaseURL = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres";
 var keystone_default = withAuth(
-  (0, import_core31.config)({
+  (0, import_core30.config)({
     db: {
       provider: "postgresql",
       url: databaseURL
@@ -3613,7 +3592,7 @@ var keystone_default = withAuth(
         // above is unaffected.
         plugins: [bugsinkApolloPlugin]
       },
-      extendGraphqlSchema: import_core31.graphql.extend((base) => {
+      extendGraphqlSchema: import_core30.graphql.extend((base) => {
         return {
           mutation: {
             recalculateCallback: recalculateCallback(base),
@@ -3623,9 +3602,6 @@ var keystone_default = withAuth(
             queryCommunicator: queryCommunicator(base),
             authenticateUserWithGoogle: authenticateUserWithGoogle(base),
             impersonateUser: impersonateUser(base)
-          },
-          query: {
-            availableCommunicatorModels: availableCommunicatorModels(base)
           }
         };
       })

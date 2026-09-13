@@ -2628,7 +2628,7 @@ type Mutation {
   sendEmail(emailData: JSON): Boolean
   updateStudentSchedules(studentScheduleData: JSON): String
   addStaff(staffData: JSON): String
-  queryCommunicator(question: String!, model: String!): JSON
+  queryCommunicator(question: String!, model: String): JSON
   authenticateUserWithGoogle(idToken: String!): JSON
   impersonateUser(userId: String!): JSON
 }
@@ -2749,7 +2749,6 @@ type Query {
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
-  availableCommunicatorModels: JSON
 }
 
 union AuthenticatedItem = User

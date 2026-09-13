@@ -29,13 +29,16 @@ runtime are:
 | `MAIL_HOST` / `MAIL_PORT` / `MAIL_USER` / `MAIL_PASS` | for email | SMTP transport for `sendEmail`. |
 | `AUTH_HEADER_SECRET` | yes | Accepted `Authorization` value for service-to-service calls (`access.ts`). |
 | `GOOGLE_OAUTH_CLIENT_ID` | for Google sign-in | Must match the dashboard's `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. |
-| `COMMUNICATOR_ENDPOINT` / `COMMUNICATOR_API_KEY` | for Communicator | Points at the dashboard's `/api/communicator/query` route. See the migration plan below. |
+| `LM_STUDIO_ENDPOINT` | for Communicator | OpenAI-compatible base URL of the LM Studio server, e.g. `http://10.0.0.156:1234/v1`. Required — there is no fallback, and this host must be able to reach it. |
+| `COMMUNICATOR_MODEL` | no | Model used for every Communicator request. Blank or unset falls back to `openai/gpt-oss-120b`. Users do not choose a model; the resolved value is recorded on each chat. |
 | `ALLOW_IMPERSONATION` | no | Enables the `impersonateUser` mutation. Development only. |
 | `BUGSINK_DSN` | no | Error reporting (`lib/bugsink.ts`). |
 
-`.env` also currently contains `COOKIE_SECRET` and `API_KEY`. Neither is read
-anywhere in this repository; they can be removed once you have confirmed nothing
-external depends on them being present.
+`.env` also currently contains `COOKIE_SECRET`, `API_KEY`, `COMMUNICATOR_ENDPOINT`
+and `COMMUNICATOR_API_KEY`. None of them is read anywhere in this repository any
+more — the last two became dead when the Communicator pipeline moved into this
+service and stopped calling the dashboard over HTTP. They can be removed once
+you have confirmed nothing external depends on them being present.
 
 ## Running
 
