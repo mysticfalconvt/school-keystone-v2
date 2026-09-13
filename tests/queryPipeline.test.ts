@@ -48,14 +48,18 @@ function build(responses: any[] = []) {
 
 /** processQuery is chatty; keep the reporter readable. */
 async function quietly<T>(fn: () => Promise<T>): Promise<T> {
-  const { log, warn } = console;
+  // error too: with no LM_STUDIO_ENDPOINT the model listing fails on every
+  // processQuery call, which is caught and harmless but prints a paragraph.
+  const { log, warn, error } = console;
   console.log = () => {};
   console.warn = () => {};
+  console.error = () => {};
   try {
     return await fn();
   } finally {
     console.log = log;
     console.warn = warn;
+    console.error = error;
   }
 }
 

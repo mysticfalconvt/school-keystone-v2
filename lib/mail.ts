@@ -3,45 +3,67 @@ import {
   getTestMessageUrl,
   SendMailOptions,
   SentMessageInfo,
+  type Transporter,
 } from 'nodemailer';
 
 import 'dotenv/config';
 
-const mailPort = Number(process.env.MAIL_PORT || 587);
+// Configuration is validated on first send, not at import.
+//
+// This module used to throw while loading, which made a missing MAIL_* variable
+// fatal to the whole process rather than to the emails that need it. Keystone
+// imports the built config to generate artifacts, so `keystone postinstall` -
+// and therefore `npm ci` - failed anywhere the mail credentials were not
+// present, CI included. The same shape as lmStudio's endpoint check, and for
+// the same reason: a singleton that throws at construction takes the server
+// down at boot instead of failing the one request that needs it.
+let transport: Transporter | null = null;
 
-if (!process.env.MAIL_HOST || !process.env.MAIL_USER || !process.env.MAIL_PASS) {
-  throw new Error('MAIL_HOST, MAIL_USER, and MAIL_PASS must be configured');
+function getTransport(): Transporter {
+  if (transport) return transport;
+
+  const mailPort = Number(process.env.MAIL_PORT || 587);
+
+  if (
+    !process.env.MAIL_HOST ||
+    !process.env.MAIL_USER ||
+    !process.env.MAIL_PASS
+  ) {
+    throw new Error('MAIL_HOST, MAIL_USER, and MAIL_PASS must be configured');
+  }
+
+  if (!Number.isInteger(mailPort) || mailPort <= 0) {
+    throw new Error('MAIL_PORT must be a valid port number');
+  }
+
+  transport = createTransport({
+    pool: true,
+    host: process.env.MAIL_HOST,
+    port: mailPort,
+    secure: mailPort === 465,
+    requireTLS: mailPort !== 465,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
+    },
+    maxConnections: 2,
+    maxMessages: 50,
+    rateDelta: 1000,
+    rateLimit: 5,
+    tls: {
+      minVersion: 'TLSv1.2',
+    },
+  });
+
+  return transport;
 }
-
-if (!Number.isInteger(mailPort) || mailPort <= 0) {
-  throw new Error('MAIL_PORT must be a valid port number');
-}
-
-const transport = createTransport({
-  pool: true,
-  host: process.env.MAIL_HOST,
-  port: mailPort,
-  secure: mailPort === 465,
-  requireTLS: mailPort !== 465,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-  maxConnections: 2,
-  maxMessages: 50,
-  rateDelta: 1000,
-  rateLimit: 5,
-  tls: {
-    minVersion: 'TLSv1.2',
-  },
-});
 
 const RETRY_DELAYS_MS = [2000, 8000];
 
 async function sendMail(options: SendMailOptions): Promise<SentMessageInfo> {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await transport.sendMail(options);
+      return await getTransport().sendMail(options);
     } catch (error) {
       const responseCode =
         error instanceof Error && 'responseCode' in error

@@ -16,16 +16,23 @@ import { captureError } from './lib/bugsink';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
-// Here is a best practice! It's fine to not have provided a session secret in dev,
-// however it should always be there in production.
+// Not required in dev, always required in production.
+//
+// The dev fallback must be at least 32 characters, because that is what
+// statelessSessions enforces. The previous one was 29, so the fallback that
+// exists to let dev run without configuration threw "The session secret must be
+// at least 32 characters long" instead - which is how CI failed on a checkout
+// with no .env.
+const DEV_SESSION_SECRET =
+  'keystone-development-session-secret-not-for-production';
+
 if (!sessionSecret) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
       'The SESSION_SECRET environment variable must be set in production',
     );
   } else {
-    sessionSecret =
-      process.env.SESSION_SECRET || 'keystone-session-secret value';
+    sessionSecret = DEV_SESSION_SECRET;
   }
 }
 

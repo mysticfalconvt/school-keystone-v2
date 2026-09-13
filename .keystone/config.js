@@ -149,36 +149,41 @@ var import_session = require("@keystone-6/core/session");
 // lib/mail.ts
 var import_nodemailer = require("nodemailer");
 var import_config2 = require("dotenv/config");
-var mailPort = Number(process.env.MAIL_PORT || 587);
-if (!process.env.MAIL_HOST || !process.env.MAIL_USER || !process.env.MAIL_PASS) {
-  throw new Error("MAIL_HOST, MAIL_USER, and MAIL_PASS must be configured");
-}
-if (!Number.isInteger(mailPort) || mailPort <= 0) {
-  throw new Error("MAIL_PORT must be a valid port number");
-}
-var transport = (0, import_nodemailer.createTransport)({
-  pool: true,
-  host: process.env.MAIL_HOST,
-  port: mailPort,
-  secure: mailPort === 465,
-  requireTLS: mailPort !== 465,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS
-  },
-  maxConnections: 2,
-  maxMessages: 50,
-  rateDelta: 1e3,
-  rateLimit: 5,
-  tls: {
-    minVersion: "TLSv1.2"
+var transport = null;
+function getTransport() {
+  if (transport) return transport;
+  const mailPort = Number(process.env.MAIL_PORT || 587);
+  if (!process.env.MAIL_HOST || !process.env.MAIL_USER || !process.env.MAIL_PASS) {
+    throw new Error("MAIL_HOST, MAIL_USER, and MAIL_PASS must be configured");
   }
-});
+  if (!Number.isInteger(mailPort) || mailPort <= 0) {
+    throw new Error("MAIL_PORT must be a valid port number");
+  }
+  transport = (0, import_nodemailer.createTransport)({
+    pool: true,
+    host: process.env.MAIL_HOST,
+    port: mailPort,
+    secure: mailPort === 465,
+    requireTLS: mailPort !== 465,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS
+    },
+    maxConnections: 2,
+    maxMessages: 50,
+    rateDelta: 1e3,
+    rateLimit: 5,
+    tls: {
+      minVersion: "TLSv1.2"
+    }
+  });
+  return transport;
+}
 var RETRY_DELAYS_MS = [2e3, 8e3];
 async function sendMail(options) {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await transport.sendMail(options);
+      return await getTransport().sendMail(options);
     } catch (error) {
       const responseCode = error instanceof Error && "responseCode" in error ? Number(error.responseCode) : void 0;
       const delayMs = RETRY_DELAYS_MS[attempt];
@@ -261,13 +266,14 @@ async function sendAnEmail(to, from, subject, body) {
 
 // auth.ts
 var sessionSecret = process.env.SESSION_SECRET;
+var DEV_SESSION_SECRET = "keystone-development-session-secret-not-for-production";
 if (!sessionSecret) {
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "The SESSION_SECRET environment variable must be set in production"
     );
   } else {
-    sessionSecret = process.env.SESSION_SECRET || "keystone-session-secret value";
+    sessionSecret = DEV_SESSION_SECRET;
   }
 }
 var { withAuth } = (0, import_auth.createAuth)({

@@ -1,9 +1,16 @@
 # The checks that used to be "run tsc and read the code".
 #
-# Nothing here needs a database or a model endpoint: the Keystone artifacts and
-# the Communicator contract are both derived from the checked-in config, and the
-# test suite is pure. That is deliberate - a check that needs infrastructure is
-# a check that gets turned off.
+# Nothing here needs a database, a model endpoint, or any secret: the Keystone
+# artifacts and the Communicator contract are both derived from the checked-in
+# config, and the test suite is pure. That is deliberate - a check that needs
+# infrastructure is a check that gets turned off.
+#
+# The first run failed because that claim was only true on a machine with a
+# .env. `npm ci` runs keystone postinstall, which loads the built config, which
+# imported lib/mail, which threw on a missing MAIL_HOST at module load. Both
+# that and the too-short dev session secret behind it are fixed; verify changes
+# here the same way, by deleting .env and clearing the environment rather than
+# by running the steps locally where configuration happens to exist.
 name: CI
 
 on:
