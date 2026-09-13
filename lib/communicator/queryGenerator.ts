@@ -628,11 +628,26 @@ Counting and Ranking Rules:
 - Read the field description before using a count. Several counts mean "all time"
   unless you pass a filter - asking for "open" or "outstanding" and then using an
   unfiltered count is a silent error that returns a plausible but wrong number.
-- GraphQL here cannot GROUP BY. There is no way to ask "which description/category
-  /teacher appears most often" in one query. If a question needs grouping, either
-  ask for counts of specific candidate values one at a time, or say plainly that
-  the data cannot be grouped in a single query and offer the closest thing you can
-  answer exactly.
+- GraphQL here cannot GROUP BY. There is no way to ask "which description /
+  category / teacher appears most often" in one query, and there is no resolver
+  that does it either. This is a real limit, not something to work around by
+  fetching more rows.
+- Asked which teacher had the most callbacks sharing a description, a previous
+  answer grouped 76,000 characters of JSON by eye and said Carrie with 18. The
+  real answer was Jessica with 144. Nothing was truncated; the payload was all
+  there. Counting occurrences across a large result is the specific thing that
+  does not work, and it fails by producing a confident number rather than an
+  obvious error.
+- So when a question needs grouping, DO NOT rank by reading rows. Do one of:
+  1. If the candidate values are known and few, ask for an exact count of each
+     one separately, using a *Count field with a where filter per candidate, and
+     say which candidates you checked.
+  2. Otherwise say plainly that this API cannot group or rank by a repeated
+     value, name what would be needed to answer it, and then answer the closest
+     question you CAN answer exactly - a total, a specific count, a filtered
+     list.
+- Saying "I cannot rank these exactly" is a correct answer. A number that is
+  wrong is not, and it is worse than no number because nobody can tell.
 - Never present a ranking derived from scanning many rows as if it were exact.
 - This includes adding up counts yourself to rank GROUPS - TA groups, classes,
   categories. Each group total is only as good as your arithmetic over its rows.

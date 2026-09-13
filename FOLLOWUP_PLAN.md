@@ -233,27 +233,52 @@ to try first, since their right answers are already known.
 
 ## Phase 4: Correctness and honesty
 
-### 4.1 The evaluation score does not track correctness
+### 4.1 The evaluation score does not track correctness — no longer surfaced
 
-It scored **10** on an answer that named the wrong student, **8** on the correct
-version of the same question, and **7** on a chat the user rated **1**. Of the
-two human ratings ever given, one is a 10 and one is a 1, and the self-score
-disagreed with the 1.
+Measured across all 51 chats rather than the handful the plan started from. Of
+the 35 that carry a score, every one is between **6 and 10**, mean **7.9**:
 
-Either recalibrate it against the questions whose right answers are now known,
-or stop surfacing it as if it means something. A number that looks like
-confidence and is uncorrelated with correctness is worse than no number.
+```
+ 6: 2    7: 9    8: 16    9: 6    10: 2
+```
 
-### 4.2 Aggregation has no honest answer yet
+So `MIN_SCORE_THRESHOLD` of 6 has never gated a final answer — nothing has ever
+scored below it. And the two human ratings sit at 10-vs-self-8 and 1-vs-self-7:
+a nine point difference the score reads as one.
+
+The decision was to stop surfacing it rather than recalibrate. With two labelled
+answers there is no ground truth to calibrate against, and a number that looks
+like confidence while tracking nothing is worse than no number. The ⭐ chip is
+gone from the dashboard and the history queries no longer select it. It is still
+computed and still recorded on each chat, so it stays available for diagnostics
+and for a future recalibration; the reason not to put it back is written at the
+field in `communicatorChat.tsx`.
+
+Related: refinements that repeat an already-executed query now stop (4.5), which
+removes one visible symptom of the same problem.
+
+### 4.2 Aggregation — honest refusal, no resolver
 
 Asked which teacher has the most callbacks sharing a description, the model
 answered Carrie with 18. The real answer is Jessica with 144. This was not
 truncation — the full 76,343-character payload reached the model. It was asked
 to group and count across 76KB of JSON and could not.
 
-This GraphQL API has no `GROUP BY`, so the question is not expressible in one
-query. The prompt now tells the model to say so rather than guess. If these
-questions matter, the fix is a purpose-built resolver that groups in SQL.
+The decision was to leave this unanswerable rather than build a SQL-grouping
+resolver. So the prompt now has to carry the whole weight, and it says the limit
+explicitly: this API cannot group, there is no resolver that does, fetching more
+rows is not a workaround, and ranking by reading rows is the specific thing that
+fails. It gives two acceptable routes — exact per-candidate counts when the
+candidates are few and named, or saying plainly that it cannot rank and
+answering the nearest exact question instead — and states that "I cannot rank
+these exactly" is a correct answer while a wrong number is not.
+
+The Carrie/Jessica case is written into the prompt as the worked example,
+because the failure mode is a confident number rather than an error.
+
+**This one is unverified.** Whether the model actually refuses instead of
+guessing needs the callback-description question run against a real endpoint.
+It is the first thing to try.
 
 ### 4.3 Remaining semantics gaps — done
 
