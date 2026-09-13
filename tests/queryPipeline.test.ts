@@ -98,6 +98,65 @@ describe('collection-scoped detection', () => {
   });
 });
 
+describe('questions with nothing to answer', () => {
+  const { priv } = build();
+  const contentless = (q: string) => priv.hasNoAnswerableContent(q);
+
+  test('recognises greetings and pleasantries', () => {
+    for (const q of [
+      'hi',
+      'Hello!',
+      'hey there'.replace(' there', ''),
+      'good morning',
+      'thanks',
+      'thank you',
+      'ok cool',
+      'yes',
+      '   ',
+      '???',
+      'test',
+    ]) {
+      assert.ok(contentless(q), `should have been contentless: ${JSON.stringify(q)}`);
+    }
+  });
+
+  test('never swallows a real question', () => {
+    // Refusing a real question would be far worse than running the loop on a
+    // greeting, so this is the direction that matters. The token set contains
+    // no domain words, which is what makes it safe.
+    for (const q of [
+      'hi, who gave the most cards',
+      'good morning, how many callbacks are open',
+      'thanks - can you also show my TA students',
+      'no callbacks',
+      'is the test score recorded',
+      'which TA has the most cards',
+      'ok so who is missing work',
+      'students',
+    ]) {
+      assert.ok(!contentless(q), `should NOT have been contentless: ${q}`);
+    }
+  });
+
+  test('answers without entering the loop', async () => {
+    const { service, graphql } = build();
+    let generated = 0;
+    service.generateQuery = (async () => {
+      generated++;
+      return { query: 'query { a }', reasoning: '', needsFollowup: false };
+    }) as any;
+
+    const result = await quietly(() => service.processQuery('hi', 'm'));
+
+    assert.equal(generated, 0, 'no model call');
+    assert.equal(graphql.calls.length, 0, 'no database call');
+    assert.equal(result.iterations, 0);
+    assert.equal(result.query, '');
+    assert.equal(result.data, null);
+    assert.match(result.explanation, /ask me about/i);
+  });
+});
+
 describe('the collection date prefetch', () => {
   test('fetches the two most recent runs for a scoped question', async () => {
     const dates = {
@@ -122,6 +181,26 @@ describe('the collection date prefetch', () => {
     assert.deepEqual(step.data, dates.data);
     assert.ok(step.note);
     assert.equal(graphql.calls.length, 1);
+  });
+
+  test("treats a card question scoped to a week as a collection question", async () => {
+    // "This week's cards" means the collection period here, not a calendar week.
+    const { priv, graphql } = build([{ data: { pbisCollectionDates: [] } }]);
+    const step = await quietly(() =>
+      priv.seedCollectionDates('how many pbis cards were given this week'),
+    );
+    assert.ok(step);
+    assert.equal(graphql.calls.length, 1);
+  });
+
+  test('leaves a non-card question scoped to a week alone', async () => {
+    // "Callbacks assigned this week" really does mean a calendar week.
+    const { priv, graphql } = build();
+    const step = await quietly(() =>
+      priv.seedCollectionDates('how many callbacks were assigned this week'),
+    );
+    assert.equal(step, null);
+    assert.equal(graphql.calls.length, 0);
   });
 
   test('costs nothing on an unrelated question', async () => {
@@ -254,10 +333,16 @@ describe('the loop', () => {
     ) => {
       // Snapshot what this generation was given, not the array that keeps growing.
       seen.push([...priorSteps]);
+      // Past the end of the plan, keep the last entry's shape but make the
+      // query distinct. A real refinement that returns the identical query is
+      // now stopped on purpose, so a repeating stub would silently cut every
+      // budget test short. Tests that want a repeat spell it out in the plan.
       const step = plan[Math.min(call, plan.length - 1)];
+      const query =
+        call < plan.length ? step.query : `${step.query} # pass ${call}`;
       call++;
       return {
-        query: step.query,
+        query,
         reasoning: 'stub',
         needsFollowup: step.needsFollowup,
         followupReason: step.needsFollowup ? 'need a value first' : undefined,
@@ -381,6 +466,55 @@ describe('the loop', () => {
     assert.equal(h.counts().generates, 3);
     assert.equal(h.counts().explains, 1);
     assert.equal(result.iterations, 3);
+  });
+
+  test('stops when a refinement repeats a query that already ran', async () => {
+    // Seen in production: the evaluator asked for a follow-up, the model
+    // returned a byte-identical query, and the identical result was then scored
+    // an 8. Re-running it cannot change the answer, so the pass is refused.
+    const h = harness(
+      [
+        { needsFollowup: false, query: 'query { answer }' },
+        { needsFollowup: false, query: 'query { answer }' },
+      ],
+      NEVER_COMPLETE,
+    );
+    const result = await quietly(() => h.service.processQuery('who gave the most cards', 'm'));
+
+    // Pass 1 runs and explains. Pass 2 generates the same query and stops
+    // before executing it, so there is no second explanation.
+    assert.equal(h.counts().generates, 2);
+    assert.equal(h.counts().explains, 1);
+    // Still two steps: the refused pass cost a generate even though nothing ran
+    // from it, and the persisted count should say what the answer cost.
+    assert.equal(result.iterations, 2);
+    assert.equal(result.explanation, 'explanation');
+  });
+
+  test('whitespace alone does not make a query look new', async () => {
+    const h = harness(
+      [
+        { needsFollowup: false, query: 'query { answer }' },
+        { needsFollowup: false, query: 'query   {\n  answer\n}' },
+      ],
+      NEVER_COMPLETE,
+    );
+    await quietly(() => h.service.processQuery('who gave the most cards', 'm'));
+    assert.equal(h.counts().explains, 1);
+  });
+
+  test('a genuinely different refinement still runs', async () => {
+    const h = harness(
+      [
+        { needsFollowup: false, query: 'query { first }' },
+        { needsFollowup: false, query: 'query { second }' },
+        { needsFollowup: false, query: 'query { third }' },
+        { needsFollowup: false, query: 'query { fourth }' },
+      ],
+      NEVER_COMPLETE,
+    );
+    await quietly(() => h.service.processQuery('who gave the most cards', 'm'));
+    assert.equal(h.counts().explains, 4, 'distinct refinements are not blocked');
   });
 
   test('a collection-scoped question starts with the dates already fetched', async () => {

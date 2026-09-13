@@ -127,11 +127,11 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
     studentPbisCardsCount:
       'Live count of PBIS cards this student has RECEIVED. Accepts the same where filter as pbisCards, so date ranges go inside it. With no argument it counts every card on record.',
     teacherPbisCardsCount:
-      'Live count of PBIS cards this staff member has GIVEN to students.',
+      'Live count of PBIS cards this staff member has GIVEN to students. With no argument it counts every card they have ever given, not this term or this collection period. Any question scoped to a time range MUST pass one: teacherPbisCardsCount(where: { dateGiven: { gte: "...", lt: "..." } }).',
     staffPbisCardsGivenCount:
-      'Live count of staff-to-staff PBIS cards this person has given.',
+      'Live count of staff-to-staff PBIS cards this person has given. All time unless you pass a dateGiven filter.',
     staffPbisCardsReceivedCount:
-      'Live count of staff-to-staff PBIS cards this person has received.',
+      'Live count of staff-to-staff PBIS cards this person has received. All time unless you pass a dateGiven filter.',
     isTeacher:
       'True for classroom teachers specifically. Note that people here say "teacher" to mean any employee, so isStaff is usually the right filter; use isTeacher only when the question means classroom teachers as distinct from other staff.',
     isStaff: 'True for anyone who works at the school.',
@@ -140,9 +140,9 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
     individualPbisLevel:
       'Stored level for the student, updated by the weekly PBIS collection. Current state, not a running total.',
     taTeamPbisLevel:
-      "Stored level for this teacher's TA group, updated by the weekly PBIS collection.",
+      "Stored level for this teacher's TA group, written by the weekly PBIS collection. Describes that run, not all time.",
     taTeamAveragePbisCardsPerStudent:
-      "Stored average cards per student for this teacher's TA group, updated by the weekly PBIS collection.",
+      "Stored average cards per student for this teacher's TA group, written by the weekly PBIS collection. It describes THAT RUN, not all time, and it does not rank the same as all-time group totals - sorting by it to answer \"which TA has the most cards\" gives a different and wrong order. Add up taStudents' studentPbisCardsCount instead.",
     callbackCount:
       'Stored count of open callback assignments for a student. Prefer callbackItemsCount with an explicit filter over trusting this.',
     callbackAssigned:
@@ -155,8 +155,12 @@ export const FIELD_DESCRIPTIONS: Record<string, Record<string, string>> = {
       'Live count of callbacks this student has RECEIVED. With no argument it counts every callback, including completed ones. For OPEN ones filter: callbackItemsCount(where: { dateCompleted: null }).',
     averageTimeToCompleteCallback:
       'Stored average days taken to complete a callback.',
-    taStudents: 'The students in this teacher\'s TA (advisory) group.',
+    taStudents:
+      "The students in this teacher's TA (advisory) group. A question about \"which TA\" means this group, not the teacher's own activity. Group sizes differ, so a total and a per-student average rank differently.",
     taTeacher: "The student's TA (advisory) teacher.",
+    taStudentsCount:
+      "How many students are in this teacher's TA (advisory) group. Use it as the denominator when a question asks per student.",
+    hasTA: 'True for staff who run a TA (advisory) group. This is the filter for "which TA" questions.',
   },
   PbisCard: {
     dateGiven: 'When the card was given. Use this for any date filtering.',

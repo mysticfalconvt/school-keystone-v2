@@ -255,27 +255,47 @@ This GraphQL API has no `GROUP BY`, so the question is not expressible in one
 query. The prompt now tells the model to say so rather than guess. If these
 questions matter, the fix is a purpose-built resolver that groups in SQL.
 
-### 4.3 Remaining semantics gaps
+### 4.3 Remaining semantics gaps — done
 
-Each one produced a wrong answer that looked right:
+Both readings were confirmed against the database first: staff by cards given is
+James Pacheco at 660, and the TA group reading is Michael Ingram's at 476,
+exactly as recorded here.
 
-- **"TA"** means an advisory group, not the teacher. Asked which TA has the most
-  cards, the model ranked staff by cards *given* (James, 660). The group reading
-  is Michael Ingram's TA at 476.
-- **Counts default to all-time.** Fixed for callbacks; audit the rest.
-- **"This week"** likely has the same collection-period ambiguity as "last
-  collection".
+- **"TA"** now has a prompt rule, not just a field description, because the
+  model will not select `taStudents` unless it already understood the term. It
+  says a TA is the advisory group, that "which TA has the most cards" asks about
+  cards the group's students *received*, and gives the query shape.
+- **Group size varies** — 8 to 11 students — so a total and a per-student
+  average rank differently, and the rule says to state which was answered.
+- **`taTeamAveragePbisCardsPerStudent` is a trap** and is now documented as one.
+  It is written by the collection run, so it describes that run rather than all
+  time. Sorting by it looks like an exact answer and gets the top two right,
+  then reranks: Carrie McGraw moves from 9th to 4th and Adam Dobler from 3rd to
+  5th.
+- **Counts defaulting to all-time**: audited. `teacherPbisCardsCount`,
+  `staffPbisCardsGivenCount` and `staffPbisCardsReceivedCount` had no such
+  warning and now do.
+- **"This week"** is seeded as a collection question when the question is also
+  about cards. "How many callbacks were assigned this week" really does mean a
+  calendar week and is left alone.
 
-Put semantics in field descriptions in `approvedSchema.ts`. Put rules the model
-must follow regardless of which fields it selects in the prompt — a description
-is only seen if that field is selected, which is why the `isSuperAdmin` note was
-ignored until it became a prompt rule.
+### 4.4 A greeting costs four model calls — done
 
-### 4.4 A greeting costs four model calls
+`hasNoAnswerableContent` returns before the loop, so a greeting costs no model
+call and no database call. The token set contains no domain words, so any real
+question has at least one token outside it; the tests push hardest on that
+direction, since refusing a real question would be far worse than running the
+loop on a greeting.
 
-"hi" ran all four iterations, produced no evaluation score, and concluded that
-no users were returned when 678 were. Cheap guard: if the question has no
-answerable content, say so without entering the loop.
+### 4.5 Refinements that repeat a query — done
+
+Not in the original plan; found in production while checking Phase 3. The
+evaluator scored an answer below the threshold, asked for a follow-up, got back
+a byte-identical query, and scored the identical result an 8. The loop now
+compares each generated query against the ones already executed and keeps the
+existing answer rather than paying for an execute and an explain that cannot
+change it. This is a symptom of 4.1 rather than a fix for it.
+
 
 ---
 

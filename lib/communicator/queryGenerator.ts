@@ -594,6 +594,26 @@ Collection Period Rules:
 - If you answer with a date range, state the actual range you used so the reader
   can see what "last collection" was taken to mean.
 
+"TA" Means The Advisory Group, Not The Teacher (CRITICAL):
+- A TA is a student ADVISORY GROUP. Each one belongs to a teacher: that
+  teacher's taStudents are the group's members, and hasTA marks the teachers
+  who have one.
+- "Which TA has the most cards" asks which GROUP's students received the most
+  cards between them. It is NOT asking which staff member GAVE the most cards.
+  Those are different questions with different answers, and answering the
+  giving question when the group question was asked has produced a confident
+  wrong answer before.
+- A group's cards are the cards its students RECEIVED:
+  query { users(where: { hasTA: { equals: true } }) { id name taStudents { name studentPbisCardsCount } } }
+  Then add up each group's students. Say that you did this and that the totals
+  come from adding the per-student counts.
+- TA groups are NOT all the same size. "The most cards" and "the most cards per
+  student" therefore rank differently. Say which one you answered.
+- taTeamAveragePbisCardsPerStudent and taTeamPbisLevel are STORED values written
+  by the last collection run. They describe that run, not all time, and they do
+  NOT rank the same as all-time totals. Never use them to answer an all-time
+  question, and never sort by them to answer "which TA has the most cards".
+
 Who Counts As A Teacher:
 - Administrators bulk-import PBIS cards hundreds at a time, so their totals are
   not comparable to a teacher handing out cards individually. For any "who gave
@@ -614,6 +634,12 @@ Counting and Ranking Rules:
   the data cannot be grouped in a single query and offer the closest thing you can
   answer exactly.
 - Never present a ranking derived from scanning many rows as if it were exact.
+- This includes adding up counts yourself to rank GROUPS - TA groups, classes,
+  categories. Each group total is only as good as your arithmetic over its rows.
+  Give the answer, say how it was worked out, and do not claim it is exact.
+- If you list runners-up, they must come from the same data in the same order.
+  Silently skipping a row that outranks one you listed is the most common way
+  these answers go wrong.
 
 Name and Display Rules:
 - The name field for users includes BOTH first and last name (e.g., "John Smith")
@@ -1049,10 +1075,61 @@ ${
   private readonly COLLECTION_SCOPED =
     /\b(?:last|this|latest|current|previous)\s+(?:\w+\s+){0,2}collection\b|\bcollection\s+(?:period|run)\b/i;
 
+  /**
+   * "This week's cards" means the current collection period here, not a calendar
+   * week - the same ambiguity as "last collection", and the prompt already says
+   * so. Seeding it needs both halves: the week wording AND a sign the question
+   * is about cards. "How many callbacks were assigned this week" really does
+   * mean a calendar week, and should not drag the collection dates in.
+   */
+  private readonly WEEK_SCOPED = /\b(?:this|last|past)\s+week\b/i;
+  private readonly CARD_SUBJECT = /\b(?:card|cards|pbis)\b/i;
+
+  /**
+   * Words that carry no question. A message made up entirely of these has
+   * nothing to look up, and running the full loop on it produced the worst
+   * behaviour in the pipeline: "hi" ran all four iterations, returned no
+   * evaluation score, and concluded that no users were returned when there were
+   * 678.
+   *
+   * Deliberately contains no domain words, so any real question has at least one
+   * token outside this set and never matches. Refusing a real question here
+   * would be far worse than running the loop on a greeting.
+   */
+  private static readonly CONTENTLESS_TOKENS = new Set([
+    'hi', 'hii', 'hiya', 'hello', 'helo', 'hey', 'heya', 'yo', 'howdy',
+    'greetings', 'sup', 'good', 'morning', 'afternoon', 'evening', 'night',
+    'thanks', 'thank', 'thx', 'ty', 'cheers', 'please', 'pls',
+    'ok', 'okay', 'k', 'cool', 'nice', 'great', 'awesome', 'sure',
+    'yes', 'yeah', 'yep', 'no', 'nope', 'maybe',
+    'test', 'testing', 'hm', 'hmm', 'huh', 'lol',
+    'bye', 'goodbye', 'later', 'you', 'u', 'a', 'the',
+  ]);
+
+  /**
+   * True when the message is only greeting or pleasantry tokens, so there is
+   * nothing to query.
+   */
+  private hasNoAnswerableContent(question: string): boolean {
+    const tokens = question
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (tokens.length === 0) return true;
+    return tokens.every((t) =>
+      QueryGeneratorService.CONTENTLESS_TOKENS.has(t),
+    );
+  }
+
   private async seedCollectionDates(
     question: string,
   ): Promise<PriorStep | null> {
-    if (!this.COLLECTION_SCOPED.test(question)) return null;
+    const scoped =
+      this.COLLECTION_SCOPED.test(question) ||
+      (this.WEEK_SCOPED.test(question) && this.CARD_SUBJECT.test(question));
+    if (!scoped) return null;
 
     const query =
       'query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2) { id collectionDate } }';
@@ -1110,12 +1187,29 @@ ${
       console.warn('Could not fetch model context length:', error);
     }
 
+    // Nothing to look up: answer directly rather than spending four model
+    // calls discovering that a greeting has no data behind it.
+    if (this.hasNoAnswerableContent(question)) {
+      console.log('Question has no answerable content; skipping the loop.');
+      return {
+        query: '',
+        reasoning: 'The message contained no question to answer.',
+        data: null,
+        explanation:
+          "I did not find a question in that. Ask me about the data in the school system and I will look it up - for example: who gave the most PBIS cards in the last collection, which students have open callbacks, or how many cards a particular student has received.",
+        iterations: 0,
+      };
+    }
+
     let currentQuestion = question;
     let allQueries: string[] = [];
     let allData: any[] = [];
     // What has already run, carried into every generation prompt. This is what
     // lets step two use step one's result instead of re-deriving it from prose.
     const priorSteps: PriorStep[] = [];
+    // Normalised text of every query already executed, so a refinement that
+    // circles back to one can be spotted before it costs anything.
+    const executedQueries = new Set<string>();
     let finalExplanation = '';
     let iteration = 0;
     let lookupHops = 0;
@@ -1163,6 +1257,22 @@ ${
       }
 
       const { query, variables, reasoning } = generated;
+
+      // A refinement that produces a query already run is not a refinement.
+      // Observed in production: the evaluator scored an answer below the
+      // threshold, asked for a follow-up, got back a byte-identical query, and
+      // then scored the identical result an 8. Executing and explaining it
+      // again costs two model calls and cannot change the answer.
+      const normalized = query.replace(/\s+/g, ' ').trim();
+      if (executedQueries.has(normalized) && finalExplanation) {
+        console.log(
+          '↺ Refinement produced a query that has already run; keeping the current answer.',
+        );
+        iteration -= 1; // this pass produced nothing
+        break;
+      }
+      executedQueries.add(normalized);
+
       allQueries.push(query);
       console.log('Generated query:', query);
 

@@ -33,8 +33,13 @@ type User {
   name: String
   preferredName: String
   email: String
-  """The students in this teacher's TA (advisory) group."""
+  """
+  The students in this teacher's TA (advisory) group. A question about "which TA" means this group, not the teacher's own activity. Group sizes differ, so a total and a per-student average rank differently.
+  """
   taStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  """
+  How many students are in this teacher's TA (advisory) group. Use it as the denominator when a question asks per student.
+  """
   taStudentsCount(where: UserWhereInput! = {}): Int
   """The student's TA (advisory) teacher."""
   taTeacher: User
@@ -42,6 +47,9 @@ type User {
   parentCount(where: UserWhereInput! = {}): Int
   children(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   childrenCount(where: UserWhereInput! = {}): Int
+  """
+  True for staff who run a TA (advisory) group. This is the filter for "which TA" questions.
+  """
   hasTA: Boolean
   hasClasses: Boolean
   isStudent: Boolean
@@ -98,7 +106,9 @@ type User {
   coTeachesWithTeacher(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   coTeachesWithTeacherCount(where: UserWhereInput! = {}): Int
   teacherPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
-  """Live count of PBIS cards this staff member has GIVEN to students."""
+  """
+  Live count of PBIS cards this staff member has GIVEN to students. With no argument it counts every card they have ever given, not this term or this collection period. Any question scoped to a time range MUST pass one: teacherPbisCardsCount(where: { dateGiven: { gte: "...", lt: "..." } }).
+  """
   teacherPbisCardsCount(where: PbisCardWhereInput! = {}): Int
   studentPbisCards(where: PbisCardWhereInput! = {}, orderBy: [PbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PbisCardWhereUniqueInput): [PbisCard!]
   """
@@ -106,10 +116,14 @@ type User {
   """
   studentPbisCardsCount(where: PbisCardWhereInput! = {}): Int
   staffPbisCardsGiven(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
-  """Live count of staff-to-staff PBIS cards this person has given."""
+  """
+  Live count of staff-to-staff PBIS cards this person has given. All time unless you pass a dateGiven filter.
+  """
   staffPbisCardsGivenCount(where: StaffPbisCardWhereInput! = {}): Int
   staffPbisCardsReceived(where: StaffPbisCardWhereInput! = {}, orderBy: [StaffPbisCardOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StaffPbisCardWhereUniqueInput): [StaffPbisCard!]
-  """Live count of staff-to-staff PBIS cards this person has received."""
+  """
+  Live count of staff-to-staff PBIS cards this person has received. All time unless you pass a dateGiven filter.
+  """
   staffPbisCardsReceivedCount(where: StaffPbisCardWhereInput! = {}): Int
   """
   Callback assignments this student has RECEIVED, all of them, completed or not.
@@ -134,11 +148,11 @@ type User {
   """
   individualPbisLevel: Int
   """
-  Stored level for this teacher's TA group, updated by the weekly PBIS collection.
+  Stored level for this teacher's TA group, written by the weekly PBIS collection. Describes that run, not all time.
   """
   taTeamPbisLevel: Int
   """
-  Stored average cards per student for this teacher's TA group, updated by the weekly PBIS collection.
+  Stored average cards per student for this teacher's TA group, written by the weekly PBIS collection. It describes THAT RUN, not all time, and it does not rank the same as all-time group totals - sorting by it to answer "which TA has the most cards" gives a different and wrong order. Add up taStudents' studentPbisCardsCount instead.
   """
   taTeamAveragePbisCardsPerStudent: Int
   """
