@@ -1060,13 +1060,17 @@ ${
     // - GraphQL query (~500 tokens)
     // - LLM response (~2000 tokens from MAX_TOKENS)
     // - Safety buffer (20%)
-    const reservedTokens = 1000 + 200 + 500 + this.MAX_TOKENS;
+    const reservedTokens = 2000 + 200 + 500 + this.MAX_TOKENS;
     const safetyBuffer = 0.2; // 20% buffer
     const availableTokens = modelContextLength - reservedTokens;
     const tokensForResults = availableTokens * (1 - safetyBuffer);
 
-    // Rough conversion: 1 token ≈ 4 characters
-    const maxChars = Math.max(1000, Math.floor(tokensForResults * 4));
+    // 3 characters per token, not 4. The 4:1 rule of thumb is for prose; this
+    // budget is spent on JSON, which is dense in quotes, braces and punctuation
+    // and tokenizes worse. Overestimating here means the request is rejected
+    // outright by the server rather than merely truncated, so the error is
+    // one-sided and the estimate should be too.
+    const maxChars = Math.max(1000, Math.floor(tokensForResults * 3));
 
     console.log(
       `Dynamic truncation: context=${modelContextLength}, available=${tokensForResults} tokens, maxChars=${maxChars}`,
@@ -1194,9 +1198,18 @@ ${
     try {
       const models = await lmStudio.getModelsWithLimits();
       const currentModel = models.find((m) => m.id === model);
-      modelContextLength = currentModel?.max_context_length;
+      // loaded_context_length first. max_context_length is what the model can
+      // do, not what it is being served at, and the two differ by a lot:
+      // gpt-oss-120b reports 131072 while loaded at 47952. Sizing against the
+      // maximum produced "n_keep: 66341 >= n_ctx: 48128" and failed the whole
+      // question.
+      modelContextLength =
+        currentModel?.loaded_context_length || currentModel?.max_context_length;
       console.log(
-        `Model ${model} context length: ${modelContextLength || 'unknown'}`,
+        `Model ${model} context length: ${modelContextLength || 'unknown'}` +
+          (currentModel?.loaded_context_length
+            ? ` (loaded; max ${currentModel.max_context_length})`
+            : ''),
       );
     } catch (error) {
       console.warn('Could not fetch model context length:', error);

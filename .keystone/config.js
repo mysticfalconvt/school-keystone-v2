@@ -3167,11 +3167,11 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
     if (!modelContextLength || modelContextLength === 0) {
       return this.MAX_RESULT_CHARS;
     }
-    const reservedTokens = 1e3 + 200 + 500 + this.MAX_TOKENS;
+    const reservedTokens = 2e3 + 200 + 500 + this.MAX_TOKENS;
     const safetyBuffer = 0.2;
     const availableTokens = modelContextLength - reservedTokens;
     const tokensForResults = availableTokens * (1 - safetyBuffer);
-    const maxChars = Math.max(1e3, Math.floor(tokensForResults * 4));
+    const maxChars = Math.max(1e3, Math.floor(tokensForResults * 3));
     console.log(
       `Dynamic truncation: context=${modelContextLength}, available=${tokensForResults} tokens, maxChars=${maxChars}`
     );
@@ -3305,9 +3305,9 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
     try {
       const models = await lmStudio.getModelsWithLimits();
       const currentModel = models.find((m) => m.id === model);
-      modelContextLength = currentModel?.max_context_length;
+      modelContextLength = currentModel?.loaded_context_length || currentModel?.max_context_length;
       console.log(
-        `Model ${model} context length: ${modelContextLength || "unknown"}`
+        `Model ${model} context length: ${modelContextLength || "unknown"}` + (currentModel?.loaded_context_length ? ` (loaded; max ${currentModel.max_context_length})` : "")
       );
     } catch (error) {
       console.warn("Could not fetch model context length:", error);

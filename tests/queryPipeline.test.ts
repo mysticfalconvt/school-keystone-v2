@@ -13,6 +13,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
+import { lmStudio } from '../lib/communicator/lmStudio';
 import {
   QueryGeneratorService,
   type PriorStep,
@@ -293,6 +294,91 @@ describe('parsing the lookup signal', () => {
   test('finds it inside the wrapper shapes models use', () => {
     const got = extract({ arguments: { query: 'query { a }', needs_followup: true } });
     assert.equal(got.needsFollowup, true);
+  });
+});
+
+describe('sizing results against the context window', () => {
+  const { priv } = build();
+  const limit = (ctx?: number) => priv.calculateTruncationLimit(ctx);
+
+  test('fits inside the context it is given', () => {
+    // The failure this guards: a question was rejected outright with
+    // "n_keep: 66341 >= n_ctx: 48128". The budget must leave room for the
+    // prompt and the reply, not just for itself.
+    const ctx = 47952; // what gpt-oss-120b is actually loaded with
+    const chars = limit(ctx);
+    // Worst-case tokenisation of dense JSON is about 3 characters per token.
+    const worstCaseTokens = chars / 3;
+    assert.ok(
+      worstCaseTokens + 4700 < ctx,
+      `${chars} chars could be ${worstCaseTokens} tokens, which does not fit in ${ctx}`,
+    );
+  });
+
+  test('does not size against a context the model is not serving', () => {
+    // gpt-oss-120b reports a 131072 maximum while loaded at 47952. Sizing
+    // against the maximum is what produced the overflow.
+    assert.ok(
+      limit(47952) < limit(131072),
+      'the loaded context must produce a smaller budget than the maximum',
+    );
+    assert.ok(limit(47952) < 200000);
+  });
+
+  test('asks the loaded context, not the model maximum', async () => {
+    // calculateTruncationLimit can only be right if it is handed the right
+    // number, and the number is chosen in processQuery. Reverting that choice
+    // to max_context_length passes every other test in this file.
+    const { service, graphql } = build([{ data: { ok: true } }]);
+    const original = lmStudio.getModelsWithLimits;
+    const seen: Array<number | undefined> = [];
+
+    (lmStudio as any).getModelsWithLimits = async () => [
+      {
+        id: 'the-model',
+        object: 'model',
+        type: 'llm',
+        max_context_length: 131072,
+        loaded_context_length: 47952,
+      },
+    ];
+
+    const priv = service as any;
+    const realLimit = priv.calculateTruncationLimit.bind(service);
+    priv.calculateTruncationLimit = (ctx?: number) => {
+      seen.push(ctx);
+      return realLimit(ctx);
+    };
+    service.generateQuery = (async () => ({
+      query: 'query { a }',
+      reasoning: '',
+      needsFollowup: false,
+    })) as any;
+    service.explainResults = (async () => 'explanation') as any;
+    service.evaluateResponse = (async () => ({
+      score: 9,
+      isComplete: true,
+      missingInfo: '',
+      suggestedFollowup: '',
+    })) as any;
+
+    try {
+      await quietly(() => service.processQuery('who gave the most cards', 'the-model'));
+    } finally {
+      (lmStudio as any).getModelsWithLimits = original;
+    }
+
+    assert.ok(graphql.calls.length > 0);
+    assert.deepEqual(seen, [47952]);
+  });
+
+  test('falls back to a fixed budget when the context is unknown', () => {
+    assert.equal(limit(undefined), priv.MAX_RESULT_CHARS);
+    assert.equal(limit(0), priv.MAX_RESULT_CHARS);
+  });
+
+  test('never returns a budget too small to hold anything', () => {
+    assert.ok(limit(1000) >= 1000);
   });
 });
 

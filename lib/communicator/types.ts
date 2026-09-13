@@ -23,7 +23,15 @@ export interface LMStudioRestModel {
   compatibility_type?: string;
   quantization?: string;
   state?: string;
+  /** The model's maximum, NOT what it is currently serving. */
   max_context_length: number;
+  /**
+   * The context the model is actually loaded with, present on loaded models.
+   * This is the number that matters: gpt-oss-120b reports a 131072 maximum
+   * while being served at 47952, and sizing a prompt against the maximum
+   * overflows the server.
+   */
+  loaded_context_length?: number;
 }
 
 export interface LMStudioRestModelsResponse {
