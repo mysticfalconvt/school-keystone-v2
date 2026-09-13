@@ -12,12 +12,6 @@ export const queryCommunicator = (base: any) =>
 
     args: {
       question: graphql.arg({ type: graphql.nonNull(graphql.String) }),
-      // Accepted but ignored. The model is configuration (COMMUNICATOR_MODEL)
-      // rather than a user choice. Kept optional rather than removed so a
-      // browser tab left open on the old page keeps working instead of failing
-      // validation on an unknown argument; it can be deleted once no client
-      // sends it.
-      model: graphql.arg({ type: graphql.String }),
     },
     resolve: async (source, args, context) => {
       const session = await context.session;
@@ -38,7 +32,7 @@ export const queryCommunicator = (base: any) =>
         );
       }
 
-      // Configuration, not a user choice. args.model is ignored if supplied.
+      // Configuration, not a user choice. See COMMUNICATOR_MODEL.
       const model = getCommunicatorModel();
 
       const question = args.question.trim();

@@ -3226,13 +3226,7 @@ var MAX_QUESTION_LENGTH = 2e3;
 var queryCommunicator = (base) => import_core26.graphql.field({
   type: import_core26.graphql.JSON,
   args: {
-    question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) }),
-    // Accepted but ignored. The model is configuration (COMMUNICATOR_MODEL)
-    // rather than a user choice. Kept optional rather than removed so a
-    // browser tab left open on the old page keeps working instead of failing
-    // validation on an unknown argument; it can be deleted once no client
-    // sends it.
-    model: import_core26.graphql.arg({ type: import_core26.graphql.String })
+    question: import_core26.graphql.arg({ type: import_core26.graphql.nonNull(import_core26.graphql.String) })
   },
   resolve: async (source, args, context) => {
     const session2 = await context.session;

@@ -133,11 +133,24 @@ and `API_KEY`, which are in `.env` but read nowhere in this repository.
 `COMMUNICATOR_API_KEYS` in the dashboard is already unreferenced in source as
 of 2.2 — what is left there is removing it from the deployment environment.
 
-### 2.4 Drop the vestigial `model` argument
+### 2.4 Drop the vestigial `model` argument — done, with a caveat
 
-`queryCommunicator(question, model)` still accepts `model` and ignores it, so
-that a browser tab left open on the old page keeps working. Once the dashboard
-deploy has been live long enough that no client sends it, remove the argument.
+The argument is gone; the signature is now `queryCommunicator(question)`. The
+resolved model is still written to `CommunicatorChat.model` on both the success
+and failure paths and still tagged on Sentry reports, so history keeps showing
+which model produced an answer. Only the input went.
+
+The caveat is timing. The dashboard stopped sending `model` in 757e6b7, on
+2026-09-12 — about a day before this change, and it is the only caller in any
+repository. The plan's condition was that the dashboard deploy be live "long
+enough that no client sends it", and a day is not obviously long enough: a tab
+opened before that deploy still runs the old bundle, and an unknown argument
+fails GraphQL validation for the whole request, so those sessions error until
+someone refreshes.
+
+That is the exact failure the argument was kept to avoid, so if the backend
+deploy is going out soon after the dashboard one, this is the commit to hold.
+Reverting it is one line and no database involvement.
 
 ---
 
