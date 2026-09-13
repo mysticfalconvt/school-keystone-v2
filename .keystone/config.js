@@ -2420,6 +2420,14 @@ var GRAPHQL_TOOL = {
         reasoning: {
           type: "string",
           description: "Brief explanation of why this query was chosen"
+        },
+        needs_followup: {
+          type: "boolean",
+          description: "Set true when this query does NOT answer the question on its own - it fetches a value you need before you can write the query that does. The result is handed back to you and you are asked to continue. Example: fetching the most recent collectionDate so you can then filter cards by it. Leave false when this query returns the data the question actually asks for."
+        },
+        followup_reason: {
+          type: "string",
+          description: 'Only when needs_followup is true: what you will do with this result. For example, "use the latest collectionDate as the lower bound for dateGiven".'
         }
       },
       required: ["query"]
@@ -2437,11 +2445,19 @@ var QueryGeneratorService = class {
   MAX_TOKENS = 2e3;
   // Max tokens for LLM responses
   MAX_ITERATIONS = 4;
-  // Max follow-up queries
+  // Refinement passes, and error repairs
   MIN_SCORE_THRESHOLD = 6;
   // Minimum score to consider complete
   MAX_TOOL_ATTEMPTS = 2;
   // Retries when a model botches a tool call
+  // Deliberate lookups are capped separately from refinements. A question that
+  // needs a value before it can be expressed should not have to spend the
+  // budget that exists for improving an answer, and a confused model should not
+  // be able to spend the whole budget looking things up.
+  MAX_LOOKUP_HOPS = 2;
+  // Prior results go into the generation prompt alongside the schema, so they
+  // get a much tighter budget than the explanation step's.
+  MAX_PRIOR_STEP_CHARS = 1500;
   /**
    * Truncate large JSON results to fit within token limits
    */
@@ -2625,7 +2641,39 @@ Use the identify_schema_types tool to specify which types are needed.`;
   /**
    * Step 2: Generate a GraphQL query with only relevant types
    */
-  async generateQuery(question, model, userId, userName) {
+  /**
+   * Render completed steps for the generation prompt. Each result is truncated
+   * hard: this sits next to the schema in the same context window, and a step
+   * that returned thousands of rows would crowd out the thing it is there to
+   * inform.
+   */
+  renderPriorSteps(steps) {
+    if (steps.length === 0) return "";
+    const rendered = steps.map((step, index) => {
+      const data = JSON.stringify(
+        this.truncateResults(step.data, this.MAX_PRIOR_STEP_CHARS),
+        null,
+        2
+      );
+      const why = step.note ? ` - ${step.note}` : "";
+      return `Step ${index + 1}${why}
+  query:  ${step.query}
+  result: ${data}`;
+    }).join("\n\n");
+    return `
+STEPS ALREADY RUN FOR THIS QUESTION:
+${rendered}
+
+CRITICAL - how to use the steps above:
+- The results above are real values that have already been fetched. Use them
+  directly in your next query.
+- Do NOT run the same query again, and do NOT invent a value that is sitting in
+  a result above.
+- If a step returned an empty list or null, that is the answer to that step. Say
+  so rather than retrying it or guessing what it might have contained.
+`;
+  }
+  async generateQuery(question, model, userId, userName, priorSteps = []) {
     const { types } = await this.identifyRelevantTypes(question, model);
     const fullSchema = await this.graphql.getSchema();
     const relevantSchema = this.extractTypes(fullSchema, types);
@@ -2750,9 +2798,22 @@ Collection Period Rules:
 - "The last collection", "this collection", "since the last collection" and
   "this week's cards" all refer to a PBIS collection RUN, not a calendar week or
   month. The runs are the rows of pbisCollectionDates.
-- NEVER invent a date like the first of the month for these. Fetch the latest run
-  first: query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 1)
-  { collectionDate } }, then filter cards with dateGiven gte that value.
+- NEVER invent a date like the first of the month for these. Fetch the two most
+  recent runs first and set needs_followup to true:
+  query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2)
+  { collectionDate } }
+  You will be handed the dates and asked to continue. If those dates are already
+  in the steps above, use them and do not fetch them again.
+- Two runs, not one, because a collection period is a RANGE with both ends. With
+  results[0] the most recent run and results[1] the one before it:
+  - "the last collection" / "this collection" means the cards that run counted:
+    dateGiven gte results[1].collectionDate AND lt results[0].collectionDate
+  - "since the last collection" means after the most recent run:
+    dateGiven gte results[0].collectionDate
+  An open-ended gte with no upper bound answers a different question from the
+  one that was asked, and it looks right.
+- If only one run comes back there is no earlier bound, so say that the range is
+  everything up to that run rather than inventing a start date.
 - If you answer with a date range, state the actual range you used so the reader
   can see what "last collection" was taken to mean.
 
@@ -2794,11 +2855,18 @@ query { students: users(where: { isStudent: { equals: true } }) { id name } staf
 query { user(where: { id: "123" }) { id name } }
 query { users(where: { name: { contains: "Smith", mode: insensitive }, isStaff: { equals: true } }) { id name } }
 
+${this.renderPriorSteps(priorSteps)}
 GraphQL Schema:
 ${relevantSchema}`;
     const userPrompt = `Generate a GraphQL query to answer this question: "${question}"
 
-Use the generate_graphql_query tool to provide your answer.`;
+Use the generate_graphql_query tool to provide your answer.
+
+If you cannot write that query yet because you first need a value out of the
+database - a date, an id, a name you have not been given - then generate the
+query that fetches THAT value and set needs_followup to true. You will be given
+the result and asked to continue. Do not guess the value, and do not try to do
+both in one query.`;
     let lastFailure = "";
     for (let attempt = 1; attempt <= this.MAX_TOOL_ATTEMPTS; attempt++) {
       const attemptPrompt = attempt === 1 ? userPrompt : `${userPrompt}
@@ -2840,7 +2908,9 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
       return {
         query: queryArgs.query,
         variables: queryArgs.variables,
-        reasoning: queryArgs.reasoning || "No reasoning provided"
+        reasoning: queryArgs.reasoning || "No reasoning provided",
+        needsFollowup: queryArgs.needsFollowup === true,
+        followupReason: queryArgs.followupReason
       };
     }
     throw new Error(
@@ -2891,7 +2961,10 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
         return {
           query: value.trim(),
           variables: container.variables,
-          reasoning: container.reasoning
+          reasoning: container.reasoning,
+          // Models emit booleans as strings often enough to be worth handling.
+          needsFollowup: container.needs_followup === true || container.needs_followup === "true",
+          followupReason: container.followup_reason
         };
       }
     }
@@ -3064,6 +3137,42 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
     return maxChars;
   }
   /**
+   * Questions scoped to a PBIS collection period cannot be expressed at all
+   * without the run dates, and the model has repeatedly answered them by
+   * inventing a calendar date instead. Fetching the dates up front costs one
+   * GraphQL call and no model call, and it means the first generated query
+   * already has a real range to work with rather than spending a lookup hop to
+   * get one.
+   *
+   * Deliberately narrow. This runs before anything else on every request, so a
+   * loose pattern would put an extra query on questions that have nothing to do
+   * with collections.
+   */
+  COLLECTION_SCOPED = /\b(?:last|this|latest|current|previous)\s+collection\b|\bcollection\s+(?:period|run)\b|\bsince\s+the\s+last\s+collection\b/i;
+  async seedCollectionDates(question) {
+    if (!this.COLLECTION_SCOPED.test(question)) return null;
+    const query = "query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2) { id collectionDate } }";
+    try {
+      const result = await this.graphql.query({ query });
+      if (result.errors?.length || !result.data) {
+        console.warn(
+          "Collection date prefetch failed, continuing without it:",
+          result.errors?.map((e) => e.message).join(", ")
+        );
+        return null;
+      }
+      console.log("Seeded collection dates:", JSON.stringify(result.data));
+      return {
+        query,
+        data: result.data,
+        note: "fetched automatically because the question is scoped to a collection period"
+      };
+    } catch (error) {
+      console.warn("Collection date prefetch threw, continuing without it:", error);
+      return null;
+    }
+  }
+  /**
    * Complete flow with iterative refinement: Generate query, execute, evaluate, and refine if needed
    */
   async processQuery(question, model, userId, userName) {
@@ -3081,12 +3190,20 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
     let currentQuestion = question;
     let allQueries = [];
     let allData = [];
+    const priorSteps = [];
     let finalExplanation = "";
     let iteration = 0;
+    let lookupHops = 0;
+    let totalSteps = 0;
+    const seeded = await this.seedCollectionDates(question);
+    if (seeded) priorSteps.push(seeded);
     while (iteration < this.MAX_ITERATIONS) {
       iteration++;
-      console.log(`
-=== Iteration ${iteration} ===`);
+      totalSteps++;
+      console.log(
+        `
+=== Step ${totalSteps} (refinement ${iteration}/${this.MAX_ITERATIONS}, lookups ${lookupHops}/${this.MAX_LOOKUP_HOPS}) ===`
+      );
       console.log(`Question: ${currentQuestion}`);
       let generated;
       try {
@@ -3094,7 +3211,8 @@ ${isEmpty ? "IMPORTANT: Since no data was found, you MUST provide a suggested_fo
           currentQuestion,
           model,
           userId,
-          userName
+          userName,
+          priorSteps
         );
       } catch (error) {
         if (allData.length > 0 && finalExplanation) {
@@ -3153,6 +3271,23 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
         );
       }
       allData.push(result.data);
+      priorSteps.push({ query, data: result.data });
+      if (generated.needsFollowup) {
+        if (lookupHops < this.MAX_LOOKUP_HOPS) {
+          iteration--;
+          lookupHops++;
+          console.log(
+            `\u2192 Lookup ${lookupHops}/${this.MAX_LOOKUP_HOPS}: ${generated.followupReason || "no reason given"}`
+          );
+          currentQuestion = `${question}
+
+You have already fetched a value you needed before you could answer${generated.followupReason ? `: ${generated.followupReason}` : ""}. Its result is in the steps above. Use that value and write the query that answers the question. Do not set needs_followup again unless you genuinely need another value first.`;
+          continue;
+        }
+        console.warn(
+          `\u26A0\uFE0F Model asked for another lookup but the ${this.MAX_LOOKUP_HOPS}-hop budget is spent; answering with what it has.`
+        );
+      }
       let combinedData2 = allData.length === 1 ? allData[0] : { iteration_results: allData };
       const truncationLimit = this.calculateTruncationLimit(modelContextLength);
       const dataToExplain = this.truncateResults(combinedData2, truncationLimit);
@@ -3179,7 +3314,9 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
             reasoning,
             data: combinedData2,
             explanation: finalExplanation,
-            iterations: iteration,
+            // Total model-driven steps, lookups included, so the persisted
+            // count reflects what the answer actually cost.
+            iterations: totalSteps,
             evaluationScore: evaluation.score
           };
         }
@@ -3205,7 +3342,9 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
         }
       }
     }
-    console.log(`\u2713 Max iterations reached (${this.MAX_ITERATIONS})`);
+    console.log(
+      `\u2713 Loop finished after ${totalSteps} step(s): ${iteration} refinement(s), ${lookupHops} lookup(s)`
+    );
     const combinedData = allData.length === 1 ? allData[0] : { iteration_results: allData };
     return {
       query: allQueries.join("\n---\n"),
@@ -3213,7 +3352,7 @@ IMPORTANT: The previous query failed with this error: "${retryableError.message}
       reasoning: "Multi-step query process",
       data: combinedData,
       explanation: finalExplanation,
-      iterations: iteration
+      iterations: totalSteps
     };
   }
 };

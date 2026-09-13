@@ -191,6 +191,44 @@ adds a generate and an execute per hop. Cap lookup hops separately from
 refinement hops so a confused model cannot spend the whole budget looking things
 up.
 
+### What shipped
+
+All three, plus the budget split.
+
+`generateQuery` takes a `PriorStep[]` — each completed step's query and its
+result — and renders them into the generation prompt ahead of the schema, under
+instructions to use those values and not re-fetch or invent them. Results are
+truncated to 1500 characters per step, much tighter than the explanation step's
+budget, because they share a context window with the schema.
+
+The query tool gained `needs_followup` and `followup_reason`. When set, the loop
+records the result, skips explain and evaluate, and regenerates with the data in
+context. `MAX_LOOKUP_HOPS` is 2 and is spent separately from `MAX_ITERATIONS`,
+so two lookups still leave all four refinement passes. When the lookup budget is
+gone the model is made to answer with what it has rather than looping.
+
+Collection-scoped questions are seeded before the loop starts: a narrow pattern
+match triggers one GraphQL call for `pbisCollectionDates(orderBy: {
+collectionDate: desc }, take: 2)`, pushed in as the first prior step. Two runs,
+not one, because a collection period is a range — the prompt now spells out that
+"the last collection" is `gte` the earlier date and `lt` the later one, while
+"since the last collection" is `gte` the later one. An open-ended `gte` answers a
+different question and looks right. A failed prefetch is logged and skipped, not
+raised.
+
+`iterations` on `CommunicatorChat` now counts lookups too, so the persisted
+number reflects what an answer cost.
+
+### What is not verified
+
+The tests cover the machinery — which questions seed, how steps render and are
+bounded, how the signal parses, how the budgets are spent — and each assertion
+was checked by breaking the code under it. None of that says the model uses any
+of it well. Whether it sets `needs_followup` when it should, and whether having
+the collection dates in front of it actually stops the invented-date answers,
+needs real questions against a real endpoint. The questions in 4.3 are the ones
+to try first, since their right answers are already known.
+
 ---
 
 ## Phase 4: Correctness and honesty

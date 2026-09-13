@@ -96,11 +96,37 @@ const GRAPHQL_TOOL: Tool = {
           type: 'string',
           description: 'Brief explanation of why this query was chosen',
         },
+        needs_followup: {
+          type: 'boolean',
+          description:
+            'Set true when this query does NOT answer the question on its own - it fetches a value you need before you can write the query that does. The result is handed back to you and you are asked to continue. Example: fetching the most recent collectionDate so you can then filter cards by it. Leave false when this query returns the data the question actually asks for.',
+        },
+        followup_reason: {
+          type: 'string',
+          description:
+            'Only when needs_followup is true: what you will do with this result. For example, "use the latest collectionDate as the lower bound for dateGiven".',
+        },
       },
       required: ['query'],
     },
   },
 };
+
+/**
+ * One completed step of an answer: the query that ran and what came back.
+ *
+ * This is the channel that makes the loop able to chain data. Before it,
+ * generateQuery took a string, so step two never saw step one's query or its
+ * results and a value fetched in one step had nowhere to live - the only thing
+ * carried forward was whatever the evaluator wrote into suggestedFollowup as
+ * prose.
+ */
+export interface PriorStep {
+  query: string;
+  data: any;
+  /** Why this step is here, when it was not the model's own idea. */
+  note?: string;
+}
 
 export class QueryGeneratorService {
   // GraphQL access scoped to the requesting user. Supplied per request.
@@ -109,9 +135,17 @@ export class QueryGeneratorService {
   // Token/character limits for context management
   private readonly MAX_RESULT_CHARS = 4000; // ~1000 tokens - more conservative
   private readonly MAX_TOKENS = 2000; // Max tokens for LLM responses
-  private readonly MAX_ITERATIONS = 4; // Max follow-up queries
+  private readonly MAX_ITERATIONS = 4; // Refinement passes, and error repairs
   private readonly MIN_SCORE_THRESHOLD = 6; // Minimum score to consider complete
   private readonly MAX_TOOL_ATTEMPTS = 2; // Retries when a model botches a tool call
+  // Deliberate lookups are capped separately from refinements. A question that
+  // needs a value before it can be expressed should not have to spend the
+  // budget that exists for improving an answer, and a confused model should not
+  // be able to spend the whole budget looking things up.
+  private readonly MAX_LOOKUP_HOPS = 2;
+  // Prior results go into the generation prompt alongside the schema, so they
+  // get a much tighter budget than the explanation step's.
+  private readonly MAX_PRIOR_STEP_CHARS = 1500;
 
   /**
    * Truncate large JSON results to fit within token limits
@@ -355,15 +389,55 @@ Use the identify_schema_types tool to specify which types are needed.`;
   /**
    * Step 2: Generate a GraphQL query with only relevant types
    */
+  /**
+   * Render completed steps for the generation prompt. Each result is truncated
+   * hard: this sits next to the schema in the same context window, and a step
+   * that returned thousands of rows would crowd out the thing it is there to
+   * inform.
+   */
+  private renderPriorSteps(steps: PriorStep[]): string {
+    if (steps.length === 0) return '';
+
+    const rendered = steps
+      .map((step, index) => {
+        const data = JSON.stringify(
+          this.truncateResults(step.data, this.MAX_PRIOR_STEP_CHARS),
+          null,
+          2,
+        );
+        const why = step.note ? ` - ${step.note}` : '';
+        return `Step ${index + 1}${why}
+  query:  ${step.query}
+  result: ${data}`;
+      })
+      .join('\n\n');
+
+    return `
+STEPS ALREADY RUN FOR THIS QUESTION:
+${rendered}
+
+CRITICAL - how to use the steps above:
+- The results above are real values that have already been fetched. Use them
+  directly in your next query.
+- Do NOT run the same query again, and do NOT invent a value that is sitting in
+  a result above.
+- If a step returned an empty list or null, that is the answer to that step. Say
+  so rather than retrying it or guessing what it might have contained.
+`;
+  }
+
   async generateQuery(
     question: string,
     model: string,
     userId?: string,
     userName?: string,
+    priorSteps: PriorStep[] = [],
   ): Promise<{
     query: string;
     variables?: Record<string, any>;
     reasoning: string;
+    needsFollowup: boolean;
+    followupReason?: string;
   }> {
     // Step 1: Identify relevant types
     const { types } = await this.identifyRelevantTypes(question, model);
@@ -501,9 +575,22 @@ Collection Period Rules:
 - "The last collection", "this collection", "since the last collection" and
   "this week's cards" all refer to a PBIS collection RUN, not a calendar week or
   month. The runs are the rows of pbisCollectionDates.
-- NEVER invent a date like the first of the month for these. Fetch the latest run
-  first: query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 1)
-  { collectionDate } }, then filter cards with dateGiven gte that value.
+- NEVER invent a date like the first of the month for these. Fetch the two most
+  recent runs first and set needs_followup to true:
+  query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2)
+  { collectionDate } }
+  You will be handed the dates and asked to continue. If those dates are already
+  in the steps above, use them and do not fetch them again.
+- Two runs, not one, because a collection period is a RANGE with both ends. With
+  results[0] the most recent run and results[1] the one before it:
+  - "the last collection" / "this collection" means the cards that run counted:
+    dateGiven gte results[1].collectionDate AND lt results[0].collectionDate
+  - "since the last collection" means after the most recent run:
+    dateGiven gte results[0].collectionDate
+  An open-ended gte with no upper bound answers a different question from the
+  one that was asked, and it looks right.
+- If only one run comes back there is no earlier bound, so say that the range is
+  everything up to that run rather than inventing a start date.
 - If you answer with a date range, state the actual range you used so the reader
   can see what "last collection" was taken to mean.
 
@@ -545,12 +632,19 @@ query { students: users(where: { isStudent: { equals: true } }) { id name } staf
 query { user(where: { id: "123" }) { id name } }
 query { users(where: { name: { contains: "Smith", mode: insensitive }, isStaff: { equals: true } }) { id name } }
 
+${this.renderPriorSteps(priorSteps)}
 GraphQL Schema:
 ${relevantSchema}`;
 
     const userPrompt = `Generate a GraphQL query to answer this question: "${question}"
 
-Use the generate_graphql_query tool to provide your answer.`;
+Use the generate_graphql_query tool to provide your answer.
+
+If you cannot write that query yet because you first need a value out of the
+database - a date, an id, a name you have not been given - then generate the
+query that fetches THAT value and set needs_followup to true. You will be given
+the result and asked to continue. Do not guess the value, and do not try to do
+both in one query.`;
 
     // Smaller local models regularly botch the tool call — no tool_calls at all,
     // malformed JSON arguments, or arguments that omit/nest the "query" field.
@@ -606,6 +700,8 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
         query: queryArgs.query,
         variables: queryArgs.variables,
         reasoning: queryArgs.reasoning || 'No reasoning provided',
+        needsFollowup: queryArgs.needsFollowup === true,
+        followupReason: queryArgs.followupReason,
       };
     }
 
@@ -650,6 +746,8 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
     query: string;
     variables?: Record<string, any>;
     reasoning?: string;
+    needsFollowup?: boolean;
+    followupReason?: string;
   } | null {
     if (!args || typeof args !== 'object') {
       return null;
@@ -667,6 +765,11 @@ Call the generate_graphql_query tool with a "query" argument whose value is the 
           query: value.trim(),
           variables: container.variables,
           reasoning: container.reasoning,
+          // Models emit booleans as strings often enough to be worth handling.
+          needsFollowup:
+            container.needs_followup === true ||
+            container.needs_followup === 'true',
+          followupReason: container.followup_reason,
         };
       }
     }
@@ -932,6 +1035,52 @@ ${
   }
 
   /**
+   * Questions scoped to a PBIS collection period cannot be expressed at all
+   * without the run dates, and the model has repeatedly answered them by
+   * inventing a calendar date instead. Fetching the dates up front costs one
+   * GraphQL call and no model call, and it means the first generated query
+   * already has a real range to work with rather than spending a lookup hop to
+   * get one.
+   *
+   * Deliberately narrow. This runs before anything else on every request, so a
+   * loose pattern would put an extra query on questions that have nothing to do
+   * with collections.
+   */
+  private readonly COLLECTION_SCOPED =
+    /\b(?:last|this|latest|current|previous)\s+collection\b|\bcollection\s+(?:period|run)\b|\bsince\s+the\s+last\s+collection\b/i;
+
+  private async seedCollectionDates(
+    question: string,
+  ): Promise<PriorStep | null> {
+    if (!this.COLLECTION_SCOPED.test(question)) return null;
+
+    const query =
+      'query { pbisCollectionDates(orderBy: { collectionDate: desc }, take: 2) { id collectionDate } }';
+
+    try {
+      const result = await this.graphql.query({ query });
+      if (result.errors?.length || !result.data) {
+        console.warn(
+          'Collection date prefetch failed, continuing without it:',
+          result.errors?.map((e) => e.message).join(', '),
+        );
+        return null;
+      }
+      console.log('Seeded collection dates:', JSON.stringify(result.data));
+      return {
+        query,
+        data: result.data,
+        note: 'fetched automatically because the question is scoped to a collection period',
+      };
+    } catch (error) {
+      // A failed prefetch must not fail the question. Without it the model is
+      // back to where it was, which the prompt already covers.
+      console.warn('Collection date prefetch threw, continuing without it:', error);
+      return null;
+    }
+  }
+
+  /**
    * Complete flow with iterative refinement: Generate query, execute, evaluate, and refine if needed
    */
   async processQuery(
@@ -964,12 +1113,23 @@ ${
     let currentQuestion = question;
     let allQueries: string[] = [];
     let allData: any[] = [];
+    // What has already run, carried into every generation prompt. This is what
+    // lets step two use step one's result instead of re-deriving it from prose.
+    const priorSteps: PriorStep[] = [];
     let finalExplanation = '';
     let iteration = 0;
+    let lookupHops = 0;
+    let totalSteps = 0;
+
+    const seeded = await this.seedCollectionDates(question);
+    if (seeded) priorSteps.push(seeded);
 
     while (iteration < this.MAX_ITERATIONS) {
       iteration++;
-      console.log(`\n=== Iteration ${iteration} ===`);
+      totalSteps++;
+      console.log(
+        `\n=== Step ${totalSteps} (refinement ${iteration}/${this.MAX_ITERATIONS}, lookups ${lookupHops}/${this.MAX_LOOKUP_HOPS}) ===`,
+      );
       console.log(`Question: ${currentQuestion}`);
 
       // Step 1: Generate GraphQL query
@@ -977,6 +1137,8 @@ ${
         query: string;
         variables?: Record<string, any>;
         reasoning: string;
+        needsFollowup: boolean;
+        followupReason?: string;
       };
       try {
         generated = await this.generateQuery(
@@ -984,6 +1146,7 @@ ${
           model,
           userId,
           userName,
+          priorSteps,
         );
       } catch (error) {
         // A follow-up iteration failing shouldn't throw away the answer we
@@ -1092,6 +1255,38 @@ ${
       }
 
       allData.push(result.data);
+      priorSteps.push({ query, data: result.data });
+
+      // Step 2b: The model said this query only fetched something it needed
+      // before it could answer. Loop immediately with the result in context and
+      // skip explain and evaluate, which have nothing to work with yet.
+      //
+      // This is the distinction that makes the loop agentic: "the evaluator
+      // judged this inadequate" and "I know I need a value before I can answer"
+      // are different signals, and only the second one is the model's own.
+      if (generated.needsFollowup) {
+        if (lookupHops < this.MAX_LOOKUP_HOPS) {
+          // A lookup is not a refinement. Give the refinement budget back and
+          // spend from the lookup allowance instead, so a question needing two
+          // values up front still gets its full set of refinement passes.
+          iteration--;
+          lookupHops++;
+          console.log(
+            `→ Lookup ${lookupHops}/${this.MAX_LOOKUP_HOPS}: ${
+              generated.followupReason || 'no reason given'
+            }`,
+          );
+          currentQuestion = `${question}
+
+You have already fetched a value you needed before you could answer${
+            generated.followupReason ? `: ${generated.followupReason}` : ''
+          }. Its result is in the steps above. Use that value and write the query that answers the question. Do not set needs_followup again unless you genuinely need another value first.`;
+          continue;
+        }
+        console.warn(
+          `⚠️ Model asked for another lookup but the ${this.MAX_LOOKUP_HOPS}-hop budget is spent; answering with what it has.`,
+        );
+      }
 
       // Step 3: Generate explanation with all accumulated data
       // Important: Truncate combined data to avoid token overflow
@@ -1133,7 +1328,9 @@ ${
             reasoning,
             data: combinedData,
             explanation: finalExplanation,
-            iterations: iteration,
+            // Total model-driven steps, lookups included, so the persisted
+            // count reflects what the answer actually cost.
+            iterations: totalSteps,
             evaluationScore: evaluation.score,
           };
         }
@@ -1167,7 +1364,9 @@ ${
       }
     }
 
-    console.log(`✓ Max iterations reached (${this.MAX_ITERATIONS})`);
+    console.log(
+      `✓ Loop finished after ${totalSteps} step(s): ${iteration} refinement(s), ${lookupHops} lookup(s)`,
+    );
 
     // Return final results
     const combinedData =
@@ -1178,7 +1377,7 @@ ${
       reasoning: 'Multi-step query process',
       data: combinedData,
       explanation: finalExplanation,
-      iterations: iteration,
+      iterations: totalSteps,
     };
   }
 }
