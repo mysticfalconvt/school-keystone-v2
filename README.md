@@ -26,13 +26,15 @@ runtime are:
 | `SESSION_SECRET` | yes in production | Signs session cookies (`auth.ts`). A value is generated in development if unset. |
 | `PORT` | no | Server port. Defaults to `4000`. |
 | `FRONTEND_URL` | yes | Used in outgoing email links (`lib/mail.ts`). |
-| `MAIL_HOST` / `MAIL_PORT` / `MAIL_USER` / `MAIL_PASS` | for email | SMTP transport for `sendEmail`. |
+| `MAIL_HOST` / `MAIL_PORT` / `MAIL_USER` / `MAIL_PASS` | for email | SMTP transport for queued email. Port 587 requires STARTTLS by default; port 465 uses implicit TLS. |
+| `MAIL_REQUIRE_TLS` | no | Overrides STARTTLS enforcement (`true`/`false`). Local SMTP servers on ports such as 1025 default to false. |
 | `AUTH_HEADER_SECRET` | yes | Accepted `Authorization` value for service-to-service calls (`access.ts`). |
 | `GOOGLE_OAUTH_CLIENT_ID` | for Google sign-in | Must match the dashboard's `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. |
 | `LM_STUDIO_ENDPOINT` | for Communicator | OpenAI-compatible base URL of the LM Studio server, e.g. `http://10.0.0.156:1234/v1`. Required — there is no fallback, and this host must be able to reach it. |
 | `COMMUNICATOR_MODEL` | no | Model used for every Communicator request. Blank or unset falls back to `openai/gpt-oss-120b`. Users do not choose a model; the resolved value is recorded on each chat. |
 | `ALLOW_IMPERSONATION` | no | Enables the `impersonateUser` mutation. Development only. |
-| `BUGSINK_DSN` | no | Error reporting (`lib/bugsink.ts`). |
+| `BUGSINK_DSN_DEVELOPMENT` / `BUGSINK_DSN_PRODUCTION` | no | Environment-specific error reporting projects (`lib/bugsink.ts`). |
+| `BUGSINK_DSN` | no | Fallback DSN when an environment-specific Bugsink DSN is not set. |
 
 `.env` also currently contains `COOKIE_SECRET`, `API_KEY`, `COMMUNICATOR_ENDPOINT`
 and `COMMUNICATOR_API_KEY`. None of them is read anywhere in this repository any
@@ -74,6 +76,17 @@ but note what it implies:
 - There is no migration file to review before the fact or roll back after it.
 
 Take a backup before any run that will drop something.
+
+The durable email queue requires the `EmailDelivery` table. Apply its reviewed,
+additive migration before deploying code that starts the queue worker:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f sql/2026-10-02-email-delivery-queue.sql
+```
+
+Starting the new application code before this migration is applied will prevent
+emails from being queued.
 
 `schema.graphql` and `schema.prisma` are generated and committed. Regenerate them
 by running `npm run dev` after a model change; never hand-edit them. `.keystone/`

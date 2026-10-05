@@ -19,6 +19,7 @@ import { CellPhoneViolation } from './schemas/CellPhoneViolation';
 import { CommunicatorChat } from './schemas/CommunicatorChat';
 import { ChromebookCheck } from './schemas/ChromebookCheck';
 import { Discipline } from './schemas/Discipline';
+import { EmailDelivery } from './schemas/EmailDelivery';
 import { Link } from './schemas/Link';
 import { Message } from './schemas/Message';
 import { PbisCard } from './schemas/PbisCard';
@@ -48,6 +49,7 @@ import { queryCommunicator } from './mutations/queryCommunicator';
 import { recalculateCallback } from './mutations/recalculateCallback';
 import { sendEmail } from './mutations/sendEmail';
 import { updateStudentSchedules } from './mutations/updateStudentSchedules';
+import { startEmailQueueWorker } from './lib/emailQueue';
 
 export default withAuth(
   config({
@@ -72,6 +74,9 @@ export default withAuth(
 
         credentials: true,
       },
+      extendHttpServer: (server, context) => {
+        startEmailQueueWorker(context, (stop) => server.on('close', stop));
+      },
     },
     // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
     ui: {
@@ -91,6 +96,7 @@ export default withAuth(
       ChromebookCheck,
       CommunicatorChat,
       Discipline,
+      EmailDelivery,
       Link,
       Message,
       PbisCard,

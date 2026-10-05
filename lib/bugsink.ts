@@ -2,8 +2,8 @@
 Error reporting to Bugsink (https://bugsink.rboskind.com).
 
 Bugsink speaks the Sentry ingest protocol, so we use the official @sentry/node
-SDK and simply point the DSN at our own server. Nothing is sent unless
-BUGSINK_DSN is set, so an unconfigured checkout stays completely silent.
+SDK and simply point the DSN at our own server. Environment-specific DSNs take
+precedence over BUGSINK_DSN, and an unconfigured checkout stays silent.
 
 What gets reported:
   - uncaught exceptions / unhandled promise rejections (Sentry defaults)
@@ -17,7 +17,12 @@ import * as Sentry from '@sentry/node';
 import type { ApolloServerPlugin } from '@apollo/server';
 import type { GraphQLError } from 'graphql';
 
-const dsn = process.env.BUGSINK_DSN;
+const environment = process.env.NODE_ENV || 'development';
+const environmentDsn =
+  environment === 'production'
+    ? process.env.BUGSINK_DSN_PRODUCTION
+    : process.env.BUGSINK_DSN_DEVELOPMENT;
+const dsn = environmentDsn || process.env.BUGSINK_DSN;
 
 export const bugsinkEnabled = Boolean(dsn);
 
@@ -25,7 +30,7 @@ if (dsn) {
   Sentry.init({
     dsn,
     release: `school-keystone-v2@${process.env.npm_package_version || 'dev'}`,
-    environment: process.env.NODE_ENV || 'development',
+    environment,
     // Bugsink is an error tracker only — it does not ingest traces or profiles.
     tracesSampleRate: 0,
     // This app holds student data. Never let the SDK attach request bodies,
@@ -41,9 +46,11 @@ if (dsn) {
       return event;
     },
   });
-  console.log(`[bugsink] error reporting enabled -> ${new URL(dsn).origin}`);
+  console.log(
+    `[bugsink] ${environment} error reporting enabled -> ${new URL(dsn).origin}`,
+  );
 } else {
-  console.log('[bugsink] BUGSINK_DSN not set — error reporting disabled');
+  console.log(`[bugsink] ${environment} error reporting disabled — no DSN set`);
 }
 
 type CaptureContext = {

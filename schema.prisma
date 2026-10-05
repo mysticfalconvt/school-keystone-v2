@@ -394,6 +394,40 @@ model Discipline {
   @@index([teacherId])
 }
 
+model EmailDelivery {
+  id                String    @id @default(cuid())
+  recipient         String    @default("")
+  replyTo           String    @default("")
+  subject           String    @default("")
+  html              String    @default("")
+  kind              String    @default("general")
+  lowPriority       Boolean   @default(false)
+  batchId           String    @default("")
+  requestedById     String    @default("")
+  status            String    @default("pending")
+  attempts          Int       @default(0)
+  maxAttempts       Int       @default(5)
+  nextAttemptAt     DateTime?
+  lastAttemptAt     DateTime?
+  lockedAt          DateTime?
+  lockId            String    @default("")
+  expiresAt         DateTime?
+  sentAt            DateTime?
+  providerMessageId String    @default("")
+  lastError         String    @default("")
+  createdAt         DateTime? @default(now())
+
+  @@index([recipient])
+  @@index([kind])
+  @@index([batchId])
+  @@index([requestedById])
+  @@index([status])
+  @@index([nextAttemptAt])
+  @@index([expiresAt])
+  @@index([sentAt])
+  @@index([createdAt])
+}
+
 model Link {
   id            String   @id @default(cuid())
   name          String   @default("")

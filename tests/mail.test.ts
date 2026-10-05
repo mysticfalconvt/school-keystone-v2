@@ -43,4 +43,18 @@ describe('mail configuration', () => {
       /MAIL_PORT must be a valid port number/,
     );
   });
+
+  test('an invalid TLS override is rejected', async () => {
+    process.env.MAIL_HOST = 'smtp.example.test';
+    process.env.MAIL_USER = 'user';
+    process.env.MAIL_PASS = 'pass';
+    process.env.MAIL_PORT = '1025';
+    process.env.MAIL_REQUIRE_TLS = 'sometimes';
+
+    await assert.rejects(
+      () => sendAnEmail('to@example.test', 'from@example.test', 'subject', 'body'),
+      /MAIL_REQUIRE_TLS must be true or false/,
+    );
+    delete process.env.MAIL_REQUIRE_TLS;
+  });
 });

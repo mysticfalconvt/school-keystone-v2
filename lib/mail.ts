@@ -19,6 +19,14 @@ import 'dotenv/config';
 // down at boot instead of failing the one request that needs it.
 let transport: Transporter | null = null;
 
+function getRequireTls(mailPort: number): boolean {
+  const configured = process.env.MAIL_REQUIRE_TLS;
+  if (configured === undefined || configured === '') return mailPort === 587;
+  if (configured === 'true' || configured === '1') return true;
+  if (configured === 'false' || configured === '0') return false;
+  throw new Error('MAIL_REQUIRE_TLS must be true or false');
+}
+
 function getTransport(): Transporter {
   if (transport) return transport;
 
@@ -41,7 +49,7 @@ function getTransport(): Transporter {
     host: process.env.MAIL_HOST,
     port: mailPort,
     secure: mailPort === 465,
-    requireTLS: mailPort !== 465,
+    requireTLS: getRequireTls(mailPort),
     auth: {
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASS,
@@ -50,6 +58,9 @@ function getTransport(): Transporter {
     maxMessages: 50,
     rateDelta: 1000,
     rateLimit: 5,
+    connectionTimeout: 30_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 120_000,
     tls: {
       minVersion: 'TLSv1.2',
     },
@@ -58,38 +69,17 @@ function getTransport(): Transporter {
   return transport;
 }
 
-const RETRY_DELAYS_MS = [2000, 8000];
-
-async function sendMail(options: SendMailOptions): Promise<SentMessageInfo> {
-  for (let attempt = 0; ; attempt += 1) {
-    try {
-      return await getTransport().sendMail(options);
-    } catch (error) {
-      const responseCode =
-        error instanceof Error && 'responseCode' in error
-          ? Number(error.responseCode)
-          : undefined;
-      const delayMs = RETRY_DELAYS_MS[attempt];
-
-      if (!delayMs || (responseCode !== 421 && responseCode !== 454)) {
-        throw error;
-      }
-
-      console.warn('[mail] transient SMTP failure; retrying', {
-        responseCode,
-        attempt: attempt + 1,
-        delayMs,
-      });
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
+export async function deliverEmail(
+  options: SendMailOptions,
+): Promise<SentMessageInfo> {
+  return getTransport().sendMail(options);
 }
 
 function logSentMessage(info: SentMessageInfo) {
   console.log('[mail] message sent', { messageId: info?.messageId });
 }
 
-function makeANiceEmail(text: string) {
+export function makeANiceEmail(text: string) {
   return `
     <div className="email" style="
       border: 1px solid black;
@@ -111,7 +101,7 @@ export async function sendPasswordResetEmail(
   to: string,
 ): Promise<void> {
   // email the user a token
-  const info = await sendMail({
+  const info = await deliverEmail({
     to,
     from: process.env.MAIL_USER,
     subject: 'Your password reset token!',
@@ -129,7 +119,7 @@ export async function sendMagicLinkEmail(
   token: string,
   email: string,
 ): Promise<void> {
-  const info = await sendMail({
+  const info = await deliverEmail({
     to: email,
     from: process.env.MAIL_USER,
     subject: 'Your Magic Link',
@@ -153,7 +143,7 @@ export async function sendAnEmail(
   subject: string,
   body: string,
 ): Promise<void> {
-  const info = await sendMail({
+  const info = await deliverEmail({
     to,
     from: process.env.MAIL_USER,
     replyTo: from,

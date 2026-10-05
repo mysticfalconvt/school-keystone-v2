@@ -11,8 +11,10 @@ import { createAuth } from '@keystone-6/auth';
 
 // See https://keystonejs.com/docs/apis/session#session-api for the session docs
 import { statelessSessions } from '@keystone-6/core/session';
-import { sendMagicLinkEmail, sendPasswordResetEmail } from './lib/mail';
-import { captureError } from './lib/bugsink';
+import {
+  enqueueMagicLinkEmail,
+  enqueuePasswordResetEmail,
+} from './lib/emailQueue';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -54,22 +56,14 @@ const { withAuth } = createAuth({
   },
   passwordResetLink: {
     async sendToken(args) {
-      await sendPasswordResetEmail(args.token, args.identity);
+      await enqueuePasswordResetEmail(args.context, args.token, args.identity);
     },
+    tokensValidForMins: 60,
   },
   magicAuthLink: {
-    sendToken: async ({ itemId, identity, token }) => {
+    sendToken: async ({ itemId, identity, token, context }) => {
       if (itemId && identity && token) {
-        try {
-          await sendMagicLinkEmail(token, identity);
-        } catch (err) {
-          console.error('[auth] magicAuthLink sendToken failed');
-          captureError(err, {
-            tags: { source: 'auth', step: 'magicAuthLink.sendToken' },
-            extra: { itemId: String(itemId) },
-          });
-          throw err;
-        }
+        await enqueueMagicLinkEmail(context, token, identity);
       } else {
         console.warn('[auth] magicAuthLink sendToken skipped — missing field', {
           hasItemId: !!itemId,

@@ -1874,6 +1874,137 @@ input DisciplineCreateInput {
   othersInvolved: Boolean
 }
 
+type EmailDelivery {
+  id: ID!
+  recipient: String
+  replyTo: String
+  subject: String
+  kind: String
+  lowPriority: Boolean
+  batchId: String
+  requestedById: String
+  status: String
+  attempts: Int
+  maxAttempts: Int
+  nextAttemptAt: DateTime
+  lastAttemptAt: DateTime
+  lockedAt: DateTime
+  expiresAt: DateTime
+  sentAt: DateTime
+  providerMessageId: String
+  lastError: String
+  createdAt: DateTime
+}
+
+input EmailDeliveryWhereUniqueInput {
+  id: ID
+}
+
+input EmailDeliveryWhereInput {
+  AND: [EmailDeliveryWhereInput!]
+  OR: [EmailDeliveryWhereInput!]
+  NOT: [EmailDeliveryWhereInput!]
+  id: IDFilter
+  recipient: StringFilter
+  replyTo: StringFilter
+  subject: StringFilter
+  kind: StringFilter
+  lowPriority: BooleanFilter
+  batchId: StringFilter
+  requestedById: StringFilter
+  status: StringFilter
+  attempts: IntFilter
+  maxAttempts: IntFilter
+  nextAttemptAt: DateTimeNullableFilter
+  lastAttemptAt: DateTimeNullableFilter
+  lockedAt: DateTimeNullableFilter
+  expiresAt: DateTimeNullableFilter
+  sentAt: DateTimeNullableFilter
+  providerMessageId: StringFilter
+  lastError: StringFilter
+  createdAt: DateTimeNullableFilter
+}
+
+input IntFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntFilter
+}
+
+input EmailDeliveryOrderByInput {
+  id: OrderDirection
+  recipient: OrderDirection
+  replyTo: OrderDirection
+  subject: OrderDirection
+  kind: OrderDirection
+  lowPriority: OrderDirection
+  batchId: OrderDirection
+  requestedById: OrderDirection
+  status: OrderDirection
+  attempts: OrderDirection
+  maxAttempts: OrderDirection
+  nextAttemptAt: OrderDirection
+  lastAttemptAt: OrderDirection
+  lockedAt: OrderDirection
+  expiresAt: OrderDirection
+  sentAt: OrderDirection
+  providerMessageId: OrderDirection
+  lastError: OrderDirection
+  createdAt: OrderDirection
+}
+
+input EmailDeliveryUpdateInput {
+  recipient: String
+  replyTo: String
+  subject: String
+  kind: String
+  lowPriority: Boolean
+  batchId: String
+  requestedById: String
+  status: String
+  attempts: Int
+  maxAttempts: Int
+  nextAttemptAt: DateTime
+  lastAttemptAt: DateTime
+  lockedAt: DateTime
+  expiresAt: DateTime
+  sentAt: DateTime
+  providerMessageId: String
+  lastError: String
+  createdAt: DateTime
+}
+
+input EmailDeliveryUpdateArgs {
+  where: EmailDeliveryWhereUniqueInput!
+  data: EmailDeliveryUpdateInput!
+}
+
+input EmailDeliveryCreateInput {
+  recipient: String
+  replyTo: String
+  subject: String
+  kind: String
+  lowPriority: Boolean
+  batchId: String
+  requestedById: String
+  status: String
+  attempts: Int
+  maxAttempts: Int
+  nextAttemptAt: DateTime
+  lastAttemptAt: DateTime
+  lockedAt: DateTime
+  expiresAt: DateTime
+  sentAt: DateTime
+  providerMessageId: String
+  lastError: String
+  createdAt: DateTime
+}
+
 type Link {
   id: ID!
   name: String
@@ -2552,6 +2683,12 @@ type Mutation {
   updateDisciplines(data: [DisciplineUpdateArgs!]!): [Discipline]
   deleteDiscipline(where: DisciplineWhereUniqueInput!): Discipline
   deleteDisciplines(where: [DisciplineWhereUniqueInput!]!): [Discipline]
+  createEmailDelivery(data: EmailDeliveryCreateInput!): EmailDelivery
+  createEmailDeliveries(data: [EmailDeliveryCreateInput!]!): [EmailDelivery]
+  updateEmailDelivery(where: EmailDeliveryWhereUniqueInput!, data: EmailDeliveryUpdateInput!): EmailDelivery
+  updateEmailDeliveries(data: [EmailDeliveryUpdateArgs!]!): [EmailDelivery]
+  deleteEmailDelivery(where: EmailDeliveryWhereUniqueInput!): EmailDelivery
+  deleteEmailDeliveries(where: [EmailDeliveryWhereUniqueInput!]!): [EmailDelivery]
   createLink(data: LinkCreateInput!): Link
   createLinks(data: [LinkCreateInput!]!): [Link]
   updateLink(where: LinkWhereUniqueInput!, data: LinkUpdateInput!): Link
@@ -2711,6 +2848,9 @@ type Query {
   discipline(where: DisciplineWhereUniqueInput!): Discipline
   disciplines(where: DisciplineWhereInput! = {}, orderBy: [DisciplineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DisciplineWhereUniqueInput): [Discipline!]
   disciplinesCount(where: DisciplineWhereInput! = {}): Int
+  emailDelivery(where: EmailDeliveryWhereUniqueInput!): EmailDelivery
+  emailDeliveries(where: EmailDeliveryWhereInput! = {}, orderBy: [EmailDeliveryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EmailDeliveryWhereUniqueInput): [EmailDelivery!]
+  emailDeliveriesCount(where: EmailDeliveryWhereInput! = {}): Int
   link(where: LinkWhereUniqueInput!): Link
   links(where: LinkWhereInput! = {}, orderBy: [LinkOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LinkWhereUniqueInput): [Link!]
   linksCount(where: LinkWhereInput! = {}): Int
