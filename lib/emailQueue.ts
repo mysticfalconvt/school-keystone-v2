@@ -115,7 +115,9 @@ export function enqueueMagicLinkEmail(
   token: string,
   email: string,
 ) {
-  const url = `${process.env.FRONTEND_URL}/loginLink?token=${token}&email=${email}`;
+  // Encode the params so the raw address never appears in the body; otherwise
+  // mail clients linkify "user@domain" inside the URL as a mailto: link.
+  const url = `${process.env.FRONTEND_URL}/loginLink?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
   return enqueueEmail(context, {
     to: email,
     subject: 'Your Magic Link',
@@ -126,7 +128,7 @@ export function enqueueMagicLinkEmail(
       Here is your link to login:
       <a href="${url}">Click Here to login</a>
       <br/>
-      <p>or copy this link: ${url}</p>
+      <p>or copy this link: <a href="${url}">${url}</a></p>
     `),
   });
 }
