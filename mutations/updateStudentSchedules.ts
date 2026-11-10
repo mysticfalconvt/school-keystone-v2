@@ -102,12 +102,14 @@ export const updateStudentSchedules = (base: any) =>
           }
 
           // Prefer the name supplied in the payload. Falling back to the email
-          // gives a lowercase, lossy name ("hectorm figueroa"), so it is only a
-          // last resort. Applied on update as well as create so a re-import
-          // corrects names that were previously derived from the address.
+          // gives a lowercase, lossy name ("hectorm figueroa"), so use it only
+          // when creating a student. A schedule-only import must not overwrite
+          // an existing student's display name.
           const suppliedName = student.name?.trim();
-          studentUpdateResults.name =
-            suppliedName || student.email.split("@")[0].split(".").join(" ");
+          if (suppliedName || !studentInfo[0]?.id) {
+            studentUpdateResults.name =
+              suppliedName || student.email.split("@")[0].split(".").join(" ");
+          }
 
           //if user is new create new user
           if (!studentInfo[0]?.id) {
