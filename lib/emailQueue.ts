@@ -110,11 +110,47 @@ export function enqueueGeneralEmail(
   });
 }
 
-export function enqueueMagicLinkEmail(
+/**
+ * Retire queued sign-in emails that have not gone out yet.
+ *
+ * Requesting a new magic link or password reset replaces the stored token, so
+ * an older email still waiting in the queue carries a dead link. If delivery
+ * was delayed (a mail outage, retries), that stale email can arrive *after* the
+ * fresh one and look like the newest, which is the one people click. Mark them
+ * failed, the same way expired emails are, so only the newest link is sent.
+ *
+ * Rows already `processing` are mid-delivery and are left alone. The worker
+ * claims rows with FOR UPDATE, so a row claimed concurrently no longer matches
+ * `pending`/`retrying` by the time this update reaches it.
+ */
+export async function supersedeQueuedEmails(
+  context: QueueContext,
+  recipient: string,
+  kind: 'magic-link' | 'password-reset',
+): Promise<number> {
+  const result = await queueModel(context).updateMany({
+    where: {
+      recipient: { equals: recipient },
+      kind: { equals: kind },
+      status: { in: ['pending', 'retrying'] },
+    },
+    data: {
+      status: 'failed',
+      html: '',
+      lastError: 'Superseded by a newer link before it was delivered',
+      lockedAt: null,
+      lockId: '',
+    },
+  });
+  return result?.count ?? 0;
+}
+
+export async function enqueueMagicLinkEmail(
   context: QueueContext,
   token: string,
   email: string,
 ) {
+  await supersedeQueuedEmails(context, email, 'magic-link');
   // Encode the params so the raw address never appears in the body; otherwise
   // mail clients linkify "user@domain" inside the URL as a mailto: link.
   const url = `${process.env.FRONTEND_URL}/loginLink?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
@@ -133,11 +169,12 @@ export function enqueueMagicLinkEmail(
   });
 }
 
-export function enqueuePasswordResetEmail(
+export async function enqueuePasswordResetEmail(
   context: QueueContext,
   resetToken: string,
   email: string,
 ) {
+  await supersedeQueuedEmails(context, email, 'password-reset');
   return enqueueEmail(context, {
     to: email,
     subject: 'Your password reset token!',
