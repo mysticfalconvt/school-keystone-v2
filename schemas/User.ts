@@ -7,6 +7,13 @@ import {
   timestamp,
 } from "@keystone-6/core/fields";
 import { isAdmin, isSignedIn } from "../access";
+import {
+  canCreateUser,
+  canCreateUserItem,
+  canDeleteUser,
+  canUpdateUserItem,
+  userUpdateFilter,
+} from "../lib/userAccess";
 import { permissionFields } from "./fields";
 import { NUMBER_OF_BLOCKS } from "./blocks";
 
@@ -29,12 +36,20 @@ const authTokenFields = {
 };
 
 export const User = list({
+  // See lib/userAccess.ts for who may change which users and fields.
   access: {
     operation: {
       query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
+      create: canCreateUser,
+      delete: canDeleteUser,
       update: isSignedIn,
+    },
+    filter: {
+      update: userUpdateFilter,
+    },
+    item: {
+      create: canCreateUserItem,
+      update: canUpdateUserItem,
     },
   },
   ui: {

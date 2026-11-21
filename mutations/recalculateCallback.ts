@@ -66,7 +66,10 @@ export const recalculateCallback = (base: any) =>
       });
       // console.log(teacher)
 
-      const updateStudentCallbacks = await context.query.User.updateOne({
+      // These are derived counts, recomputed from the callbacks themselves, so
+      // write them with sudo: the student or teacher whose counts change may not
+      // be someone the caller is allowed to edit (lib/userAccess.ts).
+      const updateStudentCallbacks = await context.sudo().query.User.updateOne({
         where: { id: studentId },
         data: {
           callbackCount: student.callbackToDo,
@@ -74,7 +77,7 @@ export const recalculateCallback = (base: any) =>
           averageTimeToCompleteCallback: Math.floor(averageTimeToComplete),
         },
       });
-      const updateTeacherCallbacks = await context.query.User.updateOne({
+      const updateTeacherCallbacks = await context.sudo().query.User.updateOne({
         where: { id: teacherId },
         data: {
           callbackCount: teacher.callbackToDo,
