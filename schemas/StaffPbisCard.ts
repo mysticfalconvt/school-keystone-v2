@@ -25,7 +25,7 @@ export const StaffPbisCard = list({
     },
   },
   ui: {
-    isHidden: !isAdmin,
+    hideNavigation: (args) => !isAdmin(args as any),
     listView: {
       initialColumns: ["recipient", "giver", "dateGiven"],
       initialSort: { field: "dateGiven", direction: "DESC" },
@@ -33,7 +33,7 @@ export const StaffPbisCard = list({
     },
   },
   hooks: {
-    validateInput: async ({
+    validate: async ({
       operation,
       resolvedData,
       context,
@@ -83,6 +83,6 @@ export const StaffPbisCard = list({
       validation: { isRequired: true },
       defaultValue: { kind: "now" },
     }),
-    counted: checkbox({ defaultValue: false, label: "Counted" }),
+    counted: checkbox({ defaultValue: false, ui: { label: "Counted" } }),
   },
 });

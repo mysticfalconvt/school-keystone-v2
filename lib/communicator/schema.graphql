@@ -25,7 +25,7 @@ type Query {
   randomDrawingWin(where: RandomDrawingWinWhereUniqueInput!): RandomDrawingWin
   randomDrawingWins(where: RandomDrawingWinWhereInput! = {}, orderBy: [RandomDrawingWinOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RandomDrawingWinWhereUniqueInput): [RandomDrawingWin!]
   randomDrawingWinsCount(where: RandomDrawingWinWhereInput! = {}): Int
-  authenticatedItem: AuthenticatedItem
+  authenticatedItem: User
 }
 
 type User {
@@ -277,8 +277,6 @@ type Callback {
   messageFromStudentDate: String
   daysLate: Int
 }
-
-union AuthenticatedItem = User
 
 input BooleanFilter {
   equals: Boolean

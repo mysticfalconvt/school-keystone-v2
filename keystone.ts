@@ -36,11 +36,8 @@ import { SortingHatQuestion } from './schemas/SortingHatQuestion';
 import { TrimesterAward } from './schemas/TrimesterAward';
 import { Video } from './schemas/video';
 
-// database URL is set in .env file
-const databaseURL =
-  process.env.LOCAL_DATABASE_URL ||
-  process.env.DATABASE_URL ||
-  'postgres://postgres:postgres@localhost:5432/postgres';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { resolveDatabaseUrl } from './lib/databaseUrl';
 
 import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
@@ -56,7 +53,11 @@ export default withAuth(
   config({
     db: {
       provider: 'postgresql',
-      url: databaseURL,
+      // Prisma 7 connects through a driver adapter; the URL comes from the
+      // same resolver prisma.config.ts uses.
+      prismaClientOptions: () => ({
+        adapter: new PrismaPg({ connectionString: resolveDatabaseUrl() }),
+      }),
     },
     // server options
     server: {

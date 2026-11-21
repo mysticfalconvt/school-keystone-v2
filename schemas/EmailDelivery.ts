@@ -36,7 +36,7 @@ export const EmailDelivery = list({
     },
   },
   ui: {
-    isHidden: ({ session }) => !session?.data?.isSuperAdmin,
+    hideNavigation: ({ session }) => !session?.data?.isSuperAdmin,
     listView: {
       initialColumns: [
         'recipient',

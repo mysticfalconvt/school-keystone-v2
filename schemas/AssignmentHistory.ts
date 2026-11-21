@@ -16,7 +16,7 @@ export const AssignmentHistory = list({
     },
   },
   ui: {
-    isHidden: !isAdmin,
+    hideNavigation: (args) => !isAdmin(args as any),
     listView: {
       initialColumns: ["teacher", "block", "className", "dateRemoved"],
       initialSort: { field: "dateRemoved", direction: "DESC" },

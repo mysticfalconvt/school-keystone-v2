@@ -39,9 +39,8 @@ export const User = list({
   },
   ui: {
     // hide the backend UI from regular users
-    isHidden: !isAdmin,
-    hideDelete: !isAdmin,
-    description: "Users of the site",
+    hideNavigation: (args) => !isAdmin(args as any),
+    hideDelete: (args) => !isAdmin(args as any),
     listView: {
       initialColumns: ["name", "email", "taTeacher"],
       pageSize: 100,
@@ -128,6 +127,8 @@ export const User = list({
       many: true,
       ui: {
         displayMode: "count",
+        // Keystone 8 only allows a count display on a read-only field.
+        itemView: { fieldMode: "read" },
       },
     }),
     staffPbisCardsGiven: relationship({
@@ -139,6 +140,8 @@ export const User = list({
       many: true,
       ui: {
         displayMode: "count",
+        // Keystone 8 only allows a count display on a read-only field.
+        itemView: { fieldMode: "read" },
       },
     }),
     teacherDiscipline: relationship({ ref: "Discipline.teacher", many: true }),

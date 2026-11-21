@@ -88,6 +88,25 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
 Starting the new application code before this migration is applied will prevent
 emails from being queued.
 
+Keystone 8 (Prisma 7) gives many-to-many join tables a primary key on
+`("A", "B")` instead of a unique index. Apply this once, alongside the first
+Keystone 8 deploy; it changes no rows:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f sql/2026-11-21-prisma-7-join-table-primary-keys.sql
+```
+
+To see what the database still differs by, without changing anything:
+
+```bash
+npx prisma migrate diff --from-config-datasource --to-schema schema.prisma --script
+```
+
+`prisma.config.ts` and the running app both take the database URL from
+`lib/databaseUrl.ts` (`LOCAL_DATABASE_URL`, then `DATABASE_URL`), so that command
+and `keystone dev` always target the database the app uses.
+
 `schema.graphql` and `schema.prisma` are generated and committed. Regenerate them
 by running `npm run dev` after a model change; never hand-edit them. `.keystone/`
 holds build output and is gitignored; `npm run build` (run by Coolify/Nixpacks on
