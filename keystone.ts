@@ -44,6 +44,7 @@ const databaseURL =
 
 import { addStaff } from './mutations/AddStaff';
 import { authenticateUserWithGoogle } from './mutations/authenticateWithGoogle';
+import { authTokenSchema } from './mutations/authTokens';
 import { impersonateUser } from './mutations/impersonateUser';
 import { queryCommunicator } from './mutations/queryCommunicator';
 import { recalculateCallback } from './mutations/recalculateCallback';
@@ -117,8 +118,13 @@ export default withAuth(
         plugins: [bugsinkApolloPlugin],
       },
       extendGraphqlSchema: graphql.extend((base) => {
+        const authTokens = authTokenSchema(base);
         return {
+          query: {
+            ...authTokens.query,
+          },
           mutation: {
+            ...authTokens.mutation,
             recalculateCallback: recalculateCallback(base),
             sendEmail: sendEmail(base),
             updateStudentSchedules: updateStudentSchedules(base),

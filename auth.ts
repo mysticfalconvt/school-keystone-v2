@@ -11,10 +11,6 @@ import { createAuth } from '@keystone-6/auth';
 
 // See https://keystonejs.com/docs/apis/session#session-api for the session docs
 import { statelessSessions } from '@keystone-6/core/session';
-import {
-  enqueueMagicLinkEmail,
-  enqueuePasswordResetEmail,
-} from './lib/emailQueue';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
@@ -47,33 +43,10 @@ const { withAuth } = createAuth({
   sessionData:
     'name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled canManageCommunicator hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups',
   secretField: 'password',
-  initFirstItem: {
-    // If there are no items in the database, keystone will ask you to create
-    // a new user, filling in these fields.
-    fields: ['name', 'email', 'password'],
-    itemData: { isSuperAdmin: true },
-    skipKeystoneWelcome: true,
-  },
-  passwordResetLink: {
-    async sendToken(args) {
-      await enqueuePasswordResetEmail(args.context, args.token, args.identity);
-    },
-    tokensValidForMins: 60,
-  },
-  magicAuthLink: {
-    sendToken: async ({ itemId, identity, token, context }) => {
-      if (itemId && identity && token) {
-        await enqueueMagicLinkEmail(context, token, identity);
-      } else {
-        console.warn('[auth] magicAuthLink sendToken skipped — missing field', {
-          hasItemId: !!itemId,
-          hasIdentity: !!identity,
-          hasToken: !!token,
-        });
-      }
-    },
-    tokensValidForMins: 60,
-  },
+  // Password reset and magic-link sign in are implemented in
+  // mutations/authTokens.ts; @keystone-6/auth v10 no longer provides them.
+  // initFirstItem is gone too: the database already has users, and Keystone 8
+  // removes the /init page.
 });
 
 // This defines how long people will remain logged in for.

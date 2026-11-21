@@ -10,6 +10,24 @@ import { isAdmin, isSignedIn } from "../access";
 import { permissionFields } from "./fields";
 import { NUMBER_OF_BLOCKS } from "./blocks";
 
+const hiddenAuthField = {
+  access: () => false,
+  ui: {
+    createView: { fieldMode: "hidden" },
+    itemView: { fieldMode: "hidden" },
+    listView: { fieldMode: "hidden" },
+  },
+} as const;
+
+const authTokenFields = {
+  passwordResetToken: password({ ...hiddenAuthField }),
+  passwordResetIssuedAt: timestamp({ ...hiddenAuthField }),
+  passwordResetRedeemedAt: timestamp({ ...hiddenAuthField }),
+  magicAuthToken: password({ ...hiddenAuthField }),
+  magicAuthIssuedAt: timestamp({ ...hiddenAuthField }),
+  magicAuthRedeemedAt: timestamp({ ...hiddenAuthField }),
+};
+
 export const User = list({
   access: {
     operation: {
@@ -228,6 +246,11 @@ export const User = list({
 
     // Sorting Hat
     sortingHat: text({ defaultValue: "" }),
+
+    // One-time tokens for password reset and magic-link sign in; see
+    // lib/authTokens.ts. These were added by @keystone-6/auth until v10, so
+    // they are declared here with the same types to keep the existing columns.
+    ...authTokenFields,
   },
   hooks: {
     afterOperation: async ({ operation, item, originalItem, context }) => {

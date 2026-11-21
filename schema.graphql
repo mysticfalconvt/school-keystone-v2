@@ -2751,7 +2751,6 @@ type Mutation {
   deleteVideos(where: [VideoWhereUniqueInput!]!): [Video]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
-  createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
   sendUserPasswordResetLink(email: String!): Boolean!
   redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
   sendUserMagicAuthLink(email: String!): Boolean!
@@ -2763,23 +2762,6 @@ type Mutation {
   queryCommunicator(question: String!): JSON
   authenticateUserWithGoogle(idToken: String!): JSON
   impersonateUser(userId: String!): JSON
-}
-
-union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
-
-type UserAuthenticationWithPasswordSuccess {
-  sessionToken: String!
-  item: User!
-}
-
-type UserAuthenticationWithPasswordFailure {
-  message: String!
-}
-
-input CreateInitialUserInput {
-  name: String
-  email: String
-  password: String
 }
 
 type RedeemUserPasswordResetTokenResult {
@@ -2809,6 +2791,17 @@ enum MagicLinkRedemptionErrorCode {
   FAILURE
   TOKEN_EXPIRED
   TOKEN_REDEEMED
+}
+
+union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
+
+type UserAuthenticationWithPasswordSuccess {
+  sessionToken: String!
+  item: User!
+}
+
+type UserAuthenticationWithPasswordFailure {
+  message: String!
 }
 
 type Query {
@@ -2886,12 +2879,12 @@ type Query {
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
 }
 
-union AuthenticatedItem = User
-
 type ValidateUserPasswordResetTokenResult {
   code: PasswordResetRedemptionErrorCode!
   message: String!
 }
+
+union AuthenticatedItem = User
 
 type KeystoneMeta {
   adminMeta: KeystoneAdminMeta!
