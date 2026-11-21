@@ -9,7 +9,8 @@ import { config, graphql } from '@keystone-6/core';
 
 // Look in the schema file for how we define our lists, and how users interact with them through graphql or the Admin UI
 
-import { session, withAuth } from './auth';
+import { authSchema, session } from './auth';
+import { adminSigninRoute } from './lib/adminSignin';
 
 // Schemas from individual files
 import { Calendar } from './schemas/Calendar';
@@ -49,93 +50,97 @@ import { sendEmail } from './mutations/sendEmail';
 import { updateStudentSchedules } from './mutations/updateStudentSchedules';
 import { startEmailQueueWorker } from './lib/emailQueue';
 
-export default withAuth(
-  config({
-    db: {
-      provider: 'postgresql',
-      // Prisma 7 connects through a driver adapter; the URL comes from the
-      // same resolver prisma.config.ts uses.
-      prismaClientOptions: () => ({
-        adapter: new PrismaPg({ connectionString: resolveDatabaseUrl() }),
-      }),
-    },
-    // server options
-    server: {
-      // the port to run the server on
-      port: Number(process.env.PORT) || 4000,
-      cors: {
-        origin: [
-          /^https?:\/\/localhost:\d+$/,
-          'https://ncujhs.tech',
-          'https://www.ncujhs.tech',
-          'https://www.ncujhs.tech/',
-          'https://old.ncujhs.tech',
-          'https://old.ncujhs.tech/',
-          'http://10.0.0.23:7979',
-        ],
+export default config({
+  db: {
+    provider: 'postgresql',
+    // Prisma 7 connects through a driver adapter; the URL comes from the
+    // same resolver prisma.config.ts uses.
+    prismaClientOptions: () => ({
+      adapter: new PrismaPg({ connectionString: resolveDatabaseUrl() }),
+    }),
+  },
+  // server options
+  server: {
+    // the port to run the server on
+    port: Number(process.env.PORT) || 4000,
+    cors: {
+      origin: [
+        /^https?:\/\/localhost:\d+$/,
+        'https://ncujhs.tech',
+        'https://www.ncujhs.tech',
+        'https://www.ncujhs.tech/',
+        'https://old.ncujhs.tech',
+        'https://old.ncujhs.tech/',
+        'http://10.0.0.23:7979',
+      ],
 
-        credentials: true,
-      },
-      extendHttpServer: (server, context) => {
-        startEmailQueueWorker(context, (stop) => server.on('close', stop));
-      },
+      credentials: true,
     },
-    // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
-    ui: {
-      // For our starter, we check that someone has session data before letting them see the Admin UI.
-      isAccessAllowed: (context) => !!context.session?.data?.isSuperAdmin,
+    extendExpressApp: (app, commonContext) => {
+      app.post('/admin-signin', adminSigninRoute(commonContext));
     },
-    lists: {
-      User,
-      AssignmentHistory,
-      Birthday,
-      BugReport,
-      Bullying,
-      Callback,
-      CallbackRewardRun,
-      Calendar,
-      CellPhoneViolation,
-      ChromebookCheck,
-      CommunicatorChat,
-      Discipline,
-      EmailDelivery,
-      Link,
-      Message,
-      PbisCard,
-      StaffPbisCard,
-      PbisCollectionDate,
-      RandomDrawingWin,
-      SortingHatQuestion,
-      StudentFocus,
-      TrimesterAward,
-      Video,
+    extendHttpServer: (server, context) => {
+      startEmailQueueWorker(context, (stop) => server.on('close', stop));
     },
-    session,
-    graphql: {
-      playground: process.env.NODE_ENV === 'development',
-      apolloConfig: {
-        // Keystone appends these to its own plugins, so the playground config
-        // above is unaffected.
-        plugins: [bugsinkApolloPlugin],
-      },
-      extendGraphqlSchema: graphql.extend((base) => {
-        const authTokens = authTokenSchema(base);
-        return {
-          query: {
-            ...authTokens.query,
-          },
-          mutation: {
-            ...authTokens.mutation,
-            recalculateCallback: recalculateCallback(base),
-            sendEmail: sendEmail(base),
-            updateStudentSchedules: updateStudentSchedules(base),
-            addStaff: addStaff(base),
-            queryCommunicator: queryCommunicator(base),
-            authenticateUserWithGoogle: authenticateUserWithGoogle(base),
-            impersonateUser: impersonateUser(base),
-          },
-        };
-      }),
+  },
+  // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
+  ui: {
+    // Super admins only. There is no sign-in page: they arrive signed in via
+    // POST /admin-signin from the dashboard (lib/adminSignin.ts).
+    isAccessAllowed: (context) => !!context.session?.data?.isSuperAdmin,
+  },
+  lists: {
+    User,
+    AssignmentHistory,
+    Birthday,
+    BugReport,
+    Bullying,
+    Callback,
+    CallbackRewardRun,
+    Calendar,
+    CellPhoneViolation,
+    ChromebookCheck,
+    CommunicatorChat,
+    Discipline,
+    EmailDelivery,
+    Link,
+    Message,
+    PbisCard,
+    StaffPbisCard,
+    PbisCollectionDate,
+    RandomDrawingWin,
+    SortingHatQuestion,
+    StudentFocus,
+    TrimesterAward,
+    Video,
+  },
+  session,
+  graphql: {
+    playground: process.env.NODE_ENV === 'development',
+    apolloConfig: {
+      // Keystone appends these to its own plugins, so the playground config
+      // above is unaffected.
+      plugins: [bugsinkApolloPlugin],
     },
-  }),
-);
+    extendGraphqlSchema: graphql.extend((base) => {
+      const auth = authSchema(base);
+      const authTokens = authTokenSchema(base);
+      return {
+        query: {
+          ...auth.query,
+        },
+        mutation: {
+          ...auth.mutation,
+          ...authTokens.mutation,
+          recalculateCallback: recalculateCallback(base),
+          sendEmail: sendEmail(base),
+          updateStudentSchedules: updateStudentSchedules(base),
+          addStaff: addStaff(base),
+          queryCommunicator: queryCommunicator(base),
+          authenticateUserWithGoogle: authenticateUserWithGoogle(base),
+          impersonateUser: impersonateUser(base),
+        },
+      };
+    }),
+  },
+});

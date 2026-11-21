@@ -314,7 +314,7 @@ describe('the pruning rules', () => {
     type User {
       id: ID!
       name: String
-      password: String
+      magicAuthToken: String
       isStaff: Boolean
       taStudents: [User!]
       studentDiscipline(where: DisciplineWhereInput): [Discipline!]
@@ -367,8 +367,8 @@ describe('the pruning rules', () => {
   });
 
   test('drops a denied field from an approved type', () => {
-    assert.ok(!names('User').includes('password'));
-    assert.ok(result.excludedFields.includes('User.password'));
+    assert.ok(!names('User').includes('magicAuthToken'));
+    assert.ok(result.excludedFields.includes('User.magicAuthToken'));
   });
 
   test('keeps a field whose type is approved', () => {

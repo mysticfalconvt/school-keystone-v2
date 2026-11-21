@@ -75,11 +75,7 @@ export const APPROVED_TYPES = [
  * are excluded instead.
  */
 export const USER_FIELD_DENY = [
-  // Authentication and account recovery
-  'password',
-  'passwordResetToken',
-  'passwordResetIssuedAt',
-  'passwordResetRedeemedAt',
+  // Sign-in tokens
   'magicAuthToken',
   'magicAuthIssuedAt',
   'magicAuthRedeemedAt',

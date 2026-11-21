@@ -18,7 +18,6 @@ type StaffMemberUpdate = {
   isTeacher?: boolean;
   existed?: boolean;
   isStudent?: boolean;
-  password?: string;
   canManageCalendar?: boolean;
   canSeeOtherUsers?: boolean;
   canManageUsers?: boolean;
@@ -90,7 +89,6 @@ export const addStaff = (base: any) =>
               ? true
               : false;
 
-            studentUpdateResults.password = "notPassword";
             const createdStudent = await context.query.User.createOne({
               data: {
                 ...studentUpdateResults,

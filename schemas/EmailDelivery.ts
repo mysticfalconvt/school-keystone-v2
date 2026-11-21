@@ -76,6 +76,7 @@ export const EmailDelivery = list({
         { label: 'General', value: 'general' },
         { label: 'PBIS bulk', value: 'pbis-bulk' },
         { label: 'Magic link', value: 'magic-link' },
+        // No longer sent (passwords were removed); kept so old rows display.
         { label: 'Password reset', value: 'password-reset' },
       ],
       defaultValue: 'general',

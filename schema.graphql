@@ -6,7 +6,6 @@ type User {
   name: String
   preferredName: String
   email: String
-  password: PasswordState
   taStudents(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   taStudentsCount(where: UserWhereInput! = {}): Int
   taTeacher: User
@@ -160,19 +159,16 @@ type User {
   assignmentHistory(where: AssignmentHistoryWhereInput! = {}, orderBy: [AssignmentHistoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AssignmentHistoryWhereUniqueInput): [AssignmentHistory!]
   assignmentHistoryCount(where: AssignmentHistoryWhereInput! = {}): Int
   sortingHat: String
-  passwordResetToken: PasswordState
-  passwordResetIssuedAt: DateTime
-  passwordResetRedeemedAt: DateTime
   magicAuthToken: PasswordState
   magicAuthIssuedAt: DateTime
   magicAuthRedeemedAt: DateTime
 }
 
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
+
 type PasswordState {
   isSet: Boolean!
 }
-
-scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 input UserWhereUniqueInput {
   id: ID
@@ -305,9 +301,6 @@ input UserWhereInput {
   block12AssignmentLastUpdated: DateTimeNullableFilter
   assignmentHistory: AssignmentHistoryManyRelationFilter
   sortingHat: StringFilter
-  passwordResetToken: PasswordFilter
-  passwordResetIssuedAt: DateTimeNullableFilter
-  passwordResetRedeemedAt: DateTimeNullableFilter
   magicAuthToken: PasswordFilter
   magicAuthIssuedAt: DateTimeNullableFilter
   magicAuthRedeemedAt: DateTimeNullableFilter
@@ -533,8 +526,6 @@ input UserOrderByInput {
   block12ClassName: OrderDirection
   block12AssignmentLastUpdated: OrderDirection
   sortingHat: OrderDirection
-  passwordResetIssuedAt: OrderDirection
-  passwordResetRedeemedAt: OrderDirection
   magicAuthIssuedAt: OrderDirection
   magicAuthRedeemedAt: OrderDirection
 }
@@ -548,7 +539,6 @@ input UserUpdateInput {
   name: String
   preferredName: String
   email: String
-  password: String
   taStudents: UserRelateToManyForUpdateInput
   taTeacher: UserRelateToOneForUpdateInput
   parent: UserRelateToManyForUpdateInput
@@ -666,9 +656,6 @@ input UserUpdateInput {
   block12AssignmentLastUpdated: DateTime
   assignmentHistory: AssignmentHistoryRelateToManyForUpdateInput
   sortingHat: String
-  passwordResetToken: String
-  passwordResetIssuedAt: DateTime
-  passwordResetRedeemedAt: DateTime
   magicAuthToken: String
   magicAuthIssuedAt: DateTime
   magicAuthRedeemedAt: DateTime
@@ -779,7 +766,6 @@ input UserCreateInput {
   name: String
   preferredName: String
   email: String
-  password: String
   taStudents: UserRelateToManyForCreateInput
   taTeacher: UserRelateToOneForCreateInput
   parent: UserRelateToManyForCreateInput
@@ -897,9 +883,6 @@ input UserCreateInput {
   block12AssignmentLastUpdated: DateTime
   assignmentHistory: AssignmentHistoryRelateToManyForCreateInput
   sortingHat: String
-  passwordResetToken: String
-  passwordResetIssuedAt: DateTime
-  passwordResetRedeemedAt: DateTime
   magicAuthToken: String
   magicAuthIssuedAt: DateTime
   magicAuthRedeemedAt: DateTime
@@ -2762,9 +2745,6 @@ type Mutation {
   deleteVideo(where: VideoWhereUniqueInput!): Video
   deleteVideos(where: [VideoWhereUniqueInput!]!): [Video]
   endSession: Boolean!
-  authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
-  sendUserPasswordResetLink(email: String!): Boolean!
-  redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
   sendUserMagicAuthLink(email: String!): Boolean!
   redeemUserMagicAuthToken(email: String!, token: String!): RedeemUserMagicAuthTokenResult!
   recalculateCallback(callbackId: ID!): Callback
@@ -2774,17 +2754,6 @@ type Mutation {
   queryCommunicator(question: String!): JSON
   authenticateUserWithGoogle(idToken: String!): JSON
   impersonateUser(userId: String!): JSON
-}
-
-type RedeemUserPasswordResetTokenResult {
-  code: PasswordResetRedemptionErrorCode!
-  message: String!
-}
-
-enum PasswordResetRedemptionErrorCode {
-  FAILURE
-  TOKEN_EXPIRED
-  TOKEN_REDEEMED
 }
 
 union RedeemUserMagicAuthTokenResult = RedeemUserMagicAuthTokenSuccess | RedeemUserMagicAuthTokenFailure
@@ -2803,17 +2772,6 @@ enum MagicLinkRedemptionErrorCode {
   FAILURE
   TOKEN_EXPIRED
   TOKEN_REDEEMED
-}
-
-union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
-
-type UserAuthenticationWithPasswordSuccess {
-  sessionToken: String!
-  item: User!
-}
-
-type UserAuthenticationWithPasswordFailure {
-  message: String!
 }
 
 type Query {
@@ -2888,12 +2846,6 @@ type Query {
   videosCount(where: VideoWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: User
-  validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
-}
-
-type ValidateUserPasswordResetTokenResult {
-  code: PasswordResetRedemptionErrorCode!
-  message: String!
 }
 
 type KeystoneMeta {

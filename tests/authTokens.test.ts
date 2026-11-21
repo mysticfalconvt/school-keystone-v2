@@ -6,7 +6,6 @@ import {
   generateAuthToken,
   issueAuthToken,
   redeemAuthToken,
-  validateAuthToken,
 } from '../lib/authTokens';
 
 const MIN = 60_000;
@@ -135,12 +134,6 @@ describe('issuing and redeeming tokens', () => {
     assert.equal(issued.userId, '7');
     assert.notEqual((users[0] as any).magicAuthToken, issued.token, 'stored hashed');
 
-    assert.deepEqual(
-      await validateAuthToken(context, 'magicAuth', 'a@example.test', issued.token),
-      { ok: true },
-      'validating does not use the token up',
-    );
-
     const first = await redeemAuthToken(context, 'magicAuth', 'a@example.test', issued.token);
     assert.equal(first.ok, true);
 
@@ -150,33 +143,24 @@ describe('issuing and redeeming tokens', () => {
 
   test('issuing for an unknown email writes nothing', async () => {
     const context = fakeContext([{ id: 1, email: 'a@example.test' }]);
-    assert.equal(await issueAuthToken(context, 'passwordReset', 'nobody@example.test'), null);
+    assert.equal(await issueAuthToken(context, 'magicAuth', 'nobody@example.test'), null);
     assert.equal(context.updates.length, 0);
   });
 
   test('a new token replaces the old one and clears redemption', async () => {
     const users = [{ id: 1, email: 'a@example.test' }];
     const context = fakeContext(users);
-    const first = (await issueAuthToken(context, 'passwordReset', 'a@example.test'))!;
-    await redeemAuthToken(context, 'passwordReset', 'a@example.test', first.token);
-    const second = (await issueAuthToken(context, 'passwordReset', 'a@example.test'))!;
+    const first = (await issueAuthToken(context, 'magicAuth', 'a@example.test'))!;
+    await redeemAuthToken(context, 'magicAuth', 'a@example.test', first.token);
+    const second = (await issueAuthToken(context, 'magicAuth', 'a@example.test'))!;
 
     assert.equal(
-      ((await redeemAuthToken(context, 'passwordReset', 'a@example.test', first.token)) as any).code,
+      ((await redeemAuthToken(context, 'magicAuth', 'a@example.test', first.token)) as any).code,
       'FAILURE',
     );
     assert.equal(
-      (await redeemAuthToken(context, 'passwordReset', 'a@example.test', second.token)).ok,
+      (await redeemAuthToken(context, 'magicAuth', 'a@example.test', second.token)).ok,
       true,
-    );
-  });
-
-  test('token types are independent', async () => {
-    const context = fakeContext([{ id: 1, email: 'a@example.test' }]);
-    const reset = (await issueAuthToken(context, 'passwordReset', 'a@example.test'))!;
-    assert.equal(
-      ((await redeemAuthToken(context, 'magicAuth', 'a@example.test', reset.token)) as any).code,
-      'FAILURE',
     );
   });
 

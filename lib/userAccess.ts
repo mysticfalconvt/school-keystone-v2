@@ -4,10 +4,10 @@
 //   do anything.
 // - Staff may create and edit users, but may not grant or remove roles and
 //   permissions (other than marking someone a student or parent), and may not
-//   change the email or password of another staff member or super admin, since
-//   either would let them take that account over.
-// - Everyone else (students, parents) may only change their own password and
-//   their own sorting-hat house.
+//   change the email of another staff member or super admin: sign-in links go
+//   to that address, so changing it would hand over the account.
+// - Everyone else (students, parents) may only change their own sorting-hat
+//   house.
 // - Only super admins may delete users.
 
 import { permissionFields } from '../schemas/fields';
@@ -28,14 +28,10 @@ export const PRIVILEGED_FIELDS: ReadonlySet<string> = new Set(
 );
 
 /** Fields that would hand over another account if changed. */
-export const CREDENTIAL_FIELDS: ReadonlySet<string> = new Set([
-  'email',
-  'password',
-]);
+export const CREDENTIAL_FIELDS: ReadonlySet<string> = new Set(['email']);
 
 /** What a student or parent may change on their own record. */
 export const SELF_EDITABLE_FIELDS: ReadonlySet<string> = new Set([
-  'password',
   'sortingHat',
 ]);
 

@@ -58,8 +58,7 @@ describe('students and parents', () => {
     assert.equal(update(student, studentItem, { isStaff: true }), false);
   });
 
-  test('may change their own password and house, and nothing else', () => {
-    assert.equal(update(student, studentItem, { password: 'new-pass-123' }), true);
+  test('may change their own house, and nothing else', () => {
     assert.equal(update(student, studentItem, { sortingHat: 'gryffindor' }), true);
     assert.equal(update(student, studentItem, { name: 'Someone Else' }), false);
     assert.equal(update(student, studentItem, { email: 'x@example.test' }), false);
@@ -67,8 +66,8 @@ describe('students and parents', () => {
   });
 
   test('cannot touch anyone else', () => {
-    assert.equal(update(student, otherStudent, { password: 'x' }), false);
-    assert.equal(update(parent, adminItem, { password: 'x' }), false);
+    assert.equal(update(student, otherStudent, { sortingHat: 'x' }), false);
+    assert.equal(update(parent, adminItem, { sortingHat: 'x' }), false);
     assert.deepEqual(userUpdateFilter({ session: student }), { id: { equals: 'student' } });
   });
 
@@ -84,10 +83,10 @@ describe('students and parents', () => {
 });
 
 describe('staff', () => {
-  test('may edit students and parents, including credentials', () => {
+  test('may edit students and parents, including their email', () => {
     assert.equal(userUpdateFilter({ session: staff }), true);
     assert.equal(update(staff, studentItem, { name: 'New Name', taTeacher: { connect: { id: 'staff' } } }), true);
-    assert.equal(update(staff, studentItem, { password: 'reset-123' }), true);
+    assert.equal(update(staff, studentItem, { email: 'new@example.test' }), true);
     assert.equal(update(staff, otherStudent, { parent: { connect: [{ id: 'p' }] } }), true);
   });
 
@@ -102,11 +101,11 @@ describe('staff', () => {
   });
 
   test('may change their own credentials', () => {
-    assert.equal(update(staff, staffItem, { password: 'mine-123' }), true);
+    assert.equal(update(staff, staffItem, { email: 'mine@example.test' }), true);
   });
 
   test("cannot take over another staff member's or admin's account", () => {
-    assert.equal(update(staff, otherStaff, { password: 'x' }), false);
+    assert.equal(update(staff, otherStaff, { email: 'x@example.test' }), false);
     assert.equal(update(staff, adminItem, { email: 'mine@example.test' }), false);
   });
 
@@ -125,7 +124,7 @@ describe('staff', () => {
 
 describe('super admins', () => {
   test('may do anything', () => {
-    assert.equal(update(admin, otherStaff, { password: 'x', isSuperAdmin: true }), true);
+    assert.equal(update(admin, otherStaff, { email: 'x@example.test', isSuperAdmin: true }), true);
     assert.equal(canCreateUserItem({ session: admin, inputData: { isStaff: true, canManagePbis: true } }), true);
     assert.equal(canDeleteUser({ session: admin }), true);
   });

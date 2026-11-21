@@ -12,7 +12,7 @@ type QueueEmailInput = {
   subject: string;
   html: string;
   lowPriority?: boolean;
-  kind?: 'general' | 'pbis-bulk' | 'magic-link' | 'password-reset';
+  kind?: 'general' | 'pbis-bulk' | 'magic-link';
   batchId?: string;
   requestedById?: string;
   expiresAt?: Date;
@@ -126,7 +126,7 @@ export function enqueueGeneralEmail(
 export async function supersedeQueuedEmails(
   context: QueueContext,
   recipient: string,
-  kind: 'magic-link' | 'password-reset',
+  kind: 'magic-link',
 ): Promise<number> {
   const result = await queueModel(context).updateMany({
     where: {
@@ -165,23 +165,6 @@ export async function enqueueMagicLinkEmail(
       <a href="${url}">Click Here to login</a>
       <br/>
       <p>or copy this link: <a href="${url}">${url}</a></p>
-    `),
-  });
-}
-
-export async function enqueuePasswordResetEmail(
-  context: QueueContext,
-  resetToken: string,
-  email: string,
-) {
-  await supersedeQueuedEmails(context, email, 'password-reset');
-  return enqueueEmail(context, {
-    to: email,
-    subject: 'Your password reset token!',
-    kind: 'password-reset',
-    expiresAt: new Date(Date.now() + 55 * 60_000),
-    html: makeANiceEmail(`Your Password Reset Token is here!
-      <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Click Here to reset</a>
     `),
   });
 }

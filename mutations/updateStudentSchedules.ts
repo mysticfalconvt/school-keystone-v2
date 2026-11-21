@@ -18,7 +18,6 @@ type TeacherConnection = { connect: { id: string } } | null;
 type StudentUpdateResultData = {
   email?: string;
   name?: string;
-  password?: string;
   isStudent?: boolean;
   existed?: boolean;
   taTeacher?: TeacherConnection;
@@ -112,7 +111,6 @@ export const updateStudentSchedules = (base: any) =>
           //if user is new create new user
           if (!studentInfo[0]?.id) {
             studentUpdateResults.isStudent = true;
-            studentUpdateResults.password = "notpassword";
             const createdStudent = await context.query.User.createOne({
               data: {
                 ...studentUpdateResults,

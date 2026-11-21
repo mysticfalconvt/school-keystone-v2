@@ -27,9 +27,6 @@ const hiddenAuthField = {
 } as const;
 
 const authTokenFields = {
-  passwordResetToken: password({ ...hiddenAuthField }),
-  passwordResetIssuedAt: timestamp({ ...hiddenAuthField }),
-  passwordResetRedeemedAt: timestamp({ ...hiddenAuthField }),
   magicAuthToken: password({ ...hiddenAuthField }),
   magicAuthIssuedAt: timestamp({ ...hiddenAuthField }),
   magicAuthRedeemedAt: timestamp({ ...hiddenAuthField }),
@@ -65,7 +62,6 @@ export const User = list({
     name: text({ isIndexed: true, validation: { isRequired: true } }),
     preferredName: text(),
     email: text({ validation: { isRequired: true }, isIndexed: "unique" }),
-    password: password({ validation: { isRequired: true } }),
     taStudents: relationship({ ref: "User.taTeacher", many: true }),
     taTeacher: relationship({ ref: "User.taStudents", many: false }),
     parent: relationship({ ref: "User.children", many: true }),
@@ -265,7 +261,7 @@ export const User = list({
     // Sorting Hat
     sortingHat: text({ defaultValue: "" }),
 
-    // One-time tokens for password reset and magic-link sign in; see
+    // One-time tokens for magic-link sign in; see
     // lib/authTokens.ts. These were added by @keystone-6/auth until v10, so
     // they are declared here with the same types to keep the existing columns.
     ...authTokenFields,

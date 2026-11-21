@@ -9,12 +9,12 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 // A throwing module would fail here, before any test runs.
-import { sendAnEmail, sendMagicLinkEmail, sendPasswordResetEmail } from '../lib/mail';
+import { sendAnEmail, sendMagicLinkEmail } from '../lib/mail';
 
 describe('mail configuration', () => {
   test('importing the module needs no configuration', () => {
     // Reaching this line is the assertion: the import above already happened.
-    for (const fn of [sendAnEmail, sendMagicLinkEmail, sendPasswordResetEmail]) {
+    for (const fn of [sendAnEmail, sendMagicLinkEmail]) {
       assert.equal(typeof fn, 'function');
     }
   });

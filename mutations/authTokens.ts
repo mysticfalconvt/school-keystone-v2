@@ -7,30 +7,15 @@ import {
   type AuthTokenType,
   issueAuthToken,
   redeemAuthToken,
-  validateAuthToken,
 } from '../lib/authTokens';
-import {
-  enqueueMagicLinkEmail,
-  enqueuePasswordResetEmail,
-} from '../lib/emailQueue';
+import { enqueueMagicLinkEmail } from '../lib/emailQueue';
 
-// Password reset and magic-link GraphQL operations.
+// Magic-link sign-in. There are no passwords, so this and Google sign-in are
+// the only ways in. Names and shapes match what @keystone-6/auth used to
+// generate, so the frontend is unaffected:
 //
-// These replace the ones @keystone-6/auth generated from its `passwordResetLink`
-// and `magicAuthLink` options (removed in auth v10). Every name and shape below
-// matches what the auth package produced, so schema.graphql and the frontend
-// are unaffected:
-//
-//   sendUserPasswordResetLink(email): Boolean!
-//   redeemUserPasswordResetToken(email, token, password): RedeemUserPasswordResetTokenResult
-//   validateUserPasswordResetToken(email, token): ValidateUserPasswordResetTokenResult   (query)
 //   sendUserMagicAuthLink(email): Boolean!
 //   redeemUserMagicAuthToken(email, token): RedeemUserMagicAuthTokenResult!
-
-const PasswordResetRedemptionErrorCode = graphql.enum({
-  name: 'PasswordResetRedemptionErrorCode',
-  values: graphql.enumValues(AUTH_TOKEN_ERROR_CODES),
-});
 
 const MagicLinkRedemptionErrorCode = graphql.enum({
   name: 'MagicLinkRedemptionErrorCode',
@@ -43,24 +28,6 @@ const failure = (code: AuthTokenErrorCode): Failure => ({
   code,
   message: AUTH_TOKEN_ERROR_MESSAGES[code],
 });
-
-const passwordResetResult = (name: string) =>
-  graphql.object<Failure>()({
-    name,
-    fields: {
-      code: graphql.field({
-        type: graphql.nonNull(PasswordResetRedemptionErrorCode),
-      }),
-      message: graphql.field({ type: graphql.nonNull(graphql.String) }),
-    },
-  });
-
-const RedeemUserPasswordResetTokenResult = passwordResetResult(
-  'RedeemUserPasswordResetTokenResult',
-);
-const ValidateUserPasswordResetTokenResult = passwordResetResult(
-  'ValidateUserPasswordResetTokenResult',
-);
 
 const RedeemUserMagicAuthTokenFailure = graphql.object<Failure>()({
   name: 'RedeemUserMagicAuthTokenFailure',
@@ -121,38 +88,6 @@ export const authTokenSchema = (base: any) => {
 
   return {
     mutation: {
-      sendUserPasswordResetLink: sendLink(
-        'passwordReset',
-        enqueuePasswordResetEmail,
-      ),
-
-      redeemUserPasswordResetToken: graphql.field({
-        type: RedeemUserPasswordResetTokenResult,
-        args: {
-          email: emailArg,
-          token: tokenArg,
-          password: graphql.arg({ type: graphql.nonNull(graphql.String) }),
-        },
-        async resolve(_root, { email, token, password }, context: any) {
-          const result = await redeemAuthToken(
-            context,
-            'passwordReset',
-            email,
-            token,
-          );
-          if (!result.ok) return failure(result.code);
-
-          // Separate from the redemption so that a password the field rejects
-          // still uses up the token, as the auth package did. The validation
-          // error reaches the client as a GraphQL error.
-          await context.sudo().db.User.updateOne({
-            where: { id: String(result.user.id) },
-            data: { password },
-          });
-          return null;
-        },
-      }),
-
       sendUserMagicAuthLink: sendLink('magicAuth', enqueueMagicLinkEmail),
 
       redeemUserMagicAuthToken: graphql.field({
@@ -187,22 +122,6 @@ export const authTokenSchema = (base: any) => {
           }
 
           return { token: sessionToken, item: result.user };
-        },
-      }),
-    },
-
-    query: {
-      validateUserPasswordResetToken: graphql.field({
-        type: ValidateUserPasswordResetTokenResult,
-        args: { email: emailArg, token: tokenArg },
-        async resolve(_root, { email, token }, context: any) {
-          const result = await validateAuthToken(
-            context,
-            'passwordReset',
-            email,
-            token,
-          );
-          return result.ok ? null : failure(result.code);
         },
       }),
     },

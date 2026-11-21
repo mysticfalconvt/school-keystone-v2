@@ -3,7 +3,6 @@ import { describe, test } from 'node:test';
 import {
   enqueueGeneralEmail,
   enqueueMagicLinkEmail,
-  enqueuePasswordResetEmail,
   isRetryableEmailError,
 } from '../lib/emailQueue';
 
@@ -98,7 +97,6 @@ describe('sign-in emails supersede older queued ones', () => {
 
   for (const [name, enqueue, kind] of [
     ['magic link', enqueueMagicLinkEmail, 'magic-link'],
-    ['password reset', enqueuePasswordResetEmail, 'password-reset'],
   ] as const) {
     test(`${name}: retires unsent emails of the same kind before queueing`, async () => {
       const { calls, context } = recordingContext();

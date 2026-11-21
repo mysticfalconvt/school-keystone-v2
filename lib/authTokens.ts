@@ -1,10 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 
-// One-time email tokens for password reset and magic-link sign in.
+// One-time email tokens for magic-link sign in.
 //
-// These used to come from @keystone-6/auth's `passwordResetLink` and
-// `magicAuthLink` options, which auth v10 (Keystone 8) removes. This module
+// These used to come from @keystone-6/auth's `magicAuthLink` option, which auth v10 (Keystone 8) removes. This module
 // keeps the same storage and behaviour so tokens, columns and the GraphQL
 // contract carry over unchanged:
 //
@@ -19,7 +18,9 @@ import bcrypt from 'bcryptjs';
 //     two concurrent requests cannot both redeem one token.
 //   - Tokens carry 256 bits of randomness instead of 120.
 
-export type AuthTokenType = 'passwordReset' | 'magicAuth';
+// Generic over the token type in case another kind of link is ever needed;
+// password reset was removed along with passwords.
+export type AuthTokenType = 'magicAuth';
 
 export const AUTH_TOKEN_ERROR_CODES = [
   'FAILURE',
@@ -156,16 +157,6 @@ async function findAndCheck(
     token,
   );
   return { user, check };
-}
-
-/** Check a token without using it up. */
-export async function validateAuthToken(
-  context: AuthTokenContext,
-  type: AuthTokenType,
-  email: string,
-  token: string,
-): Promise<AuthTokenCheck> {
-  return (await findAndCheck(context, type, email, token)).check;
 }
 
 /**
