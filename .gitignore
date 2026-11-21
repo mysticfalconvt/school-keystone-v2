@@ -1,6 +1,5 @@
 node_modules
-.keystone/admin
-.keystone/*.sync-conflict-*
+.keystone/
 keystone.db
 *.log
 .env

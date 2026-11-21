@@ -90,8 +90,8 @@ emails from being queued.
 
 `schema.graphql` and `schema.prisma` are generated and committed. Regenerate them
 by running `npm run dev` after a model change; never hand-edit them. `.keystone/`
-holds build output — `.keystone/config.js` is currently tracked, so confirm
-whether deployment depends on it before changing that.
+holds build output and is gitignored; `npm run build` (run by Coolify/Nixpacks on
+deploy) regenerates it.
 
 ## Custom mutations
 
