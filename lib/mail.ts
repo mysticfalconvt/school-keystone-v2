@@ -6,7 +6,7 @@ import {
   type Transporter,
 } from 'nodemailer';
 
-import 'dotenv/config';
+import './loadEnv';
 
 // Configuration is validated on first send, not at import.
 //

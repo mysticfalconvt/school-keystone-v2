@@ -20,7 +20,7 @@ describe('mail configuration', () => {
   });
 
   test('an unconfigured send fails on send, with the same message as before', async () => {
-    // lib/mail pulls in dotenv, so clear these at call time rather than trusting
+    // lib/mail loads .env (lib/loadEnv), so clear these at call time rather than trusting
     // the environment to be bare.
     delete process.env.MAIL_HOST;
     delete process.env.MAIL_USER;

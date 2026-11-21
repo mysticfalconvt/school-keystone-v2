@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './lib/loadEnv';
 
 // Bugsink error reporting. Imported early so the SDK's uncaught-exception and
 // unhandled-rejection handlers are installed before anything else runs.
