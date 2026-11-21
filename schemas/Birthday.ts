@@ -31,11 +31,11 @@ export const Birthday = list({
     }),
     hasChosen: checkbox({
       defaultValue: false,
-      label: "Has Chosen a Cake",
+      ui: { label: "Has Chosen a Cake" },
     }),
     hasDelivered: checkbox({
       defaultValue: false,
-      label: "Has gotten their cake",
+      ui: { label: "Has gotten their cake" },
     }),
 
     student: relationship({

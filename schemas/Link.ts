@@ -38,27 +38,27 @@ export const Link = list({
 
     forTeachers: checkbox({
       defaultValue: false,
-      label: "Teachers can view",
+      ui: { label: "Teachers can view" },
     }),
     forStudents: checkbox({
       defaultValue: false,
-      label: "Students can view",
+      ui: { label: "Students can view" },
     }),
     forParents: checkbox({
       defaultValue: false,
-      label: "Parents can view",
+      ui: { label: "Parents can view" },
     }),
     onHomePage: checkbox({
       defaultValue: false,
-      label: "Display on the home page",
+      ui: { label: "Display on the home page" },
     }),
     forPbis: checkbox({
       defaultValue: false,
-      label: "Display on the PBIS page",
+      ui: { label: "Display on the PBIS page" },
     }),
     forEPortfolio: checkbox({
       defaultValue: false,
-      label: "Display on the ePortfolio page",
+      ui: { label: "Display on the ePortfolio page" },
     }),
 
     modifiedBy: relationship({

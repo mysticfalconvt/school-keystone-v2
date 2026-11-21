@@ -9,18 +9,18 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 // A throwing module would fail here, before any test runs.
-import { sendAnEmail, sendMagicLinkEmail, sendPasswordResetEmail } from '../lib/mail';
+import { sendAnEmail, sendMagicLinkEmail } from '../lib/mail';
 
 describe('mail configuration', () => {
   test('importing the module needs no configuration', () => {
     // Reaching this line is the assertion: the import above already happened.
-    for (const fn of [sendAnEmail, sendMagicLinkEmail, sendPasswordResetEmail]) {
+    for (const fn of [sendAnEmail, sendMagicLinkEmail]) {
       assert.equal(typeof fn, 'function');
     }
   });
 
   test('an unconfigured send fails on send, with the same message as before', async () => {
-    // lib/mail pulls in dotenv, so clear these at call time rather than trusting
+    // lib/mail loads .env (lib/loadEnv), so clear these at call time rather than trusting
     // the environment to be bare.
     delete process.env.MAIL_HOST;
     delete process.env.MAIL_USER;

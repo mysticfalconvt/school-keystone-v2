@@ -1,13 +1,13 @@
 # school-keystone-v2
 
-Keystone 6 backend for the NCUJHS school dashboard. It owns the data model,
+Keystone 8 backend for the NCUJHS school dashboard. It owns the data model,
 the GraphQL API, authentication, and a handful of custom mutations. The browser
 UI lives in a separate repository (`../SchoolDashboard`, a Next.js app) and talks
 to this service over GraphQL.
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 22.12+
 - A PostgreSQL database (v17 in production)
 
 ## Setup
@@ -55,8 +55,13 @@ Development defaults to <http://localhost:4000>. The GraphQL endpoint is at
 `isSuperAdmin`; the GraphQL playground is only enabled when
 `NODE_ENV=development`.
 
-Authentication is email plus password (`auth.ts`). On an empty database Keystone
-prompts to create the first user.
+There are no passwords. People sign in with a magic link emailed to them
+(`mutations/authTokens.ts`) or with Google (`mutations/authenticateWithGoogle.ts`);
+`auth.ts` holds the session setup. The Admin UI has no sign-in page of its own:
+a super admin signs in to the dashboard and uses the **Keystone Admin** button on
+Super User Settings, which posts their session to `POST /admin-signin`
+(`lib/adminSignin.ts`) and lands them in the Admin UI signed in. Add the first
+super admin directly in the database.
 
 ## Schema and migrations
 
@@ -87,6 +92,40 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
 
 Starting the new application code before this migration is applied will prevent
 emails from being queued.
+
+Keystone 8 (Prisma 7) gives many-to-many join tables a primary key on
+`("A", "B")` instead of a unique index. Apply this once, alongside the first
+Keystone 8 deploy; it changes no rows:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f sql/2026-11-21-prisma-7-join-table-primary-keys.sql
+```
+
+Removing passwords takes two steps around the deploy that removes them. Before
+deploying, make the column optional (the running build is unaffected):
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f sql/2026-11-22-remove-passwords-1-before-deploy.sql
+```
+
+After the new build is live, drop the password and password-reset columns:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f sql/2026-11-22-remove-passwords-2-after-deploy.sql
+```
+
+To see what the database still differs by, without changing anything:
+
+```bash
+npx prisma migrate diff --from-config-datasource --to-schema schema.prisma --script
+```
+
+`prisma.config.ts` and the running app both take the database URL from
+`lib/databaseUrl.ts` (`LOCAL_DATABASE_URL`, then `DATABASE_URL`), so that command
+and `keystone dev` always target the database the app uses.
 
 `schema.graphql` and `schema.prisma` are generated and committed. Regenerate them
 by running `npm run dev` after a model change; never hand-edit them. `.keystone/`

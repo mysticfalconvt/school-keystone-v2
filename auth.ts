@@ -1,30 +1,27 @@
 /*
-Welcome to the auth file! Here we have put a config to do basic auth in Keystone.
+Sessions and the sign-in plumbing that does not depend on passwords.
 
-`createAuth` is an implementation for an email-password login out of the box.
-`statelessSessions` is a base implementation of session logic.
+There are no passwords. People sign in with a magic link
+(mutations/authTokens.ts) or Google (mutations/authenticateWithGoogle.ts);
+both start a session with `context.sessionStrategy.start`. Super admins reach
+the Admin UI through POST /admin-signin (lib/adminSignin.ts), which the
+dashboard's "Keystone Admin" button submits.
 
-For more on auth, check out: https://keystonejs.com/docs/apis/auth#authentication-api
+@keystone-6/auth is no longer used: it requires a password field. This file
+provides the two things it did that we still need:
+  - session.data: the user fields below, loaded fresh on every request
+  - the `authenticatedItem` query and `endSession` mutation
 */
 
-import { createAuth } from '@keystone-6/auth';
-
-// See https://keystonejs.com/docs/apis/session#session-api for the session docs
+import { graphql } from '@keystone-6/core';
 import { statelessSessions } from '@keystone-6/core/session';
-import {
-  enqueueMagicLinkEmail,
-  enqueuePasswordResetEmail,
-} from './lib/emailQueue';
 
 let sessionSecret = process.env.SESSION_SECRET;
 
 // Not required in dev, always required in production.
 //
 // The dev fallback must be at least 32 characters, because that is what
-// statelessSessions enforces. The previous one was 29, so the fallback that
-// exists to let dev run without configuration threw "The session secret must be
-// at least 32 characters long" instead - which is how CI failed on a checkout
-// with no .env.
+// statelessSessions enforces.
 const DEV_SESSION_SECRET =
   'keystone-development-session-secret-not-for-production';
 
@@ -38,54 +35,65 @@ if (!sessionSecret) {
   }
 }
 
-// Here we define how auth relates to our schemas.
-// What we are saying here is that we want to use the list `User`, and to log in
-// we will need their email and password.
-const { withAuth } = createAuth({
-  listKey: 'User',
-  identityField: 'email',
-  sessionData:
-    'name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled canManageCommunicator hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups',
-  secretField: 'password',
-  initFirstItem: {
-    // If there are no items in the database, keystone will ask you to create
-    // a new user, filling in these fields.
-    fields: ['name', 'email', 'password'],
-    itemData: { isSuperAdmin: true },
-    skipKeystoneWelcome: true,
-  },
-  passwordResetLink: {
-    async sendToken(args) {
-      await enqueuePasswordResetEmail(args.context, args.token, args.identity);
-    },
-    tokensValidForMins: 60,
-  },
-  magicAuthLink: {
-    sendToken: async ({ itemId, identity, token, context }) => {
-      if (itemId && identity && token) {
-        await enqueueMagicLinkEmail(context, token, identity);
-      } else {
-        console.warn('[auth] magicAuthLink sendToken skipped — missing field', {
-          hasItemId: !!itemId,
-          hasIdentity: !!identity,
-          hasToken: !!token,
-        });
-      }
-    },
-    tokensValidForMins: 60,
-  },
-});
+/** User fields available as `context.session.data` in access rules. */
+export const SESSION_DATA =
+  'name id isSuperAdmin canSeeAllCallback canManageCalendar canSeeOtherUsers canManageUsers canManageRoles canManageLinks canManageDiscipline canSeeAllDiscipline canSeeAllTeacherEvents canSeeStudentEvents canSeeOwnCallback isCommunicatorEnabled canManageCommunicator hasTA hasClasses isStudent isParent isStaff isTeacher isGuidance canManagePbis canHaveSpecialGroups';
 
-// This defines how long people will remain logged in for.
-// This will get refreshed when they log back in.
-let sessionMaxAge = 60 * 60 * 24 * 30; // 30 days
+// How long people stay signed in. Refreshed when they sign in again.
+const sessionMaxAge = 60 * 60 * 24 * 30; // 30 days
 
-// This defines how sessions should work. For more details, check out: https://keystonejs.com/docs/apis/session#session-api
-const session = statelessSessions({
+const baseSession = statelessSessions({
   maxAge: sessionMaxAge,
   secret: sessionSecret!,
   sameSite: 'lax',
   secure: true,
 });
 
-export { session, withAuth };
+// The sealed token only holds { listKey, itemId }. Load the user's current
+// flags on each request, so removing someone's access takes effect at once
+// and a deleted user's token stops working.
+const session = {
+  ...baseSession,
+  async get({ context }: { context: any }) {
+    const stored: any = await baseSession.get({ context });
+    if (!stored?.itemId || stored.listKey !== 'User') return;
+    try {
+      const data = await context.sudo().query.User.findOne({
+        where: { id: stored.itemId },
+        query: SESSION_DATA,
+      });
+      if (!data) return;
+      return { ...stored, itemId: stored.itemId, data };
+    } catch (error) {
+      console.error('[auth] failed to load session data', error);
+      return;
+    }
+  },
+};
+
+/** `authenticatedItem` and `endSession`, with the same shape as before. */
+export function authSchema(base: any) {
+  return {
+    query: {
+      authenticatedItem: graphql.field({
+        type: base.object('User'),
+        resolve(_root, _args, context) {
+          const itemId = context.session?.itemId;
+          if (!itemId) return null;
+          return context.db.User.findOne({ where: { id: itemId } });
+        },
+      }),
+    },
+    mutation: {
+      endSession: graphql.field({
+        type: graphql.nonNull(graphql.Boolean),
+        async resolve(_root, _args, context) {
+          await context.sessionStrategy?.end({ context });
+          return true;
+        },
+      }),
+    },
+  };
+}
+
+export { session };

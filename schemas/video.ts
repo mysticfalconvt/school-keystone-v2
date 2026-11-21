@@ -25,7 +25,7 @@ export const Video = list({
       },
     }),
 
-    onHomePage: checkbox({ defaultValue: false, label: "On Home Page" }),
+    onHomePage: checkbox({ defaultValue: false, ui: { label: "On Home Page" } }),
 
     type: select({
       options: [

@@ -7,23 +7,52 @@ import {
   timestamp,
 } from "@keystone-6/core/fields";
 import { isAdmin, isSignedIn } from "../access";
+import {
+  canCreateUser,
+  canCreateUserItem,
+  canDeleteUser,
+  canUpdateUserItem,
+  userUpdateFilter,
+} from "../lib/userAccess";
 import { permissionFields } from "./fields";
 import { NUMBER_OF_BLOCKS } from "./blocks";
 
+const hiddenAuthField = {
+  access: () => false,
+  ui: {
+    createView: { fieldMode: "hidden" },
+    itemView: { fieldMode: "hidden" },
+    listView: { fieldMode: "hidden" },
+  },
+} as const;
+
+const authTokenFields = {
+  magicAuthToken: password({ ...hiddenAuthField }),
+  magicAuthIssuedAt: timestamp({ ...hiddenAuthField }),
+  magicAuthRedeemedAt: timestamp({ ...hiddenAuthField }),
+};
+
 export const User = list({
+  // See lib/userAccess.ts for who may change which users and fields.
   access: {
     operation: {
       query: isSignedIn,
-      create: isSignedIn,
-      delete: isSignedIn,
+      create: canCreateUser,
+      delete: canDeleteUser,
       update: isSignedIn,
+    },
+    filter: {
+      update: userUpdateFilter,
+    },
+    item: {
+      create: canCreateUserItem,
+      update: canUpdateUserItem,
     },
   },
   ui: {
     // hide the backend UI from regular users
-    isHidden: !isAdmin,
-    hideDelete: !isAdmin,
-    description: "Users of the site",
+    hideNavigation: (args) => !isAdmin(args as any),
+    hideDelete: (args) => !isAdmin(args as any),
     listView: {
       initialColumns: ["name", "email", "taTeacher"],
       pageSize: 100,
@@ -33,7 +62,6 @@ export const User = list({
     name: text({ isIndexed: true, validation: { isRequired: true } }),
     preferredName: text(),
     email: text({ validation: { isRequired: true }, isIndexed: "unique" }),
-    password: password({ validation: { isRequired: true } }),
     taStudents: relationship({ ref: "User.taTeacher", many: true }),
     taTeacher: relationship({ ref: "User.taStudents", many: false }),
     parent: relationship({ ref: "User.children", many: true }),
@@ -110,6 +138,8 @@ export const User = list({
       many: true,
       ui: {
         displayMode: "count",
+        // Keystone 8 only allows a count display on a read-only field.
+        itemView: { fieldMode: "read" },
       },
     }),
     staffPbisCardsGiven: relationship({
@@ -121,6 +151,8 @@ export const User = list({
       many: true,
       ui: {
         displayMode: "count",
+        // Keystone 8 only allows a count display on a read-only field.
+        itemView: { fieldMode: "read" },
       },
     }),
     teacherDiscipline: relationship({ ref: "Discipline.teacher", many: true }),
@@ -228,6 +260,11 @@ export const User = list({
 
     // Sorting Hat
     sortingHat: text({ defaultValue: "" }),
+
+    // One-time tokens for magic-link sign in; see
+    // lib/authTokens.ts. These were added by @keystone-6/auth until v10, so
+    // they are declared here with the same types to keep the existing columns.
+    ...authTokenFields,
   },
   hooks: {
     afterOperation: async ({ operation, item, originalItem, context }) => {

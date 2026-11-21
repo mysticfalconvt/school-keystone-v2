@@ -35,7 +35,7 @@ export const Message = list({
             validation: {isRequired: true},
             defaultValue: {kind: "now"},
         }),
-        read: checkbox({ defaultValue: false,  label: 'Read' }),
+        read: checkbox({ defaultValue: false,  ui: { label: 'Read' } }),
         link: text(),
     },
 });

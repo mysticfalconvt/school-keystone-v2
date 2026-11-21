@@ -45,6 +45,6 @@ export const PbisCard = list({
       validation: { isRequired: true },
       defaultValue: { kind: "now" },
     }),
-    counted: checkbox({ defaultValue: false, label: "Counted" }),
+    counted: checkbox({ defaultValue: false, ui: { label: "Counted" } }),
   },
 });

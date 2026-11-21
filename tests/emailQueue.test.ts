@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { enqueueGeneralEmail, isRetryableEmailError } from '../lib/emailQueue';
+import {
+  enqueueGeneralEmail,
+  enqueueMagicLinkEmail,
+  isRetryableEmailError,
+} from '../lib/emailQueue';
 
 describe('email queue retries', () => {
   test('retries temporary SMTP responses and socket resets', () => {
@@ -69,4 +73,49 @@ describe('email queue inserts', () => {
     assert.equal(data?.kind, 'pbis-bulk');
     assert.equal(data?.batchId, 'pbis-week-1');
   });
+});
+
+describe('sign-in emails supersede older queued ones', () => {
+  function recordingContext() {
+    const calls: { op: string; args: any }[] = [];
+    const context = {
+      prisma: {
+        emailDelivery: {
+          updateMany: async (args: any) => {
+            calls.push({ op: 'updateMany', args });
+            return { count: 1 };
+          },
+          create: async (args: any) => {
+            calls.push({ op: 'create', args });
+            return { id: 'job-3' };
+          },
+        },
+      },
+    } as any;
+    return { calls, context };
+  }
+
+  for (const [name, enqueue, kind] of [
+    ['magic link', enqueueMagicLinkEmail, 'magic-link'],
+  ] as const) {
+    test(`${name}: retires unsent emails of the same kind before queueing`, async () => {
+      const { calls, context } = recordingContext();
+      await enqueue(context, 'tok', 'person@example.test');
+
+      assert.deepEqual(
+        calls.map((c) => c.op),
+        ['updateMany', 'create'],
+        'supersede runs before the new email is queued',
+      );
+      const { where, data } = calls[0].args;
+      assert.deepEqual(where, {
+        recipient: { equals: 'person@example.test' },
+        kind: { equals: kind },
+        status: { in: ['pending', 'retrying'] },
+      });
+      assert.equal(data.status, 'failed');
+      assert.equal(data.html, '', 'dead link is not kept');
+      assert.equal(calls[1].args.data.kind, kind);
+    });
+  }
 });

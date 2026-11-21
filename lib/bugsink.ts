@@ -12,7 +12,7 @@ What gets reported:
   - user-submitted BugReport records, via `reportUserBug()`
 */
 
-import 'dotenv/config';
+import './loadEnv';
 import * as Sentry from '@sentry/node';
 import type { ApolloServerPlugin } from '@apollo/server';
 import type { GraphQLError } from 'graphql';
@@ -35,7 +35,23 @@ if (dsn) {
     tracesSampleRate: 0,
     // This app holds student data. Never let the SDK attach request bodies,
     // headers, cookies or IPs on its own; we attach specific fields by hand.
-    sendDefaultPii: false,
+    // Sentry 11 replaced `sendDefaultPii: false` with `dataCollection`, whose
+    // defaults collect all of this, so every category is switched off here.
+    // GraphQL variables carry passwords and URL query strings carry sign-in
+    // tokens.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      graphQL: { document: false, variables: false },
+      genAI: { inputs: false, outputs: false },
+      mcp: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      stackFrameVariables: false,
+    },
     // Console arguments and HTTP request details can contain credentials or
     // student data even when sendDefaultPii is disabled.
     beforeBreadcrumb(breadcrumb) {

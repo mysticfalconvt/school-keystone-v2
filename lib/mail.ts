@@ -6,7 +6,7 @@ import {
   type Transporter,
 } from 'nodemailer';
 
-import 'dotenv/config';
+import './loadEnv';
 
 // Configuration is validated on first send, not at import.
 //
@@ -94,25 +94,6 @@ export function makeANiceEmail(text: string) {
       <p>NCUJHS.Tech</p>
     </div>
   `;
-}
-
-export async function sendPasswordResetEmail(
-  resetToken: string,
-  to: string,
-): Promise<void> {
-  // email the user a token
-  const info = await deliverEmail({
-    to,
-    from: process.env.MAIL_USER,
-    subject: 'Your password reset token!',
-    html: makeANiceEmail(`Your Password Reset Token is here!
-      <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Click Here to reset</a>
-    `),
-  });
-  logSentMessage(info);
-  if (process.env.MAIL_USER?.includes('ethereal.email')) {
-    console.log(`💌 Message Sent!  Preview it at ${getTestMessageUrl(info)}`);
-  }
 }
 
 export async function sendMagicLinkEmail(

@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "target": "esnext",
-    "module": "commonjs",
+    // Keystone 8 packages are ESM-only and resolved through package "exports".
+    // `keystone build` and esbuild do the actual compiling, so TypeScript only
+    // needs to understand the imports; "bundler" resolution matches how they
+    // resolve them.
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   }
 }
