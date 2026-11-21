@@ -3,9 +3,10 @@ Sessions and the sign-in plumbing that does not depend on passwords.
 
 There are no passwords. People sign in with a magic link
 (mutations/authTokens.ts) or Google (mutations/authenticateWithGoogle.ts);
-both start a session with `context.sessionStrategy.start`. Super admins reach
-the Admin UI through POST /admin-signin (lib/adminSignin.ts), which the
-dashboard's "Keystone Admin" button submits.
+both start a session with `context.sessionStrategy.start`, which returns the
+token the dashboard stores and also sets this server's session cookie (the
+dashboard sends requests with credentials). That cookie is what signs super
+admins into the Admin UI; endSession clears it.
 
 @keystone-6/auth is no longer used: it requires a password field. This file
 provides the two things it did that we still need:

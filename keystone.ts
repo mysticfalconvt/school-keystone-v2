@@ -10,7 +10,6 @@ import { config, graphql } from '@keystone-6/core';
 // Look in the schema file for how we define our lists, and how users interact with them through graphql or the Admin UI
 
 import { authSchema, session } from './auth';
-import { adminSigninRoute } from './lib/adminSignin';
 
 // Schemas from individual files
 import { Calendar } from './schemas/Calendar';
@@ -76,17 +75,14 @@ export default config({
 
       credentials: true,
     },
-    extendExpressApp: (app, commonContext) => {
-      app.post('/admin-signin', adminSigninRoute(commonContext));
-    },
     extendHttpServer: (server, context) => {
       startEmailQueueWorker(context, (stop) => server.on('close', stop));
     },
   },
   // This config allows us to set up features of the Admin UI https://keystonejs.com/docs/apis/config#ui
   ui: {
-    // Super admins only. There is no sign-in page: they arrive signed in via
-    // POST /admin-signin from the dashboard (lib/adminSignin.ts).
+    // Super admins only. There is no sign-in page: signing in on the dashboard
+    // sets this server's session cookie too (see auth.ts).
     isAccessAllowed: (context) => !!context.session?.data?.isSuperAdmin,
   },
   lists: {

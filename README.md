@@ -58,10 +58,10 @@ Development defaults to <http://localhost:4000>. The GraphQL endpoint is at
 There are no passwords. People sign in with a magic link emailed to them
 (`mutations/authTokens.ts`) or with Google (`mutations/authenticateWithGoogle.ts`);
 `auth.ts` holds the session setup. The Admin UI has no sign-in page of its own:
-a super admin signs in to the dashboard and uses the **Keystone Admin** button on
-Super User Settings, which posts their session to `POST /admin-signin`
-(`lib/adminSignin.ts`) and lands them in the Admin UI signed in. Add the first
-super admin directly in the database.
+signing in on the dashboard also sets this server's session cookie, so a super
+admin can open the Admin UI (the **Keystone Admin** button on Super User
+Settings) already signed in, and signing out of the dashboard signs them out
+here too. Add the first super admin directly in the database.
 
 ## Schema and migrations
 
